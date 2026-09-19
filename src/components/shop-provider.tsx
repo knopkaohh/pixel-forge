@@ -60,10 +60,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setCart(readStorage("mary-jute-cart", []));
-    setFavorites(readStorage("mary-jute-favorites", []));
-    setOrders(readStorage("mary-jute-orders", []));
-    setReady(true);
+    const timer = window.setTimeout(() => {
+      setCart(readStorage("mary-jute-cart", []));
+      setFavorites(readStorage("mary-jute-favorites", []));
+      setOrders(readStorage("mary-jute-orders", []));
+      setReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
