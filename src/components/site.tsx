@@ -31,21 +31,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { type ShopProduct, useShop } from "@/components/shop-provider";
 
-const products = [
-  { name: "Ковер джутовый круглый", price: "7 990 ₽", image: "/images/rug.png" },
-  { name: "Корзина с ручками", price: "2 490 ₽", image: "/images/basket.png" },
-  { name: "Панно «Солнце»", price: "3 990 ₽", image: "/images/wall-art.png" },
-  { name: "Ковер натуральный", price: "9 990 ₽", image: "/images/rug.png" },
+const products: ShopProduct[] = [
+  { id: "rug-round", name: "Ковер джутовый круглый", price: 7990, image: "/images/rug.png" },
+  { id: "basket-handles", name: "Корзина с ручками", price: 2490, image: "/images/basket.png" },
+  { id: "wall-sun", name: "Панно «Солнце»", price: 3990, image: "/images/wall-art.png" },
+  { id: "rug-natural", name: "Ковер натуральный", price: 9990, image: "/images/rug.png" },
+  { id: "planter-jute", name: "Кашпо джутовое", price: 2190, image: "/images/basket.png" },
+  { id: "lamp-jute", name: "Светильник из джута", price: 5490, image: "/images/lamp.png" },
 ];
 
 const JUTE_PRICE_PER_METER = 65;
+const formatPrice = (price: number) => `${price.toLocaleString("ru-RU")} ₽`;
 
 const categories = [
   { name: "Ковры", image: "/images/rug.png", href: "/catalog" },
   { name: "Корзины", image: "/images/basket.png", href: "/catalog" },
   { name: "Панно", image: "/images/wall-art.png", href: "/catalog" },
-  { name: "Декор", image: "/images/lamp.png", href: "/catalog" },
+  { name: "Кашпо", image: "/images/basket.png", href: "/catalog" },
+  { name: "Освещение", image: "/images/lamp.png", href: "/catalog" },
+  { name: "Декор", image: "/images/hero-dining.png", href: "/catalog" },
 ];
 
 function Logo() {
@@ -62,6 +68,7 @@ function Logo() {
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { cartCount, favorites } = useShop();
   const nav = [
     ["Каталог", "/catalog"],
     ["О нас", "/about"],
@@ -84,9 +91,9 @@ export function Header() {
           <div className="header-actions">
             <a className="phone" href="tel:+79278000000">+7 (927) 800-00-00</a>
             <button aria-label="Поиск"><Search /></button>
-            <button aria-label="Избранное"><Heart /></button>
-            <button aria-label="Личный кабинет"><UserRound /></button>
-            <button className="bag" aria-label="Корзина"><ShoppingBag /><i>1</i></button>
+            <Link className="header-icon" href="/favorites" aria-label="Избранное"><Heart />{favorites.length > 0 && <i>{favorites.length}</i>}</Link>
+            <Link className="header-icon" href="/account" aria-label="Личный кабинет"><UserRound /></Link>
+            <Link className="header-icon bag" href="/cart" aria-label="Корзина"><ShoppingBag />{cartCount > 0 && <i>{cartCount}</i>}</Link>
             <button className="mobile-menu" onClick={() => setOpen(true)} aria-label="Открыть меню"><Menu /></button>
           </div>
         </div>
@@ -118,11 +125,11 @@ export function Footer() {
           <p>Интерьерные изделия из натурального джута,<br />созданные вручную с душой в России.</p>
           <div className="socials"><a href="#">VK</a><a href="#">TG</a><a href="#">MAX</a></div>
         </div>
-        <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><a href="#">Возврат и гарантия</a><a href="#">Уход за изделиями</a></div>
-        <div><h4>О мастерской</h4><Link href="/about">О компании</Link><a href="#">Отзывы</a><a href="#">Вопросы и ответы</a><a href="#">Контакты</a></div>
+        <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><Link href="/promotions">Акции</Link><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link></div>
+        <div><h4>О мастерской</h4><Link href="/about">О компании</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/contacts">Контакты</Link><Link href="/privacy">Конфиденциальность</Link><Link href="/terms">Соглашение</Link></div>
         <div className="footer-contact"><h4>Связаться с нами</h4><a href="tel:+79278000000">+7 (927) 800-00-00</a><a href="mailto:hello@mary-jute.ru">hello@mary-jute.ru</a><p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p><Button variant="outline" render={<Link href="/contacts" />}>Написать нам</Button></div>
       </div>
-      <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span>Политика конфиденциальности</span></div>
+      <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span><Link href="/privacy">Политика конфиденциальности</Link> · <Link href="/terms">Пользовательское соглашение</Link></span></div>
     </footer>
   );
 }
@@ -136,20 +143,21 @@ function SectionTitle({ children, link }: { children: React.ReactNode; link?: st
 }
 
 function ProductCard({ product = products[0] }: { product?: typeof products[number] }) {
-  const [liked, setLiked] = useState(false);
+  const { addToCart, toggleFavorite, isFavorite } = useShop();
   const [added, setAdded] = useState(false);
+  const liked = isFavorite(product.id);
   return (
     <article className="product-card">
       <Link href="/product" className="product-image">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" />
         <span className="product-badge">Ручная работа</span>
       </Link>
-      <button className={`heart ${liked ? "active" : ""}`} onClick={() => setLiked(!liked)} aria-label="Добавить в избранное"><Heart /></button>
+      <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite(product)} aria-label="Добавить в избранное"><Heart /></button>
       <div className="product-copy">
         <div className="product-rating"><span>★★★★★</span><small>5.0</small></div>
         <Link href="/product"><h3>{product.name}</h3></Link>
         <p>Натуральный джут · в наличии</p>
-        <div className="product-bottom"><strong>{product.price}</strong><div className="mini-swatches"><i /><i /><i /></div><button onClick={() => setAdded(true)}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button></div>
+        <div className="product-bottom"><strong>{formatPrice(product.price)}</strong><div className="mini-swatches"><i /><i /><i /></div><button onClick={() => { addToCart(product); setAdded(true); }}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button></div>
       </div>
     </article>
   );
@@ -181,7 +189,7 @@ export function HomePage() {
   return (
     <Page>
       <section className="hero">
-        {slides.map((item, i) => <Image key={item.image} className={slide === i ? "active" : ""} src={item.image} alt="Интерьер с изделиями из джута" fill priority={i === 0} sizes="100vw" />)}
+        <Image key={slides[slide].image} className="active hero-slide" src={slides[slide].image} alt="Интерьер с изделиями из джута" fill priority sizes="100vw" />
         <div className="hero-shade" />
         <div className="shell hero-content">
           <p>{slides[slide].eyebrow}</p>
@@ -190,8 +198,8 @@ export function HomePage() {
           <Button className="light-button" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
         </div>
         <div className="hero-controls shell">
-          <div>{slides.map((_, i) => <button key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`} />)}</div>
-          <span><button onClick={() => setSlide((slide - 1 + slides.length) % slides.length)} aria-label="Предыдущий слайд"><ArrowLeft /></button><b>0{slide + 1}</b><i>/</i><small>0{slides.length}</small><button onClick={() => setSlide((slide + 1) % slides.length)} aria-label="Следующий слайд"><ArrowRight /></button></span>
+          <div>{slides.map((_, i) => <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`} />)}</div>
+          <span><button type="button" onClick={() => setSlide((slide - 1 + slides.length) % slides.length)} aria-label="Предыдущий слайд"><ArrowLeft /></button><b>0{slide + 1}</b><i>/</i><small>0{slides.length}</small><button type="button" onClick={() => setSlide((slide + 1) % slides.length)} aria-label="Следующий слайд"><ArrowRight /></button></span>
         </div>
         <div className="hero-note"><Leaf /><span>100% натуральный<br /><b>джут</b></span></div>
       </section>
@@ -231,7 +239,7 @@ export function HomePage() {
         <div className="review-summary"><strong>4,9</strong><span><b>★★★★★</b>На основе 186 отзывов</span><div>{["Яндекс", "Ozon", "Wildberries"].map((v) => <i key={v}><Check />{v}</i>)}</div></div>
       </section>
       <section className="shell home-bottom-grid">
-        <div className="faq-preview"><span>Помогаем с выбором</span><h2>Частые вопросы</h2>{["Как ухаживать за изделиями?", "Можно ли заказать свой размер?", "Почему новое изделие имеет запах?"].map((q, i) => <button key={q}><b>0{i + 1}</b>{q}<Plus /></button>)}<Link href="#">Все вопросы <ArrowRight /></Link></div>
+        <div className="faq-preview"><span>Помогаем с выбором</span><h2>Частые вопросы</h2>{["Как ухаживать за изделиями?", "Можно ли заказать свой размер?", "Почему новое изделие имеет запах?"].map((q, i) => <Link href="/faq" className="faq-link" key={q}><b>0{i + 1}</b>{q}<Plus /></Link>)}<Link href="/faq">Все вопросы <ArrowRight /></Link></div>
         <div className="where-buy"><Image src="/images/basket.png" alt="" fill /><div><span>Удобно покупать</span><h2>Мы также<br />на маркетплейсах</h2><p>Wildberries · Ozon · Яндекс Маркет</p><Button variant="secondary">Где купить</Button></div></div>
       </section>
     </Page>
@@ -248,7 +256,7 @@ function FilterGroup({ title, values }: { title: string; values: string[] }) {
 
 export function CatalogPage() {
   const [category, setCategory] = useState("Все");
-  const tabs = ["Все", "Ковры", "Корзины", "Панно", "Декор"];
+  const tabs = ["Все", "Ковры", "Корзины", "Кашпо", "Освещение", "Панно", "Декор"];
   return (
     <Page>
       <section className="page-hero compact">
@@ -288,6 +296,9 @@ export function CalculatorPage() {
   const [color, setColor] = useState("Натуральный");
   const [edge, setEdge] = useState(true);
   const [backing, setBacking] = useState(false);
+  const [leadName, setLeadName] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [requestSent, setRequestSent] = useState(false);
   const calculation = useMemo(() => {
     const diameterMm = (shape === "Овал" ? (size + length) / 2 : size) * 10;
     const thicknessMm = 8;
@@ -327,7 +338,7 @@ export function CalculatorPage() {
             <label className="calc-check"><Checkbox defaultChecked />Я согласен с отклонением готового изделия ± 2 см</label>
           </div>
           <aside className="estimate-card">
-            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>{calculation.lengthMeters.toFixed(1)} м джута</span><span>{material}</span><span>{pattern}</span><span>{color}</span></div><span>Расчёт по спирали, толщина 8 мм<br />и тариф {JUTE_PRICE_PER_METER} ₽/м. Итог подтвердит мастер.</span><Button>Отправить заявку <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
+            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>{calculation.lengthMeters.toFixed(1)} м джута</span><span>{material}</span><span>{pattern}</span><span>{color}</span></div><span>Расчёт по спирали, толщина 8 мм<br />и тариф {JUTE_PRICE_PER_METER} ₽/м. Итог подтвердит мастер.</span><div className="estimate-lead"><Input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="Ваше имя" /><Input value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="+7 (___) ___-__-__" /></div><Button disabled={!leadName || !leadPhone || requestSent} onClick={async () => { const response = await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "calculator", contact: { name: leadName, phone: leadPhone }, calculation: { shape, size, length, material, pattern, color, rows, edge, backing, ...calculation } }) }); setRequestSent(response.ok); }}>{requestSent ? "Заявка отправлена" : "Отправить заявку"} <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
           </aside>
         </div>
       </section>
@@ -337,6 +348,7 @@ export function CalculatorPage() {
 }
 
 export function ProductPage() {
+  const { addToCart, toggleFavorite, isFavorite } = useShop();
   const [size, setSize] = useState("80 см");
   const [color, setColor] = useState(0);
   const [qty, setQty] = useState(1);
@@ -348,12 +360,12 @@ export function ProductPage() {
     <Page>
       <div className="shell breadcrumb">Главная / Ковры / Ковер джутовый круглый</div>
       <section className="shell product-detail">
-        <div className="gallery"><div className="thumbnails">{thumbs.map((src, i) => <button className={image === src ? "active" : ""} onClick={() => setImage(src)} key={i}><Image src={src} alt="" fill /></button>)}</div><div className="main-image"><Image src={image} alt="Ковер джутовый круглый" fill priority /><button><Heart /></button></div></div>
+        <div className="gallery"><div className="thumbnails">{thumbs.map((src, i) => <button className={image === src ? "active" : ""} onClick={() => setImage(src)} key={i}><Image src={src} alt="" fill /></button>)}</div><div className="main-image"><Image src={image} alt="Ковер джутовый круглый" fill priority /><button className={isFavorite(products[0].id) ? "active" : ""} onClick={() => toggleFavorite(products[0])}><Heart /></button></div></div>
         <div className="product-info">
-          <h1>Ковер джутовый<br />круглый</h1><strong className="detail-price">7 990 ₽</strong><div className="rating">★★★★★ <span>24 отзыва</span></div>
+          <h1>Ковер джутовый<br />круглый</h1><strong className="detail-price">{formatPrice(products[0].price)}</strong><div className="rating">★★★★★ <span>24 отзыва</span></div>
           <div className="option"><label>Размер</label><div>{["60 см", "80 см", "100 см", "150 см"].map(v => <button className={size === v ? "selected" : ""} onClick={() => setSize(v)} key={v}>{v}</button>)}</div></div>
           <div className="option color-option"><label>Цвет</label><div>{["#d9c49c", "#a97a42", "#5c513b", "#173e29"].map((v, i) => <button className={color === i ? "selected" : ""} style={{background:v}} onClick={() => setColor(i)} key={v} aria-label={`Цвет ${i + 1}`} />)}</div></div>
-          <div className="buy-row"><div className="counter"><button onClick={() => setQty(Math.max(1, qty - 1))}><Minus /></button><span>{qty}</span><button onClick={() => setQty(qty + 1)}><Plus /></button></div><Button onClick={() => setAdded(true)}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button></div>
+          <div className="buy-row"><div className="counter"><button onClick={() => setQty(Math.max(1, qty - 1))}><Minus /></button><span>{qty}</span><button onClick={() => setQty(qty + 1)}><Plus /></button></div><Button onClick={() => { addToCart(products[0], qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button></div>
           <div className="mini-benefits"><span><PackageCheck />Быстрая доставка</span><span><Sparkles />Ручная работа</span><span><Truck />Возможен возврат</span></div>
         </div>
       </section>
@@ -370,8 +382,8 @@ export function ProductPage() {
       <section className="shell bundle">
         <SectionTitle>С этим товаром покупают</SectionTitle>
         <div className="bundle-row">
-          {products.slice(0, 3).map((p, i) => <div className="bundle-product" key={p.name}><Image src={p.image} alt={p.name} width={110} height={110} /><span>{p.name}<b>{p.price}</b></span>{i < 2 && <Plus />}</div>)}
-          <div className="bundle-total"><span>Итого</span><strong>14 470 ₽</strong><Button>Добавить всё в корзину</Button></div>
+          {products.slice(0, 3).map((p, i) => <div className="bundle-product" key={p.name}><Image src={p.image} alt={p.name} width={110} height={110} /><span>{p.name}<b>{formatPrice(p.price)}</b></span>{i < 2 && <Plus />}</div>)}
+          <div className="bundle-total"><span>Итого</span><strong>{formatPrice(products.slice(0, 3).reduce((sum, item) => sum + item.price, 0))}</strong><Button onClick={() => products.slice(0, 3).forEach(item => addToCart(item))}>Добавить всё в корзину</Button></div>
         </div>
       </section>
     </Page>
@@ -426,12 +438,21 @@ export function PaymentPage() {
 
 export function ContactsPage() {
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  async function submitContact(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSending(true);
+    const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+    const response = await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "contact", data }) });
+    setSending(false);
+    setSent(response.ok);
+  }
   return (
     <Page>
       <InfoHero title="Контакты" subtitle="Всегда готовы помочь с выбором и заказом" />
       <section className="shell contacts-layout">
         <div className="contact-details"><p className="eyebrow">Связаться с нами</p><h2>Давайте обсудим ваш будущий уют</h2><p>Расскажем об изделиях, поможем подобрать размер и рассчитаем индивидуальный заказ.</p><div><a href="tel:+79278000000"><span><MessageCircle /></span><b>+7 (927) 800-00-00<small>Ежедневно с 9:00 до 20:00</small></b></a><a href="mailto:hello@mary-jute.ru"><span><Mail /></span><b>hello@mary-jute.ru<small>Ответим в течение рабочего дня</small></b></a><p><span><MapPin /></span><b>Ульяновская область<small>Мастерская работает без шоурума</small></b></p></div><div className="contact-socials"><a href="#">Telegram</a><a href="#">ВКонтакте</a><a href="#">MAX</a></div></div>
-        <form className="contact-form" onSubmit={e => { e.preventDefault(); setSent(true); }}><span>Напишите нам</span><h3>Ответим на ваш вопрос</h3><label>Ваше имя<Input required placeholder="Мария" /></label><label>Телефон<Input required type="tel" placeholder="+7 (___) ___-__-__" /></label><label>E-mail<Input type="email" placeholder="mail@example.ru" /></label><label>Сообщение<textarea required placeholder="Расскажите, чем мы можем помочь" /></label><label className="calc-check"><Checkbox defaultChecked />Согласен с политикой конфиденциальности</label><Button type="submit">{sent ? "Сообщение отправлено" : "Отправить сообщение"} <ArrowRight /></Button></form>
+        <form className="contact-form" onSubmit={submitContact}><span>Напишите нам</span><h3>Ответим на ваш вопрос</h3><label>Ваше имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<Input name="phone" required type="tel" placeholder="+7 (___) ___-__-__" /></label><label>E-mail<Input name="email" type="email" placeholder="mail@example.ru" /></label><label>Сообщение<textarea name="message" required placeholder="Расскажите, чем мы можем помочь" /></label><label className="calc-check"><Checkbox defaultChecked />Согласен с политикой конфиденциальности</label><Button type="submit" disabled={sending || sent}>{sent ? "Сообщение отправлено" : sending ? "Отправляем..." : "Отправить сообщение"} <ArrowRight /></Button></form>
       </section>
     </Page>
   );

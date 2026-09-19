@@ -12,6 +12,10 @@
 - `/delivery` — доставка;
 - `/payment` — оплата;
 - `/contacts` — контакты и форма обратной связи.
+- `/cart`, `/checkout` — сохраняемая корзина и оформление заказа;
+- `/favorites`, `/account` — избранное и история заказов;
+- `/faq`, `/care`, `/returns`, `/warranty`, `/promotions` — информация покупателю;
+- `/privacy`, `/terms` — юридические документы.
 
 ## Запуск
 
@@ -23,6 +27,8 @@ npm run dev
 Откройте `http://localhost:3000`. Для production-сборки используйте `npm run build`.
 
 Изображения созданы специально для макета и находятся в `public/images`.
+
+Корзина, избранное и история заказов сохраняются в `localStorage`. Чтобы заявки из форм уходили во внешний сервис, скопируйте `.env.example` в `.env.local` и укажите `REQUEST_WEBHOOK_URL`. Без него API принимает запрос и выводит его в серверный журнал.
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
