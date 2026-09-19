@@ -6,12 +6,18 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  Banknote,
   Check,
   ChevronDown,
+  Clock3,
+  CreditCard,
   Heart,
   Leaf,
+  Mail,
   Menu,
+  MessageCircle,
   Minus,
+  MapPin,
   PackageCheck,
   Plus,
   Search,
@@ -19,6 +25,7 @@ import {
   Sparkles,
   Truck,
   UserRound,
+  WalletCards,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,9 +63,9 @@ export function Header() {
   const nav = [
     ["Каталог", "/catalog"],
     ["О нас", "/about"],
-    ["Доставка", "/#delivery"],
-    ["Оплата", "/#payment"],
-    ["Контакты", "/#contacts"],
+    ["Доставка", "/delivery"],
+    ["Оплата", "/payment"],
+    ["Контакты", "/contacts"],
   ];
 
   return (
@@ -109,9 +116,9 @@ export function Footer() {
           <p>Интерьерные изделия из натурального джута,<br />созданные вручную с душой в России.</p>
           <div className="socials"><a href="#">VK</a><a href="#">TG</a><a href="#">MAX</a></div>
         </div>
-        <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><a href="#delivery">Доставка и оплата</a><a href="#">Возврат и гарантия</a><a href="#">Уход за изделиями</a></div>
+        <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><a href="#">Возврат и гарантия</a><a href="#">Уход за изделиями</a></div>
         <div><h4>О мастерской</h4><Link href="/about">О компании</Link><a href="#">Отзывы</a><a href="#">Вопросы и ответы</a><a href="#">Контакты</a></div>
-        <div className="footer-contact"><h4>Связаться с нами</h4><a href="tel:+79278000000">+7 (927) 800-00-00</a><a href="mailto:hello@mary-jute.ru">hello@mary-jute.ru</a><p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p><Button variant="outline">Написать нам</Button></div>
+        <div className="footer-contact"><h4>Связаться с нами</h4><a href="tel:+79278000000">+7 (927) 800-00-00</a><a href="mailto:hello@mary-jute.ru">hello@mary-jute.ru</a><p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p><Button variant="outline" render={<Link href="/contacts" />}>Написать нам</Button></div>
       </div>
       <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span>Политика конфиденциальности</span></div>
     </footer>
@@ -274,10 +281,17 @@ export function CalculatorPage() {
   const [size, setSize] = useState(100);
   const [length, setLength] = useState(140);
   const [rows, setRows] = useState(2);
+  const [material, setMaterial] = useState("Натуральный джут");
+  const [pattern, setPattern] = useState("Классический");
+  const [color, setColor] = useState("Натуральный");
+  const [edge, setEdge] = useState(true);
+  const [backing, setBacking] = useState(false);
   const price = useMemo(() => {
     const diameter = shape === "Овал" ? (size + length) / 2 : size;
-    return Math.round((diameter * diameter * 0.49 + rows * 650) / 100) * 100;
-  }, [shape, size, length, rows]);
+    const materialRate = material === "Джут + хлопок" ? 1.18 : 1;
+    const extras = (edge ? 600 : 0) + (backing ? 1200 : 0) + (pattern === "Ажурный" ? 900 : 0);
+    return Math.max(2900, Math.round((diameter * diameter * 0.49 * materialRate + rows * 650 + extras) / 100) * 100);
+  }, [shape, size, length, rows, material, pattern, edge, backing]);
 
   return (
     <Page>
@@ -291,13 +305,21 @@ export function CalculatorPage() {
             <h3>Форма</h3>
             <div className="shape-row">{["Круг", "Овал"].map(v => <button onClick={() => setShape(v)} className={shape === v ? "selected" : ""} key={v}><span className={v === "Круг" ? "round" : "oval"} />{v}</button>)}</div>
             <h3>Размеры (см)</h3>
-            <div className="field-grid"><label>Ширина / диаметр<Input type="number" value={size} onChange={e => setSize(Number(e.target.value))} min={40} max={300} /></label>{shape === "Овал" && <label>Длина<Input type="number" value={length} onChange={e => setLength(Number(e.target.value))} min={60} max={400} /></label>}</div>
+            <div className="field-grid"><label>Ширина / диаметр<Input type="number" value={size} onChange={e => setSize(Math.min(300, Math.max(40, Number(e.target.value))))} min={40} max={300} /><small>от 40 до 300 см</small></label>{shape === "Овал" && <label>Длина<Input type="number" value={length} onChange={e => setLength(Math.min(400, Math.max(60, Number(e.target.value))))} min={60} max={400} /><small>от 60 до 400 см</small></label>}<label>Толщина<Input value="8 мм" disabled /><small>фиксированная</small></label></div>
+            <h3>Материал</h3>
+            <div className="choice-row option-choices">{["Натуральный джут", "Джут + хлопок"].map(v => <button onClick={() => setMaterial(v)} className={material === v ? "selected" : ""} key={v}>{v}</button>)}</div>
+            <h3>Рисунок плетения</h3>
+            <div className="choice-row option-choices">{["Классический", "Ажурный", "Без узора"].map(v => <button onClick={() => setPattern(v)} className={pattern === v ? "selected" : ""} key={v}>{v}</button>)}</div>
+            <h3>Оттенок</h3>
+            <div className="calc-colors">{[["Натуральный", "#d5bd91"], ["Карамель", "#a8753d"], ["Тёмный", "#62513d"]].map(([name, value]) => <button onClick={() => setColor(name)} className={color === name ? "selected" : ""} key={name}><i style={{background:value}} />{name}</button>)}</div>
             <h3>Количество рядов с узором</h3>
             <div className="counter"><button onClick={() => setRows(Math.max(0, rows - 1))}><Minus /></button><span>{rows}</span><button onClick={() => setRows(Math.min(8, rows + 1))}><Plus /></button></div>
+            <h3>Дополнительные опции</h3>
+            <div className="extra-options"><button className={edge ? "selected" : ""} onClick={() => setEdge(!edge)}><i>{edge && <Check />}</i><span>Обработка края<small>+ 600 ₽</small></span></button><button className={backing ? "selected" : ""} onClick={() => setBacking(!backing)}><i>{backing && <Check />}</i><span>Антискользящая основа<small>+ 1 200 ₽</small></span></button></div>
             <label className="calc-check"><Checkbox defaultChecked />Я согласен с отклонением готового изделия ± 2 см</label>
           </div>
           <aside className="estimate-card">
-            <p>Примерная стоимость</p><strong>{price.toLocaleString("ru-RU")} ₽</strong><span>Точная стоимость рассчитывается<br />после согласования с мастером</span><Button>Отправить заявку <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
+            <p>Примерная стоимость</p><strong>{price.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>{material}</span><span>{pattern}</span><span>{color}</span></div><span>Точная стоимость рассчитывается<br />после согласования с мастером</span><Button>Отправить заявку <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
           </aside>
         </div>
       </section>
@@ -311,6 +333,7 @@ export function ProductPage() {
   const [color, setColor] = useState(0);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики" | "Отзывы">("Описание");
   const thumbs = ["/images/rug.png", "/images/hero.png", "/images/rug.png", "/images/hero.png"];
   const [image, setImage] = useState(thumbs[0]);
   return (
@@ -327,7 +350,12 @@ export function ProductPage() {
         </div>
       </section>
       <section className="shell product-description">
-        <div className="description-copy"><div className="description-tabs"><button className="active">Описание</button><button>Характеристики</button><button>Отзывы (24)</button></div><p>Натуральный джутовый ковёр ручной работы. Прочное плетение и выразительная фактура делают его тёплым акцентом в интерьере гостиной, спальни или террасы.</p><ul><li>Ручная работа</li><li>Экологичный материал</li><li>Подходит для тёплого пола</li><li>Легко поддерживать в чистоте</li></ul></div>
+        <div className="description-copy">
+          <div className="description-tabs">{(["Описание", "Характеристики", "Отзывы"] as const).map(tab => <button className={activeTab === tab ? "active" : ""} onClick={() => setActiveTab(tab)} key={tab}>{tab}{tab === "Отзывы" ? " (24)" : ""}</button>)}</div>
+          {activeTab === "Описание" && <div className="tab-panel"><p>Натуральный джутовый ковёр ручной работы. Прочное плетение и выразительная фактура делают его тёплым акцентом в интерьере гостиной, спальни или террасы.</p><ul><li>Ручная работа</li><li>Экологичный материал</li><li>Подходит для тёплого пола</li><li>Легко поддерживать в чистоте</li></ul></div>}
+          {activeTab === "Характеристики" && <div className="spec-table">{[["Материал", "100% натуральный джут"], ["Диаметр", size], ["Толщина", "8 мм"], ["Цвет", ["Натуральный", "Карамель", "Тёмный", "Зелёный"][color]], ["Производство", "Россия, ручная работа"], ["Уход", "Сухая чистка"]].map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b></div>)}</div>}
+          {activeTab === "Отзывы" && <div className="product-reviews"><article><div><b>Елена</b><span>★★★★★</span></div><p>Ковёр очень красивый и плотный. Размер соответствует, цвет вживую ещё теплее.</p><small>12 сентября 2026</small></article><article><div><b>Марина</b><span>★★★★★</span></div><p>Аккуратное плетение и бережная упаковка. Отлично подошёл для гостиной.</p><small>3 сентября 2026</small></article><Button variant="outline">Оставить отзыв</Button></div>}
+        </div>
         <Image src="/images/hero.png" alt="Ковер в интерьере" width={520} height={420} />
       </section>
       <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{products.map(p => <ProductCard key={p.name} product={p} />)}</div></section>
@@ -349,6 +377,54 @@ export function AboutPage() {
       <section className="shell about-intro"><div><p className="eyebrow">Мэри Джут — это</p><h2>Семейная мастерская по производству интерьерных изделий из джута</h2><p>Мы верим, что у каждого дома есть характер. Наши изделия помогают наполнить пространство теплом натуральных материалов и живой энергией ручной работы.</p><div className="about-points"><span><Leaf />Ручная работа</span><span><Sparkles />Собственное производство</span><span><PackageCheck />Натуральные материалы</span><span><Heart />Любовь к своему делу</span></div></div><Image src="/images/craftswoman.png" alt="Мастер плетёт корзину из джута" width={480} height={620} /></section>
       <section className="shell founder"><Image src="/images/basket.png" alt="Корзина ручной работы" width={460} height={460} /><div><p className="eyebrow">Наша история</p><h2>Начиналось всё с желания создавать красивые и нужные вещи</h2><p>Первая корзина появилась как вещь для собственного дома. Затем были ковры, панно и десятки экспериментов с формой. Сегодня каждое изделие по-прежнему проходит через руки мастера.</p><Button render={<Link href="/catalog" />}>Наши работы <ArrowRight /></Button></div></section>
       <section className="stats"><div className="shell"><span><b>5 лет</b>создаём уют</span><span><b>10 000+</b>изделий нашли дом</span><span><b>100%</b>ручная работа</span></div></section>
+    </Page>
+  );
+}
+
+function InfoHero({ title, subtitle }: { title: string; subtitle: string }) {
+  return <section className="page-hero info-hero"><Image src="/images/hero-dining.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / {title}</p><h1>{title}</h1><span>{subtitle}</span></div></section>;
+}
+
+export function DeliveryPage() {
+  return (
+    <Page>
+      <InfoHero title="Доставка" subtitle="Бережно доставляем изделия по всей России" />
+      <section className="shell info-layout">
+        <div className="info-main"><p className="eyebrow">Способы получения</p><h2>Выберите удобную доставку</h2><div className="info-card-grid">
+          <article><Truck /><span><b>СДЭК</b><small>До пункта выдачи или курьером</small></span><strong>от 490 ₽</strong></article>
+          <article><PackageCheck /><span><b>Ozon Доставка</b><small>До выбранного пункта выдачи</small></span><strong>от 350 ₽</strong></article>
+          <article><MapPin /><span><b>Самовывоз</b><small>По согласованию из мастерской</small></span><strong>Бесплатно</strong></article>
+        </div><div className="info-copy"><h3>Как проходит доставка</h3><ol><li><b>Оформите заказ</b><span>Выберите изделие и укажите удобный способ получения.</span></li><li><b>Мы бережно упакуем</b><span>Защитим изделие от влаги и повреждений.</span></li><li><b>Получите уведомление</b><span>Отправим трек-номер на e-mail или в мессенджер.</span></li></ol></div></div>
+        <aside className="info-aside"><Clock3 /><h3>Сроки доставки</h3><p>Срок изготовления и отправки готовых изделий — 1–3 рабочих дня. Индивидуальные заказы согласовываются отдельно.</p><div><span>Центральный регион</span><b>2–5 дней</b></div><div><span>Южные регионы</span><b>3–7 дней</b></div><div><span>Другие регионы</span><b>4–10 дней</b></div><Button render={<Link href="/contacts" />}>Уточнить срок</Button></aside>
+      </section>
+      <section className="shell delivery-note"><Leaf /><div><h3>Бесплатная доставка</h3><p>Для заказов от 15 000 ₽ доставка до пункта выдачи — за наш счёт.</p></div></section>
+    </Page>
+  );
+}
+
+export function PaymentPage() {
+  return (
+    <Page>
+      <InfoHero title="Оплата" subtitle="Безопасные и привычные способы оплаты" />
+      <section className="shell payment-section"><div><p className="eyebrow">Оплата заказа</p><h2>Выберите удобный способ</h2><p>После оформления вы перейдёте на защищённую страницу оплаты. Мы не храним данные банковских карт.</p></div><div className="payment-grid">
+        <article><CreditCard /><h3>Банковской картой</h3><p>МИР, Visa и Mastercard российских банков.</p><span>Без комиссии</span></article>
+        <article><WalletCards /><h3>Через СБП</h3><p>Оплата по QR-коду в приложении вашего банка.</p><span>Мгновенно</span></article>
+        <article><Banknote /><h3>Индивидуальный заказ</h3><p>Предоплата после согласования параметров с мастером.</p><span>По ссылке</span></article>
+      </div></section>
+      <section className="shell payment-steps"><h2>Как происходит оплата</h2><div>{["Добавьте изделия в корзину", "Заполните данные получателя", "Оплатите заказ безопасным способом", "Получите подтверждение на e-mail"].map((text, i) => <span key={text}><b>0{i + 1}</b>{text}</span>)}</div></section>
+    </Page>
+  );
+}
+
+export function ContactsPage() {
+  const [sent, setSent] = useState(false);
+  return (
+    <Page>
+      <InfoHero title="Контакты" subtitle="Всегда готовы помочь с выбором и заказом" />
+      <section className="shell contacts-layout">
+        <div className="contact-details"><p className="eyebrow">Связаться с нами</p><h2>Давайте обсудим ваш будущий уют</h2><p>Расскажем об изделиях, поможем подобрать размер и рассчитаем индивидуальный заказ.</p><div><a href="tel:+79278000000"><span><MessageCircle /></span><b>+7 (927) 800-00-00<small>Ежедневно с 9:00 до 20:00</small></b></a><a href="mailto:hello@mary-jute.ru"><span><Mail /></span><b>hello@mary-jute.ru<small>Ответим в течение рабочего дня</small></b></a><p><span><MapPin /></span><b>Ульяновская область<small>Мастерская работает без шоурума</small></b></p></div><div className="contact-socials"><a href="#">Telegram</a><a href="#">ВКонтакте</a><a href="#">MAX</a></div></div>
+        <form className="contact-form" onSubmit={e => { e.preventDefault(); setSent(true); }}><span>Напишите нам</span><h3>Ответим на ваш вопрос</h3><label>Ваше имя<Input required placeholder="Мария" /></label><label>Телефон<Input required type="tel" placeholder="+7 (___) ___-__-__" /></label><label>E-mail<Input type="email" placeholder="mail@example.ru" /></label><label>Сообщение<textarea required placeholder="Расскажите, чем мы можем помочь" /></label><label className="calc-check"><Checkbox defaultChecked />Согласен с политикой конфиденциальности</label><Button type="submit">{sent ? "Сообщение отправлено" : "Отправить сообщение"} <ArrowRight /></Button></form>
+      </section>
     </Page>
   );
 }
