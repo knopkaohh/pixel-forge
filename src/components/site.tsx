@@ -182,9 +182,9 @@ export function HomePage() {
   ];
   const [slide, setSlide] = useState(0);
   useEffect(() => {
-    const timer = window.setInterval(() => setSlide((current) => (current + 1) % slides.length), 6500);
-    return () => window.clearInterval(timer);
-  }, [slides.length]);
+    const timer = window.setTimeout(() => setSlide((slide + 1) % slides.length), 4500);
+    return () => window.clearTimeout(timer);
+  }, [slide, slides.length]);
 
   return (
     <Page>
