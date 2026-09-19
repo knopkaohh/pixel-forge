@@ -70,6 +70,7 @@ export function Header() {
           <div className="header-actions">
             <a className="phone" href="tel:+79278000000">+7 (927) 800-00-00</a>
             <button aria-label="Поиск"><Search /></button>
+            <button aria-label="Избранное"><Heart /></button>
             <button aria-label="Личный кабинет"><UserRound /></button>
             <button className="bag" aria-label="Корзина"><ShoppingBag /><i>1</i></button>
             <button className="mobile-menu" onClick={() => setOpen(true)} aria-label="Открыть меню"><Menu /></button>
@@ -123,7 +124,7 @@ function ProductCard({ product = products[0] }: { product?: typeof products[numb
       </Link>
       <button className={`heart ${liked ? "active" : ""}`} onClick={() => setLiked(!liked)} aria-label="Добавить в избранное"><Heart /></button>
       <Link href="/product"><h3>{product.name}</h3></Link>
-      <div className="product-bottom"><strong>{product.price}</strong><button onClick={() => setAdded(true)}>{added ? "Добавлено" : <ShoppingBag />}</button></div>
+      <div className="product-bottom"><strong>{product.price}</strong><button onClick={() => setAdded(true)}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button></div>
     </article>
   );
 }
@@ -206,6 +207,7 @@ export function CatalogPage() {
         <div className="catalog-tabs">{tabs.map(t => <button key={t} onClick={() => setCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
         <div className="catalog-layout">
           <aside className="filters">
+            <div className="catalog-search"><h4>Поиск</h4><div><Input placeholder="Найти изделие" /><Search /></div></div>
             <div className="price-filter"><h4>Цена</h4><div><Input defaultValue="1 000" /><span>—</span><Input defaultValue="15 000" /></div><input type="range" min="1000" max="15000" defaultValue="10000" /></div>
             <FilterGroup title="Размер" values={["до 60 см", "60–100 см", "100–150 см", "более 150 см"]} />
             <FilterGroup title="Цвет" values={["Натуральный", "Карамельный", "Зелёный"]} />
@@ -286,6 +288,13 @@ export function ProductPage() {
         <Image src="/images/hero.png" alt="Ковер в интерьере" width={520} height={420} />
       </section>
       <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{products.map(p => <ProductCard key={p.name} product={p} />)}</div></section>
+      <section className="shell bundle">
+        <SectionTitle>С этим товаром покупают</SectionTitle>
+        <div className="bundle-row">
+          {products.slice(0, 3).map((p, i) => <div className="bundle-product" key={p.name}><Image src={p.image} alt={p.name} width={110} height={110} /><span>{p.name}<b>{p.price}</b></span>{i < 2 && <Plus />}</div>)}
+          <div className="bundle-total"><span>Итого</span><strong>14 470 ₽</strong><Button>Добавить всё в корзину</Button></div>
+        </div>
+      </section>
     </Page>
   );
 }
