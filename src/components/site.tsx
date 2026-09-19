@@ -39,6 +39,8 @@ const products = [
   { name: "Ковер натуральный", price: "9 990 ₽", image: "/images/rug.png" },
 ];
 
+const JUTE_PRICE_PER_METER = 65;
+
 const categories = [
   { name: "Ковры", image: "/images/rug.png", href: "/catalog" },
   { name: "Корзины", image: "/images/basket.png", href: "/catalog" },
@@ -286,11 +288,17 @@ export function CalculatorPage() {
   const [color, setColor] = useState("Натуральный");
   const [edge, setEdge] = useState(true);
   const [backing, setBacking] = useState(false);
-  const price = useMemo(() => {
-    const diameter = shape === "Овал" ? (size + length) / 2 : size;
+  const calculation = useMemo(() => {
+    const diameterMm = (shape === "Овал" ? (size + length) / 2 : size) * 10;
+    const thicknessMm = 8;
+    const b = thicknessMm / (2 * Math.PI);
+    const theta = Math.PI * diameterMm / thicknessMm;
+    const lengthMeters = (b / 2 * (theta * Math.sqrt(theta * theta + 1) + Math.asinh(theta))) / 1000;
     const materialRate = material === "Джут + хлопок" ? 1.18 : 1;
-    const extras = (edge ? 600 : 0) + (backing ? 1200 : 0) + (pattern === "Ажурный" ? 900 : 0);
-    return Math.max(2900, Math.round((diameter * diameter * 0.49 * materialRate + rows * 650 + extras) / 100) * 100);
+    const patternCost = pattern === "Ажурный" ? 900 : pattern === "Классический" ? rows * 180 : 0;
+    const extras = (edge ? 600 : 0) + (backing ? 1200 : 0) + patternCost;
+    const total = Math.max(2900, Math.round((lengthMeters * JUTE_PRICE_PER_METER * materialRate + extras) / 100) * 100);
+    return { total, lengthMeters };
   }, [shape, size, length, rows, material, pattern, edge, backing]);
 
   return (
@@ -319,7 +327,7 @@ export function CalculatorPage() {
             <label className="calc-check"><Checkbox defaultChecked />Я согласен с отклонением готового изделия ± 2 см</label>
           </div>
           <aside className="estimate-card">
-            <p>Примерная стоимость</p><strong>{price.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>{material}</span><span>{pattern}</span><span>{color}</span></div><span>Точная стоимость рассчитывается<br />после согласования с мастером</span><Button>Отправить заявку <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
+            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>{calculation.lengthMeters.toFixed(1)} м джута</span><span>{material}</span><span>{pattern}</span><span>{color}</span></div><span>Расчёт по спирали, толщина 8 мм<br />и тариф {JUTE_PRICE_PER_METER} ₽/м. Итог подтвердит мастер.</span><Button>Отправить заявку <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
           </aside>
         </div>
       </section>
