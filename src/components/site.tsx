@@ -190,7 +190,7 @@ export function HomePage() {
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные категории</SectionTitle>
         <div className="category-grid">
-          {categories.map((cat) => <Link href={cat.href} className="category-card" key={cat.name}><Image src={cat.image} alt={cat.name} fill sizes="25vw" /><span>{cat.name}</span></Link>)}
+          {categories.map((cat) => <Link href={cat.href} className="category-card" key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="25vw" /><i><ArrowRight /></i></div><span>{cat.name}<small>Смотреть коллекцию</small></span></Link>)}
         </div>
       </section>
       <section className="shell collection-showcase">
@@ -253,7 +253,7 @@ export function CatalogPage() {
             <div className="catalog-search"><h4>Поиск</h4><div><Input placeholder="Найти изделие" /><Search /></div></div>
             <div className="price-filter"><h4>Цена</h4><div><Input defaultValue="1 000" /><span>—</span><Input defaultValue="15 000" /></div><input type="range" min="1000" max="15000" defaultValue="10000" /></div>
             <FilterGroup title="Размер" values={["до 60 см", "60–100 см", "100–150 см", "более 150 см"]} />
-            <FilterGroup title="Цвет" values={["Натуральный", "Карамельный", "Зелёный"]} />
+            <div className="filter-group swatch-filter"><h4>Цвет<ChevronDown /></h4><div>{["#d5bd91", "#b17c43", "#6f5b42", "#204b31", "#eee9de"].map((value, i) => <button className={i === 0 ? "selected" : ""} style={{background:value}} key={value} aria-label={`Цвет ${i + 1}`}>{i === 0 && <Check />}</button>)}</div></div>
             <FilterGroup title="Материал" values={["Джут", "Хлопок", "Смешанный"]} />
           </aside>
           <div className="catalog-content">

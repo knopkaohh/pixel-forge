@@ -1,3 +1,8 @@
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/montserrat/400.css";
+@import "@fontsource/montserrat/500.css";
+@import "@fontsource/montserrat/600.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -33,12 +38,12 @@
 
 * { box-sizing: border-box; border-color: var(--line); }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: Arial, Helvetica, sans-serif; font-size: 15px; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Montserrat", Arial, sans-serif; font-size: 15px; }
 button, a { transition: .2s ease; }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 h1, h2, h3, h4, p { margin-top: 0; }
-h1, h2, h3, .brand { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
+h1, h2, h3, .brand { font-family: "Playfair Display", Georgia, serif; font-weight: 400; }
 .shell { width: min(1180px, calc(100% - 48px)); margin-inline: auto; }
 .announcement { height: 27px; background: var(--green); color: #fff; text-align: center; font-size: 11px; letter-spacing: .04em; padding: 7px; }
 .site-header { height: 70px; background: rgba(255,253,248,.97); border-bottom: 1px solid var(--line); position: relative; z-index: 30; }
@@ -539,4 +544,36 @@ body { background:#f7f3eb; }
   .page-hero, .stats { width:calc(100% - 22px); margin-top:11px; }
   .catalog-section { padding:18px 12px 45px; }
   .product-detail, .product-description, .about-intro, .founder { padding:15px; border-radius:12px; }
+}
+
+/* Reference typography and detail alignment */
+button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
+.shape-row button, .option button, .footer h4 { font-family:"Montserrat", Arial, sans-serif; }
+.brand-copy b, .hero h1, .section-heading h2, .story-copy p, .promo p,
+.collection-main h2, .faq-preview h2, .where-buy h2, .newsletter h3,
+.detail-price, .product-info h1, .about-intro h2, .founder h2, .stats b {
+  font-family:"Playfair Display", Georgia, serif;
+}
+.benefits > div { flex-direction:column; text-align:center; gap:9px; }
+.benefits svg { width:39px; height:39px; }
+.benefits span { align-items:center; }
+.category-card { height:auto; overflow:visible; box-shadow:none; border-radius:0; }
+.category-card:after { display:none; }
+.category-image { position:relative; height:310px; overflow:hidden; border-radius:15px; box-shadow:0 8px 22px #392a190c; }
+.category-image img { object-fit:cover; transition:transform .5s; }
+.category-card:hover .category-image img { transform:scale(1.04); }
+.category-image i { position:absolute; z-index:2; right:15px; bottom:15px; width:36px; height:36px; display:grid; place-items:center; color:#fff; background:#173d28d9; border-radius:50%; opacity:0; transform:translateY(5px); transition:.25s; }
+.category-card:hover .category-image i { opacity:1; transform:translateY(0); }
+.category-image i svg { width:14px; }
+.category-card > span { position:static; color:var(--ink); display:block; font:20px "Playfair Display", Georgia, serif; padding:14px 3px 0; }
+.category-card > span:after { display:none; }
+.category-card > span small { display:block; color:#8c8378; font:8px "Montserrat", Arial, sans-serif; text-transform:uppercase; letter-spacing:.1em; margin-top:5px; }
+.swatch-filter > div { display:flex; flex-wrap:wrap; gap:10px; }
+.swatch-filter button { width:28px; height:28px; padding:0; border:2px solid #fff; box-shadow:0 0 0 1px #c9c0b4; border-radius:50%; display:grid; place-items:center; color:#fff; }
+.swatch-filter button.selected { box-shadow:0 0 0 2px var(--green); }
+.swatch-filter svg { width:13px; filter:drop-shadow(0 1px 1px #0004); }
+
+@media (max-width:620px) {
+  .category-image { height:210px; border-radius:11px; }
+  .category-card > span { font-size:17px; padding-top:10px; }
 }
