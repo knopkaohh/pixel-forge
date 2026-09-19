@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
+  Check,
   ChevronDown,
   Heart,
   Leaf,
@@ -13,6 +15,7 @@ import {
   PackageCheck,
   Plus,
   Search,
+  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Truck,
@@ -34,14 +37,17 @@ const categories = [
   { name: "Ковры", image: "/images/rug.png", href: "/catalog" },
   { name: "Корзины", image: "/images/basket.png", href: "/catalog" },
   { name: "Панно", image: "/images/wall-art.png", href: "/catalog" },
-  { name: "Декор", image: "/images/hero.png", href: "/catalog" },
+  { name: "Декор", image: "/images/lamp.png", href: "/catalog" },
 ];
 
 function Logo() {
   return (
     <Link href="/" className="brand" aria-label="Мэри Джут — главная">
-      <span className="brand-mark">✦</span>
-      <span>Мэри Джут</span>
+      <svg className="brand-leaf" viewBox="0 0 42 42" aria-hidden="true">
+        <path d="M35.5 6.5C20 7 9.2 14 8.1 27.8c7.7 1.7 15.5-.5 20.2-6.9 3.6-4.8 4.8-10 7.2-14.4Z" />
+        <path d="M7 35c3.7-10.2 10.8-17.6 22.8-23.3M17.2 22.1c-.2-3.2.4-6 1.7-8.7M18.6 21.1c3.2.4 6.4-.1 9.5-1.5" />
+      </svg>
+      <span className="brand-copy"><b>Мэри Джут</b><small>изделия из джута</small></span>
     </Link>
   );
 }
@@ -92,14 +98,21 @@ export function Header() {
 export function Footer() {
   return (
     <footer className="footer" id="contacts">
+      <div className="newsletter">
+        <div className="shell newsletter-inner">
+          <div><span>Письма о натуральном уюте</span><h3>Будьте в курсе новинок и акций</h3></div>
+          <div className="subscribe"><Input placeholder="Ваш e-mail" /><Button>Подписаться <ArrowRight /></Button></div>
+        </div>
+      </div>
       <div className="shell footer-grid">
         <div>
           <Logo />
-          <p>Интерьерные изделия из джута,<br />созданные вручную с душой.</p>
+          <p>Интерьерные изделия из натурального джута,<br />созданные вручную с душой в России.</p>
+          <div className="socials"><a href="#">VK</a><a href="#">TG</a><a href="#">MAX</a></div>
         </div>
-        <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><a href="#delivery">Доставка</a><a href="#payment">Оплата</a></div>
-        <div><h4>О компании</h4><Link href="/about">Наша история</Link><a href="#">Отзывы</a><a href="#">Контакты</a></div>
-        <div><h4>Будьте в курсе новинок и акций</h4><div className="subscribe"><Input placeholder="Ваш e-mail" /><Button>Подписаться</Button></div><p>Telegram · VK · MAX</p></div>
+        <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><a href="#delivery">Доставка и оплата</a><a href="#">Возврат и гарантия</a><a href="#">Уход за изделиями</a></div>
+        <div><h4>О мастерской</h4><Link href="/about">О компании</Link><a href="#">Отзывы</a><a href="#">Вопросы и ответы</a><a href="#">Контакты</a></div>
+        <div className="footer-contact"><h4>Связаться с нами</h4><a href="tel:+79278000000">+7 (927) 800-00-00</a><a href="mailto:hello@mary-jute.ru">hello@mary-jute.ru</a><p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p><Button variant="outline">Написать нам</Button></div>
       </div>
       <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span>Политика конфиденциальности</span></div>
     </footer>
@@ -121,10 +134,15 @@ function ProductCard({ product = products[0] }: { product?: typeof products[numb
     <article className="product-card">
       <Link href="/product" className="product-image">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" />
+        <span className="product-badge">Ручная работа</span>
       </Link>
       <button className={`heart ${liked ? "active" : ""}`} onClick={() => setLiked(!liked)} aria-label="Добавить в избранное"><Heart /></button>
-      <Link href="/product"><h3>{product.name}</h3></Link>
-      <div className="product-bottom"><strong>{product.price}</strong><button onClick={() => setAdded(true)}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button></div>
+      <div className="product-copy">
+        <div className="product-rating"><span>★★★★★</span><small>5.0</small></div>
+        <Link href="/product"><h3>{product.name}</h3></Link>
+        <p>Натуральный джут · в наличии</p>
+        <div className="product-bottom"><strong>{product.price}</strong><div className="mini-swatches"><i /><i /><i /></div><button onClick={() => setAdded(true)}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button></div>
+      </div>
     </article>
   );
 }
@@ -141,17 +159,33 @@ function Benefits() {
 }
 
 export function HomePage() {
+  const slides = [
+    { image: "/images/hero.png", eyebrow: "Интерьерные изделия из джута", title: <>Природный уют<br />в вашем доме</>, text: "Ковры, корзины, панно и декор ручной работы" },
+    { image: "/images/hero-dining.png", eyebrow: "Коллекция «Тёплый дом»", title: <>Фактура природы<br />в каждой детали</>, text: "Уникальные изделия, созданные для вашего пространства" },
+    { image: "/images/hero-craft.png", eyebrow: "Сделано руками мастера", title: <>С душой.<br />Для вашего дома.</>, text: "Собственное производство в России и натуральный джут" },
+  ];
+  const [slide, setSlide] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setSlide((current) => (current + 1) % slides.length), 6500);
+    return () => window.clearInterval(timer);
+  }, [slides.length]);
+
   return (
     <Page>
       <section className="hero">
-        <Image src="/images/hero.png" alt="Уютная гостиная с джутовым ковром" fill priority sizes="100vw" />
+        {slides.map((item, i) => <Image key={item.image} className={slide === i ? "active" : ""} src={item.image} alt="Интерьер с изделиями из джута" fill priority={i === 0} sizes="100vw" />)}
         <div className="hero-shade" />
         <div className="shell hero-content">
-          <p>Интерьерные изделия из джута</p>
-          <h1>Природный уют<br />в вашем доме</h1>
-          <span>Ковры, корзины, панно и декор ручной работы<br />от российского производителя</span>
+          <p>{slides[slide].eyebrow}</p>
+          <h1>{slides[slide].title}</h1>
+          <span>{slides[slide].text}<br />от российского производителя</span>
           <Button className="light-button" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
         </div>
+        <div className="hero-controls shell">
+          <div>{slides.map((_, i) => <button key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`} />)}</div>
+          <span><button onClick={() => setSlide((slide - 1 + slides.length) % slides.length)} aria-label="Предыдущий слайд"><ArrowLeft /></button><b>0{slide + 1}</b><i>/</i><small>0{slides.length}</small><button onClick={() => setSlide((slide + 1) % slides.length)} aria-label="Следующий слайд"><ArrowRight /></button></span>
+        </div>
+        <div className="hero-note"><Leaf /><span>100% натуральный<br /><b>джут</b></span></div>
       </section>
       <Benefits />
       <section className="shell section">
@@ -160,17 +194,22 @@ export function HomePage() {
           {categories.map((cat) => <Link href={cat.href} className="category-card" key={cat.name}><Image src={cat.image} alt={cat.name} fill sizes="25vw" /><span>{cat.name}</span></Link>)}
         </div>
       </section>
+      <section className="shell collection-showcase">
+        <div className="collection-main"><Image src="/images/hero-dining.png" alt="Коллекция джутовых ковров" fill /><div><span>Новая коллекция</span><h2>Дом, в котором<br />хочется остаться</h2><Link href="/catalog">Смотреть коллекцию <ArrowRight /></Link></div></div>
+        <Link href="/catalog" className="collection-small"><Image src="/images/lamp.png" alt="Джутовые светильники" fill /><span>Свет и декор<small>12 изделий</small></span></Link>
+      </section>
       <section className="shell story-banner">
         <Image src="/images/hero.png" alt="" fill sizes="100vw" />
-        <div className="story-copy"><p>Эксклюзивные изделия для вашего пространства</p><span>Каждое изделие мы создаём вручную — от первого витка до последнего стежка.</span><Button render={<Link href="/about" />}>Наша история</Button></div>
+        <div className="story-copy"><em>Индивидуальное изготовление</em><p>Эксклюзивные изделия для вашего пространства</p><span>Подберём форму, размер и оттенок. Каждое изделие создаём вручную — от первого витка до последнего стежка.</span><Button render={<Link href="/calculator" />}>Рассчитать стоимость <ArrowRight /></Button></div>
       </section>
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные товары</SectionTitle>
         <div className="product-grid">{products.map((p) => <ProductCard key={p.name} product={p} />)}</div>
       </section>
       <section className="shell promo">
-        <Image src="/images/hero.png" alt="" fill sizes="100vw" />
-        <div><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary">Смотреть</Button></div>
+        <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
+        <div><small>За кулисами мастерской</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary">Смотреть историю <ArrowRight /></Button></div>
+        <button className="play-button" aria-label="Смотреть видео">▶</button>
       </section>
       <section className="shell section reviews">
         <SectionTitle>Отзывы</SectionTitle>
@@ -179,8 +218,13 @@ export function HomePage() {
             ["Елена П.", "Ковёр великолепный — плотный, аккуратный и очень уютный. Видно, что сделан руками."],
             ["Ольга К.", "Корзина идеально вписалась в интерьер. Упаковка бережная, доставка быстрая."],
             ["Наталья С.", "Заказывала нестандартный размер. Всё подробно согласовали, результат превзошёл ожидания."],
-          ].map(([name, text]) => <article key={name}><div className="stars">★★★★★</div><p>{text}</p><b>{name}</b></article>)}
+          ].map(([name, text], i) => <article key={name}><div className="review-top"><Image src={i === 1 ? "/images/craftswoman.png" : "/images/hero.png"} alt="" width={52} height={52} /><span><b>{name}</b><small>Покупатель</small></span><i>“</i></div><div className="stars">★★★★★</div><p>{text}</p><a href="#">Читать полностью</a></article>)}
         </div>
+        <div className="review-summary"><strong>4,9</strong><span><b>★★★★★</b>На основе 186 отзывов</span><div>{["Яндекс", "Ozon", "Wildberries"].map((v) => <i key={v}><Check />{v}</i>)}</div></div>
+      </section>
+      <section className="shell home-bottom-grid">
+        <div className="faq-preview"><span>Помогаем с выбором</span><h2>Частые вопросы</h2>{["Как ухаживать за изделиями?", "Можно ли заказать свой размер?", "Почему новое изделие имеет запах?"].map((q, i) => <button key={q}><b>0{i + 1}</b>{q}<Plus /></button>)}<Link href="#">Все вопросы <ArrowRight /></Link></div>
+        <div className="where-buy"><Image src="/images/basket.png" alt="" fill /><div><span>Удобно покупать</span><h2>Мы также<br />на маркетплейсах</h2><p>Wildberries · Ozon · Яндекс Маркет</p><Button variant="secondary">Где купить</Button></div></div>
       </section>
     </Page>
   );
