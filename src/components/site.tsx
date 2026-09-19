@@ -15,7 +15,6 @@ import {
   PackageCheck,
   Plus,
   Search,
-  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Truck,
