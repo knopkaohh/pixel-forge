@@ -33,13 +33,19 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { type ShopProduct, useShop } from "@/components/shop-provider";
 
-const products: ShopProduct[] = [
-  { id: "rug-round", name: "Ковер джутовый круглый", price: 7990, image: "/images/rug.png" },
-  { id: "basket-handles", name: "Корзина с ручками", price: 2490, image: "/images/basket.png" },
-  { id: "wall-sun", name: "Панно «Солнце»", price: 3990, image: "/images/wall-art.png" },
-  { id: "rug-natural", name: "Ковер натуральный", price: 9990, image: "/images/rug.png" },
-  { id: "planter-jute", name: "Кашпо джутовое", price: 2190, image: "/images/basket.png" },
-  { id: "lamp-jute", name: "Светильник из джута", price: 5490, image: "/images/lamp.png" },
+type CatalogProduct = ShopProduct & { category: string };
+
+const products: CatalogProduct[] = [
+  { id: "rug-round", name: "Ковер джутовый круглый", price: 7990, image: "/images/rug.png", category: "Ковры" },
+  { id: "basket-handles", name: "Корзина с ручками", price: 2490, image: "/images/basket.png", category: "Корзины" },
+  { id: "wall-sun", name: "Панно «Солнце»", price: 3990, image: "/images/wall-art.png", category: "Панно" },
+  { id: "rug-natural", name: "Ковер натуральный большой", price: 12990, image: "/images/rug.png", category: "Ковры" },
+  { id: "planter-jute", name: "Кашпо джутовое", price: 2190, image: "/images/basket.png", category: "Кашпо" },
+  { id: "lamp-jute", name: "Светильник из джута", price: 5490, image: "/images/lamp.png", category: "Освещение" },
+  { id: "basket-laundry", name: "Корзина бельевая", price: 4890, image: "/images/basket.png", category: "Корзины" },
+  { id: "wall-round", name: "Панно круглое", price: 4590, image: "/images/wall-art.png", category: "Панно" },
+  { id: "decor-tray", name: "Декоративный поднос", price: 1990, image: "/images/hero-dining.png", category: "Декор" },
+  { id: "decor-set", name: "Набор сервировочный", price: 3290, image: "/images/process.png", category: "Декор" },
 ];
 
 const JUTE_PRICE_PER_METER = 65;
@@ -216,7 +222,9 @@ export function HomePage() {
   return (
     <Page>
       <section className="hero">
-        <Image key={slides[slide].image} className="active hero-slide" src={slides[slide].image} alt="Интерьер с изделиями из джута" fill priority sizes="100vw" />
+        <div className="hero-slides" aria-live="polite">
+          {slides.map((item, index) => <Image key={item.image} className={slide === index ? "active" : ""} src={item.image} alt="Интерьер с изделиями из джута" fill priority={index === 0} sizes="100vw" />)}
+        </div>
         <div className="hero-shade" />
         <div className="shell hero-content">
           <p>{slides[slide].eyebrow}</p>
@@ -247,7 +255,7 @@ export function HomePage() {
       </section>
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные товары</SectionTitle>
-        <div className="product-grid">{products.map((p) => <ProductCard key={p.name} product={p} />)}</div>
+        <div className="product-grid">{products.slice(0, 4).map((p) => <ProductCard key={p.name} product={p} />)}</div>
       </section>
       <section className="shell promo">
         <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
@@ -283,7 +291,21 @@ function FilterGroup({ title, values }: { title: string; values: string[] }) {
 
 export function CatalogPage() {
   const [category, setCategory] = useState("Все");
+  const [maxPrice, setMaxPrice] = useState(15000);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("popular");
   const tabs = ["Все", "Ковры", "Корзины", "Кашпо", "Освещение", "Панно", "Декор"];
+  const filteredProducts = useMemo(() => {
+    const result = products.filter(product =>
+      (category === "Все" || product.category === category) &&
+      product.price <= maxPrice &&
+      product.name.toLocaleLowerCase("ru").includes(query.trim().toLocaleLowerCase("ru"))
+    );
+    if (sort === "price-asc") return [...result].sort((a, b) => a.price - b.price);
+    if (sort === "price-desc") return [...result].sort((a, b) => b.price - a.price);
+    return result;
+  }, [category, maxPrice, query, sort]);
+
   return (
     <Page>
       <section className="page-hero compact">
@@ -294,17 +316,18 @@ export function CatalogPage() {
         <div className="catalog-tabs">{tabs.map(t => <button key={t} onClick={() => setCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
         <div className="catalog-layout">
           <aside className="filters">
-            <div className="catalog-search"><h4>Поиск</h4><div><Input placeholder="Найти изделие" /><Search /></div></div>
-            <div className="price-filter"><h4>Цена</h4><div><Input defaultValue="1 000" /><span>—</span><Input defaultValue="15 000" /></div><input type="range" min="1000" max="15000" defaultValue="10000" /></div>
+            <div className="catalog-search"><h4>Поиск</h4><div><Input value={query} onChange={event => setQuery(event.target.value)} placeholder="Найти изделие" /><Search /></div></div>
+            <div className="price-filter"><h4>Цена до <b>{formatPrice(maxPrice)}</b></h4><div><Input value="1 000" readOnly /><span>—</span><Input value={maxPrice.toLocaleString("ru-RU")} readOnly /></div><input type="range" min="2000" max="15000" step="500" value={maxPrice} onChange={event => setMaxPrice(Number(event.target.value))} /></div>
             <FilterGroup title="Размер" values={["до 60 см", "60–100 см", "100–150 см", "более 150 см"]} />
             <div className="filter-group swatch-filter"><h4>Цвет<ChevronDown /></h4><div>{["#d5bd91", "#b17c43", "#6f5b42", "#204b31", "#eee9de"].map((value, i) => <button className={i === 0 ? "selected" : ""} style={{background:value}} key={value} aria-label={`Цвет ${i + 1}`}>{i === 0 && <Check />}</button>)}</div></div>
             <FilterGroup title="Материал" values={["Джут", "Хлопок", "Смешанный"]} />
           </aside>
           <div className="catalog-content">
-            <div className="catalog-toolbar"><span>Найдено: 24 товара</span><button>По популярности <ChevronDown /></button></div>
+            <div className="catalog-toolbar"><span>Найдено: {filteredProducts.length} товаров</span><label>Сортировка<select value={sort} onChange={event => setSort(event.target.value)}><option value="popular">По популярности</option><option value="price-asc">Сначала дешевле</option><option value="price-desc">Сначала дороже</option></select><ChevronDown /></label></div>
             <div className="product-grid catalog-products">
-              {[...products, ...products].map((p, i) => <ProductCard key={`${p.name}-${i}`} product={p} />)}
+              {filteredProducts.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
+            {filteredProducts.length === 0 && <div className="catalog-empty"><Search /><h3>Ничего не найдено</h3><p>Измените категорию, цену или поисковый запрос.</p><Button variant="outline" onClick={() => { setCategory("Все"); setMaxPrice(15000); setQuery(""); }}>Сбросить фильтры</Button></div>}
           </div>
         </div>
       </section>
@@ -405,7 +428,7 @@ export function ProductPage() {
         </div>
         <Image src="/images/hero.png" alt="Ковер в интерьере" width={520} height={420} />
       </section>
-      <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{products.map(p => <ProductCard key={p.name} product={p} />)}</div></section>
+      <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{products.slice(0, 4).map(p => <ProductCard key={p.name} product={p} />)}</div></section>
       <section className="shell bundle">
         <SectionTitle>С этим товаром покупают</SectionTitle>
         <div className="bundle-row">
