@@ -1002,7 +1002,7 @@ button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
 body.is-loading { overflow:hidden; }
 .site-preloader { position:fixed; inset:0; z-index:9999; display:grid; place-items:center; overflow:hidden; background:#153b27; color:#f5f0e6; isolation:isolate; transition:opacity .45s ease,visibility .45s ease; }
 .site-preloader:before { content:""; position:absolute; inset:-20%; z-index:-2; background:radial-gradient(circle at 28% 25%,#55725b66 0,transparent 28%),radial-gradient(circle at 75% 68%,#9e74402b 0,transparent 24%),linear-gradient(135deg,#102f20,#1a462e 55%,#102d1e); animation:preloader-breathe 4s ease-in-out infinite alternate; }
-.site-preloader:after { content:""; position:absolute; left:0; right:0; bottom:0; height:5px; background:#b98a4b; transform-origin:left; animation:preloader-bottom 1.25s cubic-bezier(.65,0,.35,1) both; }
+.site-preloader:after { content:""; position:absolute; left:0; right:0; bottom:0; height:5px; background:#b98a4b; transform-origin:left; animation:preloader-bottom 2.55s cubic-bezier(.65,0,.35,1) both; }
 .site-preloader.is-leaving { opacity:0; visibility:hidden; }
 .preloader-grain { position:absolute; inset:0; opacity:.14; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E"); mix-blend-mode:soft-light; }
 .preloader-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; text-align:center; animation:preloader-content-in .7s cubic-bezier(.22,1,.36,1) both; }
@@ -1013,7 +1013,7 @@ body.is-loading { overflow:hidden; }
 .preloader-wordmark span { font:clamp(37px,5vw,58px)/1 "Playfair Display",Georgia,serif; letter-spacing:-.035em; }
 .preloader-wordmark small { margin-top:10px; color:#d7d0c4; text-transform:uppercase; letter-spacing:.2em; font-size:7px; }
 .preloader-progress { width:210px; height:1px; margin-top:35px; overflow:hidden; background:#ffffff2c; }
-.preloader-progress i { display:block; width:100%; height:100%; background:linear-gradient(90deg,#b88a4b,#f4ead9); transform-origin:left; animation:preloader-progress 1.15s .12s cubic-bezier(.65,0,.35,1) both; }
+.preloader-progress i { display:block; width:100%; height:100%; background:linear-gradient(90deg,#b88a4b,#f4ead9); transform-origin:left; animation:preloader-progress 2.35s .12s cubic-bezier(.65,0,.35,1) both; }
 .preloader-content > p { margin:13px 0 0; color:#b8c4bb; font-size:8px; letter-spacing:.1em; }
 .preloader-orbit { position:absolute; width:min(68vw,760px); aspect-ratio:1; border:1px solid #ffffff0e; border-radius:50%; animation:preloader-rotate 18s linear infinite; }
 .preloader-orbit:before, .preloader-orbit:after { content:""; position:absolute; border:1px solid #ffffff0e; border-radius:50%; }

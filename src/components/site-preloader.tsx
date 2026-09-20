@@ -9,11 +9,11 @@ export function SitePreloader() {
   useEffect(() => {
     document.body.classList.add("is-loading");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const leaveTimer = window.setTimeout(() => setLeaving(true), reducedMotion ? 250 : 1150);
+    const leaveTimer = window.setTimeout(() => setLeaving(true), reducedMotion ? 250 : 2450);
     const hideTimer = window.setTimeout(() => {
       setVisible(false);
       document.body.classList.remove("is-loading");
-    }, reducedMotion ? 400 : 1650);
+    }, reducedMotion ? 400 : 2950);
 
     return () => {
       window.clearTimeout(leaveTimer);
