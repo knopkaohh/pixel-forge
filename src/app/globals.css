@@ -997,3 +997,49 @@ button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
   .certificates-page > div { padding:28px 22px; }
   .certificates-page > img { height:330px; }
 }
+
+/* Branded first-load screen */
+body.is-loading { overflow:hidden; }
+.site-preloader { position:fixed; inset:0; z-index:9999; display:grid; place-items:center; overflow:hidden; background:#153b27; color:#f5f0e6; isolation:isolate; transition:opacity .45s ease,visibility .45s ease; }
+.site-preloader:before { content:""; position:absolute; inset:-20%; z-index:-2; background:radial-gradient(circle at 28% 25%,#55725b66 0,transparent 28%),radial-gradient(circle at 75% 68%,#9e74402b 0,transparent 24%),linear-gradient(135deg,#102f20,#1a462e 55%,#102d1e); animation:preloader-breathe 4s ease-in-out infinite alternate; }
+.site-preloader:after { content:""; position:absolute; left:0; right:0; bottom:0; height:5px; background:#b98a4b; transform-origin:left; animation:preloader-bottom 1.25s cubic-bezier(.65,0,.35,1) both; }
+.site-preloader.is-leaving { opacity:0; visibility:hidden; }
+.preloader-grain { position:absolute; inset:0; opacity:.14; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E"); mix-blend-mode:soft-light; }
+.preloader-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; text-align:center; animation:preloader-content-in .7s cubic-bezier(.22,1,.36,1) both; }
+.preloader-leaf { width:76px; height:76px; fill:none; stroke:#e8ddca; stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; margin-bottom:23px; filter:drop-shadow(0 8px 18px #07160e59); }
+.preloader-leaf .leaf-fill { fill:#d4bd9452; stroke-dasharray:190; stroke-dashoffset:190; animation:preloader-draw .9s .1s ease forwards; }
+.preloader-leaf path:not(.leaf-fill) { stroke-dasharray:160; stroke-dashoffset:160; animation:preloader-draw .9s .22s ease forwards; }
+.preloader-wordmark { display:flex; flex-direction:column; align-items:center; }
+.preloader-wordmark span { font:clamp(37px,5vw,58px)/1 "Playfair Display",Georgia,serif; letter-spacing:-.035em; }
+.preloader-wordmark small { margin-top:10px; color:#d7d0c4; text-transform:uppercase; letter-spacing:.2em; font-size:7px; }
+.preloader-progress { width:210px; height:1px; margin-top:35px; overflow:hidden; background:#ffffff2c; }
+.preloader-progress i { display:block; width:100%; height:100%; background:linear-gradient(90deg,#b88a4b,#f4ead9); transform-origin:left; animation:preloader-progress 1.15s .12s cubic-bezier(.65,0,.35,1) both; }
+.preloader-content > p { margin:13px 0 0; color:#b8c4bb; font-size:8px; letter-spacing:.1em; }
+.preloader-orbit { position:absolute; width:min(68vw,760px); aspect-ratio:1; border:1px solid #ffffff0e; border-radius:50%; animation:preloader-rotate 18s linear infinite; }
+.preloader-orbit:before, .preloader-orbit:after { content:""; position:absolute; border:1px solid #ffffff0e; border-radius:50%; }
+.preloader-orbit:before { inset:10%; }
+.preloader-orbit:after { inset:27%; }
+.preloader-orbit i { position:absolute; width:6px; height:6px; border-radius:50%; background:#bd9053; box-shadow:0 0 18px #bd9053; }
+.preloader-orbit i:nth-child(1) { left:12%; top:23%; }
+.preloader-orbit i:nth-child(2) { right:7%; top:48%; }
+.preloader-orbit i:nth-child(3) { left:42%; bottom:4%; }
+.preloader-number { position:absolute; right:30px; bottom:25px; color:#ffffff70; font-size:7px; letter-spacing:.14em; }
+@keyframes preloader-content-in { from { opacity:0; transform:translateY(14px) scale(.97); } }
+@keyframes preloader-draw { to { stroke-dashoffset:0; } }
+@keyframes preloader-progress { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+@keyframes preloader-bottom { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+@keyframes preloader-breathe { to { transform:scale(1.06) rotate(1deg); } }
+@keyframes preloader-rotate { to { transform:rotate(360deg); } }
+
+@media (max-width:620px) {
+  .preloader-orbit { width:110vw; }
+  .preloader-leaf { width:65px; height:65px; }
+  .preloader-progress { width:170px; }
+  .preloader-number { right:18px; bottom:18px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .site-preloader:before, .site-preloader:after, .preloader-content, .preloader-leaf path,
+  .preloader-progress i, .preloader-orbit { animation:none!important; }
+  .site-preloader { transition:opacity .15s ease; }
+}
