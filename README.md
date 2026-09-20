@@ -14,7 +14,7 @@
 - `/contacts` — контакты и форма обратной связи.
 - `/cart`, `/checkout` — сохраняемая корзина и оформление заказа;
 - `/favorites`, `/account` — избранное и история заказов;
-- `/faq`, `/care`, `/returns`, `/warranty`, `/promotions` — информация покупателю;
+- `/faq`, `/care`, `/returns`, `/warranty`, `/promotions`, `/certificates` — информация покупателю;
 - `/privacy`, `/terms` — юридические документы.
 
 ## Запуск

@@ -76,6 +76,23 @@ export function Header() {
     ["Оплата", "/payment"],
     ["Контакты", "/contacts"],
   ];
+  const moreNav = [
+    ["Акции", "/promotions"],
+    ["Возврат и обмен", "/returns"],
+    ["Гарантия качества", "/warranty"],
+    ["Уход за изделиями", "/care"],
+    ["Вопросы и ответы", "/faq"],
+    ["Сертификаты", "/certificates"],
+    ["Избранное", "/favorites"],
+    ["Личный кабинет", "/account"],
+    ["Политика конфиденциальности", "/privacy"],
+    ["Пользовательское соглашение", "/terms"],
+  ];
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
 
   return (
     <>
@@ -99,11 +116,15 @@ export function Header() {
         </div>
       </header>
       {open && (
-        <div className="mobile-drawer">
-          <button onClick={() => setOpen(false)} aria-label="Закрыть меню"><X /></button>
-          <Logo />
-          {nav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}</Link>)}
-          <a href="tel:+79278000000">+7 (927) 800-00-00</a>
+        <div className="menu-overlay" onClick={() => setOpen(false)}>
+          <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Меню сайта" onClick={event => event.stopPropagation()}>
+            <div className="drawer-head"><Logo /><button onClick={() => setOpen(false)} aria-label="Закрыть меню"><X /></button></div>
+            <div className="drawer-columns">
+              <nav><span>Основное</span>{nav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}<ArrowRight /></Link>)}</nav>
+              <nav><span>Покупателям</span>{moreNav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}<ArrowRight /></Link>)}</nav>
+            </div>
+            <div className="drawer-contact"><span>Нужна помощь с выбором?</span><a href="tel:+79278000000">+7 (927) 800-00-00</a><Link href="/contacts" onClick={() => setOpen(false)}>Написать нам</Link></div>
+          </div>
         </div>
       )}
     </>
@@ -126,7 +147,7 @@ export function Footer() {
           <div className="socials"><a href="#">VK</a><a href="#">TG</a><a href="#">MAX</a></div>
         </div>
         <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><Link href="/promotions">Акции</Link><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link></div>
-        <div><h4>О мастерской</h4><Link href="/about">О компании</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/contacts">Контакты</Link><Link href="/privacy">Конфиденциальность</Link><Link href="/terms">Соглашение</Link></div>
+        <div><h4>О мастерской</h4><Link href="/about">О компании</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link><Link href="/contacts">Контакты</Link><Link href="/privacy">Конфиденциальность</Link><Link href="/terms">Соглашение</Link></div>
         <div className="footer-contact"><h4>Связаться с нами</h4><a href="tel:+79278000000">+7 (927) 800-00-00</a><a href="mailto:hello@mary-jute.ru">hello@mary-jute.ru</a><p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p><Button variant="outline" render={<Link href="/contacts" />}>Написать нам</Button></div>
       </div>
       <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span><Link href="/privacy">Политика конфиденциальности</Link> · <Link href="/terms">Пользовательское соглашение</Link></span></div>
@@ -152,7 +173,7 @@ function ProductCard({ product = products[0] }: { product?: typeof products[numb
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" />
         <span className="product-badge">Ручная работа</span>
       </Link>
-      <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite(product)} aria-label="Добавить в избранное"><Heart /></button>
+      <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite(product)} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
       <div className="product-copy">
         <div className="product-rating"><span>★★★★★</span><small>5.0</small></div>
         <Link href="/product"><h3>{product.name}</h3></Link>
@@ -181,6 +202,12 @@ export function HomePage() {
     { image: "/images/hero-craft.png", eyebrow: "Сделано руками мастера", title: <>С душой.<br />Для вашего дома.</>, text: "Собственное производство в России и натуральный джут" },
   ];
   const [slide, setSlide] = useState(0);
+  const [homeFaqOpen, setHomeFaqOpen] = useState<number | null>(null);
+  const homeFaqs = [
+    ["Как ухаживать за изделиями?", "Используйте сухую чистку мягкой щёткой или пылесосом на небольшой мощности. Не замачивайте изделие полностью."],
+    ["Можно ли заказать свой размер?", "Да. Укажите форму и размеры в калькуляторе, а мастер уточнит детали и подтвердит итоговую стоимость."],
+    ["Почему новое изделие имеет запах?", "Это естественный аромат натурального джута. После проветривания он становится значительно слабее в течение нескольких дней."],
+  ];
   useEffect(() => {
     const timer = window.setTimeout(() => setSlide((slide + 1) % slides.length), 4500);
     return () => window.clearTimeout(timer);
@@ -224,8 +251,8 @@ export function HomePage() {
       </section>
       <section className="shell promo">
         <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
-        <div><small>За кулисами мастерской</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary">Смотреть историю <ArrowRight /></Button></div>
-        <button className="play-button" aria-label="Смотреть видео">▶</button>
+        <div><small>За кулисами мастерской</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
+        <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
       <section className="shell section reviews">
         <SectionTitle>Отзывы</SectionTitle>
@@ -239,7 +266,7 @@ export function HomePage() {
         <div className="review-summary"><strong>4,9</strong><span><b>★★★★★</b>На основе 186 отзывов</span><div>{["Яндекс", "Ozon", "Wildberries"].map((v) => <i key={v}><Check />{v}</i>)}</div></div>
       </section>
       <section className="shell home-bottom-grid">
-        <div className="faq-preview"><span>Помогаем с выбором</span><h2>Частые вопросы</h2>{["Как ухаживать за изделиями?", "Можно ли заказать свой размер?", "Почему новое изделие имеет запах?"].map((q, i) => <Link href="/faq" className="faq-link" key={q}><b>0{i + 1}</b>{q}<Plus /></Link>)}<Link href="/faq">Все вопросы <ArrowRight /></Link></div>
+        <div className="faq-preview"><span>Помогаем с выбором</span><h2>Частые вопросы</h2>{homeFaqs.map(([question, answer], i) => <div className={`home-faq-item ${homeFaqOpen === i ? "open" : ""}`} key={question}><button type="button" onClick={() => setHomeFaqOpen(homeFaqOpen === i ? null : i)} aria-expanded={homeFaqOpen === i}><b>0{i + 1}</b><span>{question}</span><Plus /></button>{homeFaqOpen === i && <p>{answer}</p>}</div>)}<Link href="/faq">Все вопросы <ArrowRight /></Link></div>
         <div className="where-buy"><Image src="/images/basket.png" alt="" fill /><div><span>Удобно покупать</span><h2>Мы также<br />на маркетплейсах</h2><p>Wildberries · Ozon · Яндекс Маркет</p><Button variant="secondary">Где купить</Button></div></div>
       </section>
     </Page>
