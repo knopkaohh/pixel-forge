@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ru">
-      <body><ShopProvider><SitePreloader />{children}</ShopProvider></body>
+      <body className="is-loading"><ShopProvider><SitePreloader />{children}</ShopProvider></body>
     </html>
   );
 }
