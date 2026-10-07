@@ -197,7 +197,7 @@ h1, h2, h3, .brand { font-family: "Playfair Display", Georgia, serif; font-weigh
 .breadcrumb { font-size:11px; color:var(--muted); padding-block:22px; }
 .product-detail { display:grid; grid-template-columns:1.35fr 1fr; gap:55px; }
 .gallery { display:grid; grid-template-columns:80px 1fr; gap:12px; }
-.thumbnails { display:flex; flex-direction:column; gap:10px; }
+.thumbnails { display:flex; flex-direction:column; gap:10px; max-height:560px; overflow:auto; }
 .thumbnails button { height:80px; position:relative; border:1px solid transparent; background:#eee; overflow:hidden; }
 .thumbnails button.active { border-color:var(--green); }
 .thumbnails img, .main-image img { object-fit:cover; }
@@ -210,7 +210,7 @@ h1, h2, h3, .brand { font-family: "Playfair Display", Georgia, serif; font-weigh
 .rating span { color:var(--muted); margin-left:8px; }
 .option { margin-bottom:25px; }
 .option label { display:block; font-size:12px; margin-bottom:12px; }
-.option > div { display:flex; gap:8px; }
+.option > div { display:flex; flex-wrap:wrap; gap:8px; }
 .option button { border:1px solid var(--line); background:white; padding:9px 15px; font-size:11px; }
 .option button.selected { border:2px solid var(--green); color:var(--green); }
 .color-option button { width:26px; height:26px; padding:0; border-radius:50%; }
@@ -1055,11 +1055,13 @@ body.is-loading { overflow:hidden; }
 .catalog-toolbar > label { position:relative; display:flex; align-items:center; gap:7px; color:var(--muted); font-size:10px; }
 .catalog-toolbar select { appearance:none; min-width:155px; border:0; background:transparent; padding:7px 23px 7px 5px; color:var(--ink); font:10px "Montserrat",sans-serif; cursor:pointer; }
 .catalog-toolbar label svg { position:absolute; right:2px; width:13px; pointer-events:none; }
-.catalog-empty { min-height:360px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:#f7f3ec; border-radius:13px; }
-.catalog-empty > svg { width:33px; color:var(--green); }
-.catalog-empty h3 { font-size:25px; margin:15px 0 5px; }
-.catalog-empty p { color:#887f74; font-size:10px; }
-.catalog-empty button { margin-top:10px; border-radius:20px; }
+.catalog-empty, .catalog-soon { min-height:360px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:#f7f3ec; border-radius:13px; padding:40px 28px; }
+.catalog-empty > svg, .catalog-soon > svg { width:33px; color:var(--green); }
+.catalog-empty h3, .catalog-soon h3 { font-size:25px; margin:15px 0 5px; font-family:Georgia,serif; }
+.catalog-empty p, .catalog-soon p { color:#887f74; font-size:13px; line-height:1.55; max-width:420px; }
+.catalog-empty button, .catalog-soon button { margin-top:16px; border-radius:20px; }
+.category-card.soon small { color:#a08b6a; }
+.option > div { display:flex; flex-wrap:wrap; gap:8px; }
 .catalog-cta { margin-bottom:60px; }
 
 @media (max-width:620px) {

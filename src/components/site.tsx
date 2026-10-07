@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -31,34 +32,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { type ShopProduct, useShop } from "@/components/shop-provider";
-
-type CatalogProduct = ShopProduct & { category: string };
-
-const products: CatalogProduct[] = [
-  { id: "rug-round", name: "Ковер джутовый круглый", price: 7990, image: "/images/rug.png", category: "Ковры" },
-  { id: "basket-handles", name: "Корзина с ручками", price: 2490, image: "/images/basket.png", category: "Корзины" },
-  { id: "wall-sun", name: "Панно «Солнце»", price: 3990, image: "/images/wall-art.png", category: "Панно" },
-  { id: "rug-natural", name: "Ковер натуральный большой", price: 12990, image: "/images/rug.png", category: "Ковры" },
-  { id: "planter-jute", name: "Кашпо джутовое", price: 2190, image: "/images/basket.png", category: "Кашпо" },
-  { id: "lamp-jute", name: "Светильник из джута", price: 5490, image: "/images/lamp.png", category: "Освещение" },
-  { id: "basket-laundry", name: "Корзина бельевая", price: 4890, image: "/images/basket.png", category: "Корзины" },
-  { id: "wall-round", name: "Панно круглое", price: 4590, image: "/images/wall-art.png", category: "Панно" },
-  { id: "decor-tray", name: "Декоративный поднос", price: 1990, image: "/images/hero-dining.png", category: "Декор" },
-  { id: "decor-set", name: "Набор сервировочный", price: 3290, image: "/images/process.png", category: "Декор" },
-];
+import { useShop } from "@/components/shop-provider";
+import {
+  catalogTabs,
+  categories,
+  comingSoonCategories,
+  getProduct,
+  minPrice,
+  products,
+  specRows,
+  toCartItem,
+  type CatalogProduct,
+} from "@/lib/products";
 
 const JUTE_PRICE_PER_METER = 65;
 const formatPrice = (price: number) => `${price.toLocaleString("ru-RU")} ₽`;
 
-const categories = [
-  { name: "Ковры", image: "/images/rug.png", href: "/catalog" },
-  { name: "Корзины", image: "/images/basket.png", href: "/catalog" },
-  { name: "Панно", image: "/images/wall-art.png", href: "/catalog" },
-  { name: "Кашпо", image: "/images/basket.png", href: "/catalog" },
-  { name: "Освещение", image: "/images/lamp.png", href: "/catalog" },
-  { name: "Декор", image: "/images/hero-dining.png", href: "/catalog" },
-];
 
 function Logo() {
   return (
@@ -169,22 +158,23 @@ function SectionTitle({ children, link }: { children: React.ReactNode; link?: st
   return <div className="section-heading"><h2>{children}</h2>{link && <Link href={link}>Смотреть все <ArrowRight /></Link>}</div>;
 }
 
-function ProductCard({ product = products[0] }: { product?: typeof products[number] }) {
+function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
   const { addToCart, toggleFavorite, isFavorite } = useShop();
   const [added, setAdded] = useState(false);
   const liked = isFavorite(product.id);
+  const href = `/product/${product.slug}`;
+  const price = minPrice(product);
   return (
     <article className="product-card">
-      <Link href="/product" className="product-image">
+      <Link href={href} className="product-image">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" />
         <span className="product-badge">Ручная работа</span>
       </Link>
-      <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite(product)} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
+      <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite({ id: product.id, name: product.name, price, image: product.image })} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
       <div className="product-copy">
-        <div className="product-rating"><span>★★★★★</span><small>5.0</small></div>
-        <Link href="/product"><h3>{product.name}</h3></Link>
+        <Link href={href}><h3>{product.name}</h3></Link>
         <p>Натуральный джут · в наличии</p>
-        <div className="product-bottom"><strong>{formatPrice(product.price)}</strong><div className="mini-swatches"><i /><i /><i /></div><button onClick={() => { addToCart(product); setAdded(true); }}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button></div>
+        <div className="product-bottom"><strong>{product.variants.length > 1 ? `от ${formatPrice(price)}` : formatPrice(price)}</strong><button onClick={() => { addToCart(toCartItem(product)); setAdded(true); }}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button></div>
       </div>
     </article>
   );
@@ -242,12 +232,12 @@ export function HomePage() {
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные категории</SectionTitle>
         <div className="category-grid">
-          {categories.map((cat) => <Link href={cat.href} className="category-card" key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="25vw" /><i><ArrowRight /></i></div><span>{cat.name}<small>Смотреть коллекцию</small></span></Link>)}
+          {categories.map((cat) => <Link href={cat.href} className={`category-card${cat.soon ? " soon" : ""}`} key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="25vw" /><i><ArrowRight /></i></div><span>{cat.name}<small>{cat.soon ? "Скоро в каталоге" : "Смотреть коллекцию"}</small></span></Link>)}
         </div>
       </section>
       <section className="shell collection-showcase">
         <div className="collection-main"><Image src="/images/hero-dining.png" alt="Коллекция джутовых ковров" fill /><div><span>Новая коллекция</span><h2>Дом, в котором<br />хочется остаться</h2><Link href="/catalog">Смотреть коллекцию <ArrowRight /></Link></div></div>
-        <Link href="/catalog" className="collection-small"><Image src="/images/lamp.png" alt="Джутовые светильники" fill /><span>Свет и декор<small>12 изделий</small></span></Link>
+        <Link href="/catalog?category=Салфетки сервировочные" className="collection-small"><Image src="/images/products/salfetki/1.webp" alt="Сервировочные салфетки из джута" fill /><span>Салфетки и сервировка<small>Наборы 2 и 5 шт</small></span></Link>
       </section>
       <section className="shell story-banner">
         <Image src="/images/hero.png" alt="" fill sizes="100vw" />
@@ -255,7 +245,7 @@ export function HomePage() {
       </section>
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные товары</SectionTitle>
-        <div className="product-grid">{products.slice(0, 4).map((p) => <ProductCard key={p.name} product={p} />)}</div>
+        <div className="product-grid">{products.map((p) => <ProductCard key={p.id} product={p} />)}</div>
       </section>
       <section className="shell promo">
         <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
@@ -290,21 +280,28 @@ function FilterGroup({ title, values }: { title: string; values: string[] }) {
 }
 
 export function CatalogPage() {
-  const [category, setCategory] = useState("Все");
+  const searchParams = useSearchParams();
+  const requested = searchParams.get("category") ?? "Все";
+  const [category, setCategory] = useState(catalogTabs.includes(requested as typeof catalogTabs[number]) ? requested : "Все");
   const [maxPrice, setMaxPrice] = useState(15000);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("popular");
-  const tabs = ["Все", "Ковры", "Корзины", "Кашпо", "Освещение", "Панно", "Декор"];
+  const soon = comingSoonCategories.includes(category as typeof comingSoonCategories[number]);
   const filteredProducts = useMemo(() => {
+    if (soon) return [];
     const result = products.filter(product =>
       (category === "Все" || product.category === category) &&
-      product.price <= maxPrice &&
+      minPrice(product) <= maxPrice &&
       product.name.toLocaleLowerCase("ru").includes(query.trim().toLocaleLowerCase("ru"))
     );
-    if (sort === "price-asc") return [...result].sort((a, b) => a.price - b.price);
-    if (sort === "price-desc") return [...result].sort((a, b) => b.price - a.price);
+    if (sort === "price-asc") return [...result].sort((a, b) => minPrice(a) - minPrice(b));
+    if (sort === "price-desc") return [...result].sort((a, b) => minPrice(b) - minPrice(a));
     return result;
-  }, [category, maxPrice, query, sort]);
+  }, [category, maxPrice, query, sort, soon]);
+
+  useEffect(() => {
+    if (catalogTabs.includes(requested as typeof catalogTabs[number])) setCategory(requested);
+  }, [requested]);
 
   return (
     <Page>
@@ -313,21 +310,32 @@ export function CatalogPage() {
         <div className="hero-shade" /><div className="shell"><p>Главная / Каталог</p><h1>Каталог</h1><span>Натуральные материалы, ручная работа<br />и тепло вашего дома</span></div>
       </section>
       <section className="shell catalog-section">
-        <div className="catalog-tabs">{tabs.map(t => <button key={t} onClick={() => setCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
+        <div className="catalog-tabs">{catalogTabs.map(t => <button key={t} onClick={() => setCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
         <div className="catalog-layout">
           <aside className="filters">
             <div className="catalog-search"><h4>Поиск</h4><div><Input value={query} onChange={event => setQuery(event.target.value)} placeholder="Найти изделие" /><Search /></div></div>
-            <div className="price-filter"><h4>Цена до <b>{formatPrice(maxPrice)}</b></h4><div><Input value="1 000" readOnly /><span>—</span><Input value={maxPrice.toLocaleString("ru-RU")} readOnly /></div><input type="range" min="2000" max="15000" step="500" value={maxPrice} onChange={event => setMaxPrice(Number(event.target.value))} /></div>
+            <div className="price-filter"><h4>Цена до <b>{formatPrice(maxPrice)}</b></h4><div><Input value="1 000" readOnly /><span>—</span><Input value={maxPrice.toLocaleString("ru-RU")} readOnly /></div><input type="range" min="1000" max="15000" step="500" value={maxPrice} onChange={event => setMaxPrice(Number(event.target.value))} /></div>
             <FilterGroup title="Размер" values={["до 60 см", "60–100 см", "100–150 см", "более 150 см"]} />
             <div className="filter-group swatch-filter"><h4>Цвет<ChevronDown /></h4><div>{["#d5bd91", "#b17c43", "#6f5b42", "#204b31", "#eee9de"].map((value, i) => <button className={i === 0 ? "selected" : ""} style={{background:value}} key={value} aria-label={`Цвет ${i + 1}`}>{i === 0 && <Check />}</button>)}</div></div>
             <FilterGroup title="Материал" values={["Джут", "Хлопок", "Смешанный"]} />
           </aside>
           <div className="catalog-content">
-            <div className="catalog-toolbar"><span>Найдено: {filteredProducts.length} товаров</span><label>Сортировка<select value={sort} onChange={event => setSort(event.target.value)}><option value="popular">По популярности</option><option value="price-asc">Сначала дешевле</option><option value="price-desc">Сначала дороже</option></select><ChevronDown /></label></div>
-            <div className="product-grid catalog-products">
-              {filteredProducts.map(p => <ProductCard key={p.id} product={p} />)}
-            </div>
-            {filteredProducts.length === 0 && <div className="catalog-empty"><Search /><h3>Ничего не найдено</h3><p>Измените категорию, цену или поисковый запрос.</p><Button variant="outline" onClick={() => { setCategory("Все"); setMaxPrice(15000); setQuery(""); }}>Сбросить фильтры</Button></div>}
+            {soon ? (
+              <div className="catalog-soon">
+                <Leaf />
+                <h3>Позиции ещё в разработке</h3>
+                <p>Коллекция «{category}» скоро появится в каталоге. Пока можно выбрать ковры, салфетки и подставки под горячее.</p>
+                <Button variant="outline" onClick={() => setCategory("Все")}>Смотреть доступные изделия</Button>
+              </div>
+            ) : (
+              <>
+                <div className="catalog-toolbar"><span>Найдено: {filteredProducts.length} товаров</span><label>Сортировка<select value={sort} onChange={event => setSort(event.target.value)}><option value="popular">По популярности</option><option value="price-asc">Сначала дешевле</option><option value="price-desc">Сначала дороже</option></select><ChevronDown /></label></div>
+                <div className="product-grid catalog-products">
+                  {filteredProducts.map(p => <ProductCard key={p.id} product={p} />)}
+                </div>
+                {filteredProducts.length === 0 && <div className="catalog-empty"><Search /><h3>Ничего не найдено</h3><p>Измените категорию, цену или поисковый запрос.</p><Button variant="outline" onClick={() => { setCategory("Все"); setMaxPrice(15000); setQuery(""); }}>Сбросить фильтры</Button></div>}
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -397,45 +405,59 @@ export function CalculatorPage() {
   );
 }
 
-export function ProductPage() {
+export function ProductPage({ slug }: { slug: string }) {
+  const product = getProduct(slug) ?? products[0];
   const { addToCart, toggleFavorite, isFavorite } = useShop();
-  const [size, setSize] = useState("80 см");
-  const [color, setColor] = useState(0);
+  const [variantId, setVariantId] = useState(product.variants[0].id);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики" | "Отзывы">("Описание");
-  const thumbs = ["/images/rug.png", "/images/hero.png", "/images/rug.png", "/images/hero.png"];
-  const [image, setImage] = useState(thumbs[0]);
+  const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики">("Описание");
+  const [image, setImage] = useState(product.images[0]);
+  const variant = product.variants.find(item => item.id === variantId) ?? product.variants[0];
+  const related = products.filter(item => item.id !== product.id);
+  const bundle = products.filter(item => item.id !== product.id).slice(0, 2);
+  const bundleItems = [product, ...bundle];
+
+  useEffect(() => {
+    setVariantId(product.variants[0].id);
+    setImage(product.images[0]);
+    setQty(1);
+    setAdded(false);
+    setActiveTab("Описание");
+  }, [product]);
+
   return (
     <Page>
-      <div className="shell breadcrumb">Главная / Ковры / Ковер джутовый круглый</div>
+      <div className="shell breadcrumb">Главная / {product.category} / {product.name}</div>
       <section className="shell product-detail">
-        <div className="gallery"><div className="thumbnails">{thumbs.map((src, i) => <button className={image === src ? "active" : ""} onClick={() => setImage(src)} key={i}><Image src={src} alt="" fill /></button>)}</div><div className="main-image"><Image src={image} alt="Ковер джутовый круглый" fill priority /><button className={isFavorite(products[0].id) ? "active" : ""} onClick={() => toggleFavorite(products[0])}><Heart /></button></div></div>
+        <div className="gallery"><div className="thumbnails">{product.images.map((src) => <button className={image === src ? "active" : ""} onClick={() => setImage(src)} key={src}><Image src={src} alt="" fill /></button>)}</div><div className="main-image"><Image src={image} alt={product.name} fill priority /><button className={isFavorite(product.id) ? "active" : ""} onClick={() => toggleFavorite({ id: product.id, name: product.name, price: minPrice(product), image: product.image })}><Heart /></button></div></div>
         <div className="product-info">
-          <h1>Ковер джутовый<br />круглый</h1><strong className="detail-price">{formatPrice(products[0].price)}</strong><div className="rating">★★★★★ <span>24 отзыва</span></div>
-          <div className="option"><label>Размер</label><div>{["60 см", "80 см", "100 см", "150 см"].map(v => <button className={size === v ? "selected" : ""} onClick={() => setSize(v)} key={v}>{v}</button>)}</div></div>
-          <div className="option color-option"><label>Цвет</label><div>{["#d9c49c", "#a97a42", "#5c513b", "#173e29"].map((v, i) => <button className={color === i ? "selected" : ""} style={{background:v}} onClick={() => setColor(i)} key={v} aria-label={`Цвет ${i + 1}`} />)}</div></div>
-          <div className="buy-row"><div className="counter"><button onClick={() => setQty(Math.max(1, qty - 1))}><Minus /></button><span>{qty}</span><button onClick={() => setQty(qty + 1)}><Plus /></button></div><Button onClick={() => { addToCart(products[0], qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button></div>
+          <h1>{product.name}</h1><strong className="detail-price">{formatPrice(variant.price)}</strong>
+          {product.variants.length > 1 && (
+            <div className="option"><label>{product.variantKind === "set" ? "Комплектация" : "Размер"}</label><div>{product.variants.map(item => <button className={variant.id === item.id ? "selected" : ""} onClick={() => setVariantId(item.id)} key={item.id}>{item.label}</button>)}</div></div>
+          )}
+          <div className="buy-row"><div className="counter"><button onClick={() => setQty(Math.max(1, qty - 1))}><Minus /></button><span>{qty}</span><button onClick={() => setQty(qty + 1)}><Plus /></button></div><Button onClick={() => { addToCart(toCartItem(product, variant), qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button></div>
           <div className="mini-benefits"><span><PackageCheck />Быстрая доставка</span><span><Sparkles />Ручная работа</span><span><Truck />Возможен возврат</span></div>
         </div>
       </section>
       <section className="shell product-description">
         <div className="description-copy">
-          <div className="description-tabs">{(["Описание", "Характеристики", "Отзывы"] as const).map(tab => <button className={activeTab === tab ? "active" : ""} onClick={() => setActiveTab(tab)} key={tab}>{tab}{tab === "Отзывы" ? " (24)" : ""}</button>)}</div>
-          {activeTab === "Описание" && <div className="tab-panel"><p>Натуральный джутовый ковёр ручной работы. Прочное плетение и выразительная фактура делают его тёплым акцентом в интерьере гостиной, спальни или террасы.</p><ul><li>Ручная работа</li><li>Экологичный материал</li><li>Подходит для тёплого пола</li><li>Легко поддерживать в чистоте</li></ul></div>}
-          {activeTab === "Характеристики" && <div className="spec-table">{[["Материал", "100% натуральный джут"], ["Диаметр", size], ["Толщина", "8 мм"], ["Цвет", ["Натуральный", "Карамель", "Тёмный", "Зелёный"][color]], ["Производство", "Россия, ручная работа"], ["Уход", "Сухая чистка"]].map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b></div>)}</div>}
-          {activeTab === "Отзывы" && <div className="product-reviews"><article><div><b>Елена</b><span>★★★★★</span></div><p>Ковёр очень красивый и плотный. Размер соответствует, цвет вживую ещё теплее.</p><small>12 сентября 2026</small></article><article><div><b>Марина</b><span>★★★★★</span></div><p>Аккуратное плетение и бережная упаковка. Отлично подошёл для гостиной.</p><small>3 сентября 2026</small></article><Button variant="outline">Оставить отзыв</Button></div>}
+          <div className="description-tabs">{(["Описание", "Характеристики"] as const).map(tab => <button className={activeTab === tab ? "active" : ""} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>)}</div>
+          {activeTab === "Описание" && <div className="tab-panel"><p>{product.description}</p></div>}
+          {activeTab === "Характеристики" && <div className="spec-table">{specRows(product, variant).map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b></div>)}</div>}
         </div>
-        <Image src="/images/hero.png" alt="Ковер в интерьере" width={520} height={420} />
+        <Image src={product.images[1] ?? product.image} alt={product.name} width={520} height={420} />
       </section>
-      <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{products.slice(0, 4).map(p => <ProductCard key={p.name} product={p} />)}</div></section>
-      <section className="shell bundle">
-        <SectionTitle>С этим товаром покупают</SectionTitle>
-        <div className="bundle-row">
-          {products.slice(0, 3).map((p, i) => <div className="bundle-product" key={p.name}><Image src={p.image} alt={p.name} width={110} height={110} /><span>{p.name}<b>{formatPrice(p.price)}</b></span>{i < 2 && <Plus />}</div>)}
-          <div className="bundle-total"><span>Итого</span><strong>{formatPrice(products.slice(0, 3).reduce((sum, item) => sum + item.price, 0))}</strong><Button onClick={() => products.slice(0, 3).forEach(item => addToCart(item))}>Добавить всё в корзину</Button></div>
-        </div>
-      </section>
+      {related.length > 0 && <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{related.map(item => <ProductCard key={item.id} product={item} />)}</div></section>}
+      {bundle.length > 0 && (
+        <section className="shell bundle">
+          <SectionTitle>С этим товаром покупают</SectionTitle>
+          <div className="bundle-row">
+            {bundleItems.map((item, i) => <div className="bundle-product" key={item.id}><Image src={item.image} alt={item.name} width={110} height={110} /><span>{item.name}<b>{formatPrice(minPrice(item))}</b></span>{i < bundleItems.length - 1 && <Plus />}</div>)}
+            <div className="bundle-total"><span>Итого</span><strong>{formatPrice(bundleItems.reduce((sum, item) => sum + minPrice(item), 0))}</strong><Button onClick={() => bundleItems.forEach(item => addToCart(toCartItem(item)))}>Добавить всё в корзину</Button></div>
+          </div>
+        </section>
+      )}
     </Page>
   );
 }

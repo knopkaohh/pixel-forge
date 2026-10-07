@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import { CatalogPage } from "@/components/site";
 
 export default function Catalog() {
-  return <CatalogPage />;
+  return (
+    <Suspense>
+      <CatalogPage />
+    </Suspense>
+  );
 }
