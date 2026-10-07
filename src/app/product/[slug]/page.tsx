@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { ProductPage } from "@/components/site";
-import { getProduct, products } from "@/lib/products";
+import { comingSoonItems, getProduct, products } from "@/lib/products";
 
 export function generateStaticParams() {
-  return products.map(product => ({ slug: product.slug }));
+  return [...products, ...comingSoonItems].map(product => ({ slug: product.slug }));
 }
 
 export default async function Product({

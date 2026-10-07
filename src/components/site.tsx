@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Clock3,
   CreditCard,
+  ExternalLink,
   Heart,
   Leaf,
   Mail,
@@ -36,6 +37,7 @@ import {
   catalogTabs,
   categories,
   comingSoonCategories,
+  comingSoonItems,
   getProduct,
   minPrice,
   products,
@@ -163,17 +165,21 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
   const liked = isFavorite(product.id);
   const href = `/product/${product.slug}`;
   const price = minPrice(product);
+  const soon = Boolean(product.comingSoon);
   return (
-    <article className="product-card">
+    <article className={`product-card${soon ? " soon" : ""}`}>
       <Link href={href} className="product-image">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" />
-        <span className="product-badge">Ручная работа</span>
+        <span className="product-badge">{soon ? "Скоро" : "Ручная работа"}</span>
       </Link>
       <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite({ id: product.id, name: product.name, price, image: product.image })} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
       <div className="product-copy">
         <Link href={href}><h3>{product.name}</h3></Link>
-        <p>Натуральный джут · в наличии</p>
-        <div className="product-bottom"><strong>{product.variants.length > 1 ? `от ${formatPrice(price)}` : formatPrice(price)}</strong><button onClick={() => { addToCart(toCartItem(product)); setAdded(true); }}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button></div>
+        <p>{soon ? "Коллекция готовится к публикации" : "Натуральный джут · в наличии"}</p>
+        <div className="product-bottom">
+          {soon ? <strong>Скоро в каталоге</strong> : <strong>{product.variants.length > 1 ? `от ${formatPrice(price)}` : formatPrice(price)}</strong>}
+          {!soon && <button onClick={() => { addToCart(toCartItem(product)); setAdded(true); }}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button>}
+        </div>
       </div>
     </article>
   );
@@ -236,7 +242,7 @@ export function HomePage() {
       </section>
       <section className="shell collection-showcase">
         <div className="collection-main"><Image src="/images/hero-dining.png" alt="Коллекция джутовых ковров" fill /><div><span>Новая коллекция</span><h2>Дом, в котором<br />хочется остаться</h2><Link href="/catalog">Смотреть коллекцию <ArrowRight /></Link></div></div>
-        <Link href="/catalog?category=Салфетки сервировочные" className="collection-small"><Image src="/images/products/salfetki/1.webp" alt="Сервировочные салфетки из джута" fill /><span>Салфетки и сервировка<small>Наборы 2 и 5 шт</small></span></Link>
+        <Link href="/catalog?category=Салфетки сервировочные" className="collection-small"><Image src="/images/products/salfetki/2/1.jpg" alt="Сервировочные салфетки из джута" fill /><span>Салфетки и сервировка<small>Наборы 2 и 5 шт</small></span></Link>
       </section>
       <section className="shell story-banner">
         <Image src="/images/hero.png" alt="" fill sizes="100vw" />
@@ -285,6 +291,7 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("popular");
   const soon = comingSoonCategories.includes(category as typeof comingSoonCategories[number]);
+  const soonItem = comingSoonItems.find(item => item.category === category);
   const filteredProducts = useMemo(() => {
     if (soon) return [];
     const result = products.filter(product =>
@@ -319,11 +326,23 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
           </aside>
           <div className="catalog-content">
             {soon ? (
-              <div className="catalog-soon">
-                <Leaf />
-                <h3>Позиции ещё в разработке</h3>
-                <p>Коллекция «{category}» скоро появится в каталоге. Пока можно выбрать ковры, салфетки и подставки под горячее.</p>
-                <Button variant="outline" onClick={() => setCategory("Все")}>Смотреть доступные изделия</Button>
+              <div className="catalog-soon-block">
+                <div className="catalog-soon">
+                  <Leaf />
+                  <h3>Позиции ещё в разработке</h3>
+                  <p>Коллекция «{category}» скоро появится в каталоге. Пока можно выбрать ковры, салфетки и подставки под горячее.</p>
+                  <Button variant="outline" onClick={() => setCategory("Все")}>Смотреть доступные изделия</Button>
+                </div>
+                {soonItem && (
+                  <div className="soon-preview-grid">
+                    {soonItem.images.map((src) => (
+                      <figure className="soon-preview" key={src}>
+                        <Image src={src} alt={soonItem.name} fill sizes="(max-width: 700px) 50vw, 25vw" />
+                        <span>Скоро</span>
+                      </figure>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <>
@@ -405,46 +424,107 @@ export function CalculatorPage() {
 
 export function ProductPage({ slug }: { slug: string }) {
   const product = getProduct(slug) ?? products[0];
+  const comingSoon = Boolean(product.comingSoon) || product.variants.length === 0;
   const { addToCart, toggleFavorite, isFavorite } = useShop();
-  const [variantId, setVariantId] = useState(product.variants[0].id);
+  const [variantId, setVariantId] = useState(product.variants[0]?.id ?? "");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики">("Описание");
-  const [image, setImage] = useState(product.images[0]);
+  const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики" | "Отзывы">("Описание");
   const variant = product.variants.find(item => item.id === variantId) ?? product.variants[0];
+  const gallery = variant?.images?.length ? variant.images : product.images;
+  const [image, setImage] = useState(gallery[0] ?? product.image);
   const related = products.filter(item => item.id !== product.id);
-  const bundle = products.filter(item => item.id !== product.id).slice(0, 2);
+  const bundle = comingSoon ? [] : products.filter(item => item.id !== product.id).slice(0, 2);
   const bundleItems = [product, ...bundle];
+  const tabs = ["Описание", "Характеристики", "Отзывы"] as const;
 
   useEffect(() => {
-    setVariantId(product.variants[0].id);
-    setImage(product.images[0]);
+    setVariantId(product.variants[0]?.id ?? "");
     setQty(1);
     setAdded(false);
     setActiveTab("Описание");
   }, [product]);
 
+  useEffect(() => {
+    setImage(gallery[0] ?? product.image);
+  }, [variant?.id, product.id, gallery, product.image]);
+
   return (
     <Page>
       <div className="shell breadcrumb">Главная / {product.category} / {product.name}</div>
       <section className="shell product-detail">
-        <div className="gallery"><div className="thumbnails">{product.images.map((src) => <button className={image === src ? "active" : ""} onClick={() => setImage(src)} key={src}><Image src={src} alt="" fill /></button>)}</div><div className="main-image"><Image src={image} alt={product.name} fill priority /><button className={isFavorite(product.id) ? "active" : ""} onClick={() => toggleFavorite({ id: product.id, name: product.name, price: minPrice(product), image: product.image })}><Heart /></button></div></div>
+        <div className="gallery">
+          <div className="thumbnails">
+            {gallery.map((src) => (
+              <button className={image === src ? "active" : ""} onClick={() => setImage(src)} key={src}>
+                <Image src={src} alt="" fill sizes="80px" />
+              </button>
+            ))}
+          </div>
+          <div className="main-image">
+            <Image src={image} alt={product.name} fill priority sizes="(max-width: 700px) 100vw, 480px" />
+            <button className={isFavorite(product.id) ? "active" : ""} onClick={() => toggleFavorite({ id: product.id, name: product.name, price: variant?.price ?? minPrice(product), image })}>
+              <Heart />
+            </button>
+          </div>
+        </div>
         <div className="product-info">
-          <h1>{product.name}</h1><strong className="detail-price">{formatPrice(variant.price)}</strong>
-          {product.variants.length > 1 && (
-            <div className="option"><label>{product.variantKind === "set" ? "Комплектация" : "Размер"}</label><div>{product.variants.map(item => <button className={variant.id === item.id ? "selected" : ""} onClick={() => setVariantId(item.id)} key={item.id}>{item.label}</button>)}</div></div>
+          <h1>{product.name}</h1>
+          {comingSoon ? <strong className="detail-price">Скоро в каталоге</strong> : <strong className="detail-price">{formatPrice(variant.price)}</strong>}
+          {variant?.wbUrl && (
+            <p className="rating">★★★★★ <a href={variant.wbUrl} target="_blank" rel="noopener noreferrer">Отзывы на Wildberries</a></p>
           )}
-          <div className="buy-row"><div className="counter"><button onClick={() => setQty(Math.max(1, qty - 1))}><Minus /></button><span>{qty}</span><button onClick={() => setQty(qty + 1)}><Plus /></button></div><Button onClick={() => { addToCart(toCartItem(product, variant), qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button></div>
+          {product.variants.length > 1 && (
+            <div className="option">
+              <label>{product.variantKind === "set" ? "Комплектация" : "Размер"}</label>
+              <div>{product.variants.map(item => <button className={variant.id === item.id ? "selected" : ""} onClick={() => setVariantId(item.id)} key={item.id}>{item.label}</button>)}</div>
+            </div>
+          )}
+          {comingSoon ? (
+            <div className="soon-buy">
+              <p>Позиция ещё в разработке. Коллекция скоро появится в продаже.</p>
+              <Button render={<Link href="/catalog" />}>Смотреть доступные изделия</Button>
+            </div>
+          ) : (
+            <div className="buy-row">
+              <div className="counter">
+                <button onClick={() => setQty(Math.max(1, qty - 1))}><Minus /></button>
+                <span>{qty}</span>
+                <button onClick={() => setQty(qty + 1)}><Plus /></button>
+              </div>
+              <Button onClick={() => { addToCart(toCartItem(product, variant), qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button>
+            </div>
+          )}
           <div className="mini-benefits"><span><PackageCheck />Быстрая доставка</span><span><Sparkles />Ручная работа</span><span><Truck />Возможен возврат</span></div>
         </div>
       </section>
       <section className="shell product-description">
         <div className="description-copy">
-          <div className="description-tabs">{(["Описание", "Характеристики"] as const).map(tab => <button className={activeTab === tab ? "active" : ""} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>)}</div>
-          {activeTab === "Описание" && <div className="tab-panel"><p>{product.description}</p></div>}
-          {activeTab === "Характеристики" && <div className="spec-table">{specRows(product, variant).map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b></div>)}</div>}
+          <div className="description-tabs">{tabs.map(tab => <button className={activeTab === tab ? "active" : ""} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>)}</div>
+          {activeTab === "Описание" && (
+            <div className="tab-panel">
+              {product.description.split("\n\n").map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+            </div>
+          )}
+          {activeTab === "Характеристики" && (
+            <div className="spec-table">{specRows(product, variant).map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b></div>)}</div>
+          )}
+          {activeTab === "Отзывы" && (
+            <div className="product-reviews">
+              {variant?.wbUrl ? (
+                <>
+                  <p>Отзывы и фото покупателей собраны на карточке Wildberries для выбранного размера. Там же можно посмотреть оценки по конкретному артикулу.</p>
+                  <Button render={<a href={variant.wbUrl} target="_blank" rel="noopener noreferrer" />}>Читать отзывы на Wildberries <ExternalLink /></Button>
+                </>
+              ) : (
+                <p>Отзывы появятся вместе с коллекцией.</p>
+              )}
+            </div>
+          )}
         </div>
-        <Image src={product.images[1] ?? product.image} alt={product.name} width={520} height={420} />
+        <figure className="description-photo">
+          <Image src={gallery[1] ?? gallery[0] ?? product.image} alt={product.name} fill sizes="(max-width: 700px) 100vw, 420px" />
+        </figure>
       </section>
       {related.length > 0 && <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{related.map(item => <ProductCard key={item.id} product={item} />)}</div></section>}
       {bundle.length > 0 && (
