@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -279,10 +278,9 @@ function FilterGroup({ title, values }: { title: string; values: string[] }) {
   );
 }
 
-export function CatalogPage() {
-  const searchParams = useSearchParams();
-  const requested = searchParams.get("category") ?? "Все";
-  const [category, setCategory] = useState(catalogTabs.includes(requested as typeof catalogTabs[number]) ? requested : "Все");
+export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: string }) {
+  const requested = catalogTabs.includes(initialCategory as typeof catalogTabs[number]) ? initialCategory : "Все";
+  const [category, setCategory] = useState(requested);
   const [maxPrice, setMaxPrice] = useState(15000);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("popular");

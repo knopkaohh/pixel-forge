@@ -1,10 +1,10 @@
-import { Suspense } from "react";
 import { CatalogPage } from "@/components/site";
 
-export default function Catalog() {
-  return (
-    <Suspense>
-      <CatalogPage />
-    </Suspense>
-  );
+export default async function Catalog({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category } = await searchParams;
+  return <CatalogPage initialCategory={category} />;
 }
