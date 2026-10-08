@@ -1118,9 +1118,11 @@ body.is-loading { overflow:hidden; }
 .portfolio-intro { display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:end; padding:48px 0 12px; }
 .portfolio-intro h2 { font-size:34px; line-height:1.15; margin:8px 0 0; }
 .portfolio-intro p { color:var(--muted); line-height:1.7; margin:0; }
-.portfolio-collage { columns:3; column-gap:14px; padding:10px 0 70px; }
-.portfolio-collage button { width:100%; margin:0 0 14px; padding:0; border:0; background:none; break-inside:avoid; border-radius:14px; overflow:hidden; display:block; }
-.portfolio-collage img { width:100%; height:auto; display:block; transition:transform .45s; }
+.portfolio-collage { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:10px 0 70px; }
+.portfolio-collage button { position:relative; width:100%; aspect-ratio:3/4; margin:0; padding:0; border:0; background:#eee7dc; border-radius:14px; overflow:hidden; display:block; }
+.portfolio-collage button:nth-child(5n) { aspect-ratio:4/5; }
+.portfolio-collage button:nth-child(7n) { aspect-ratio:3/5; }
+.portfolio-collage img { object-fit:cover; transition:transform .45s; }
 .portfolio-collage button:hover img { transform:scale(1.03); }
 .portfolio-lightbox { position:fixed; inset:0; z-index:80; background:#1118; display:grid; place-items:center; padding:28px; }
 .portfolio-lightbox img { max-width:min(920px,100%); max-height:88vh; width:auto; height:auto; border-radius:12px; box-shadow:0 20px 60px #0006; }
@@ -1130,12 +1132,11 @@ body.is-loading { overflow:hidden; }
 @media (max-width:900px) {
   .about-preview-grid { grid-template-columns:repeat(3,1fr); }
   .portfolio-intro { grid-template-columns:1fr; gap:16px; padding-top:32px; }
-  .portfolio-collage { columns:2; }
+  .portfolio-collage { grid-template-columns:repeat(2,1fr); }
 }
 
 @media (max-width:620px) {
   .about-preview-grid, .portfolio-collage { grid-template-columns:repeat(2,1fr); }
-  .portfolio-collage { columns:1; }
 }
 
 @media (prefers-reduced-motion:reduce) {

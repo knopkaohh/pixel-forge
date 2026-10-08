@@ -647,7 +647,7 @@ export function PortfolioPage() {
       <section className="shell portfolio-collage">
         {portfolioPhotos.map((item, index) => (
           <button type="button" key={item.src} onClick={() => setOpen(index)} aria-label={item.alt}>
-            <Image src={item.src} alt={item.alt} width={item.width} height={item.height} unoptimized />
+            <Image src={item.src} alt={item.alt} fill sizes="33vw" unoptimized />
           </button>
         ))}
       </section>
