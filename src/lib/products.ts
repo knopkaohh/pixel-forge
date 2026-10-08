@@ -1,3 +1,5 @@
+import { payUrlFor } from "@/lib/payments";
+
 export type ProductVariant = {
   id: string;
   label: string;
@@ -45,6 +47,7 @@ export type CartProduct = {
   name: string;
   price: number;
   image: string;
+  payUrl?: string;
 };
 
 const SHARED_SPECS = {
@@ -284,6 +287,18 @@ export function getProduct(slug: string) {
   return products.find(product => product.slug === resolved) ?? comingSoonItems.find(product => product.slug === resolved);
 }
 
+export function toCartItem(product: CatalogProduct, variantItem?: ProductVariant): CartProduct {
+  const chosen = variantItem ?? product.variants[0];
+  const id = chosen ? `${product.id}__${chosen.id}` : product.id;
+  return {
+    id,
+    name: chosen && product.variants.length > 1 ? `${product.name}, ${chosen.label}` : product.name,
+    price: chosen?.price ?? product.price,
+    image: chosen?.images[0] ?? product.image,
+    payUrl: payUrlFor(id),
+  };
+}
+
 export function familyProducts(product: CatalogProduct) {
   return products.filter(item => item.family === product.family);
 }
@@ -291,16 +306,6 @@ export function familyProducts(product: CatalogProduct) {
 export function minPrice(product: CatalogProduct) {
   if (!product.variants.length) return product.price;
   return Math.min(...product.variants.map(item => item.price));
-}
-
-export function toCartItem(product: CatalogProduct, variantItem?: ProductVariant): CartProduct {
-  const chosen = variantItem ?? product.variants[0];
-  return {
-    id: chosen ? `${product.id}__${chosen.id}` : product.id,
-    name: chosen && product.variants.length > 1 ? `${product.name}, ${chosen.label}` : product.name,
-    price: chosen?.price ?? product.price,
-    image: chosen?.images[0] ?? product.image,
-  };
 }
 
 export function specRows(product: CatalogProduct, variantItem?: ProductVariant) {

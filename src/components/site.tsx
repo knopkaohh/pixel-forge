@@ -685,13 +685,27 @@ export function DeliveryPage() {
 export function PaymentPage() {
   return (
     <Page>
-      <InfoHero title="Оплата" subtitle="Безопасные и привычные способы оплаты" />
-      <section className="shell payment-section"><div><p className="eyebrow">Оплата заказа</p><h2>Выберите удобный способ</h2><p>После оформления вы перейдёте на защищённую страницу оплаты. Мы не храним данные банковских карт.</p></div><div className="payment-grid">
-        <article><CreditCard /><h3>Банковской картой</h3><p>МИР, Visa и Mastercard российских банков.</p><span>Без комиссии</span></article>
-        <article><WalletCards /><h3>Через СБП</h3><p>Оплата по QR-коду в приложении вашего банка.</p><span>Мгновенно</span></article>
-        <article><Banknote /><h3>Индивидуальный заказ</h3><p>Предоплата после согласования параметров с мастером.</p><span>По ссылке</span></article>
-      </div></section>
-      <section className="shell payment-steps"><h2>Как происходит оплата</h2><div>{["Добавьте изделия в корзину", "Заполните данные получателя", "Оплатите заказ безопасным способом", "Получите подтверждение на e-mail"].map((text, i) => <span key={text}><b>0{i + 1}</b>{text}</span>)}</div></section>
+      <InfoHero title="Оплата" subtitle="Через защищённую форму Ozon по каждой позиции" />
+      <section className="shell payment-section">
+        <div>
+          <p className="eyebrow">Ozon эквайринг</p>
+          <h2>Оплата после оформления заказа</h2>
+          <p>Заполните форму получателя и нажмите «Оплатить заказ». Под каждой позицией откроется ссылка на форму оплаты Ozon — туда мы заводим изделия, и оплата проходит на стороне Ozon. Данные карт мы не храним.</p>
+        </div>
+        <div className="payment-grid">
+          <article><CreditCard /><h3>Карта в форме Ozon</h3><p>МИР, Visa и Mastercard российских банков — внутри защищённой страницы эквайринга.</p><span>Ozon</span></article>
+          <article><WalletCards /><h3>СБП и другие способы</h3><p>Доступные в форме Ozon способы появятся автоматически, когда товар заведён в эквайринг.</p><span>На стороне Ozon</span></article>
+          <article><Banknote /><h3>Позиция за позицией</h3><p>Если в заказе несколько изделий, оплатите каждое по своей ссылке. Для нескольких штук одной позиции ссылка открывается на каждую единицу.</p><span>После кнопки</span></article>
+        </div>
+      </section>
+      <section className="shell payment-steps">
+        <h2>Как происходит оплата</h2>
+        <div>
+          {["Добавьте изделия в корзину", "Заполните форму оформления", "Нажмите «Оплатить заказ»", "Оплатите каждую позицию в форме Ozon"].map((text, i) => (
+            <span key={text}><b>0{i + 1}</b>{text}</span>
+          ))}
+        </div>
+      </section>
     </Page>
   );
 }

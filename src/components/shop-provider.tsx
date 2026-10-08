@@ -1,12 +1,14 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { payUrlFor } from "@/lib/payments";
 
 export type ShopProduct = {
   id: string;
   name: string;
   price: number;
   image: string;
+  payUrl?: string;
 };
 
 export type CartItem = ShopProduct & { quantity: number };
@@ -111,9 +113,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       const order: Order = {
         id: `MJ-${Date.now().toString().slice(-8)}`,
         createdAt: new Date().toISOString(),
-        status: "Заказ оформлен",
+        status: "Ожидает оплату",
         total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-        items: cart,
+        items: cart.map(item => ({ ...item, payUrl: payUrlFor(item.id) || item.payUrl || "" })),
         customer,
       };
       setOrders(current => [order, ...current]);

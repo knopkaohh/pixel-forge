@@ -819,6 +819,23 @@ button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
 .order-success > span, .order-success > p:last-of-type { color:#7e756a; font-size:10px; }
 .order-success > div { display:flex; gap:8px; margin-top:22px; }
 .order-success button, .order-success a { border-radius:22px; }
+.order-pay { display:grid; grid-template-columns:1fr 320px; gap:24px; padding:10px 0 70px; }
+.order-pay > div { background:#fff; border-radius:16px; padding:36px; }
+.order-pay h2 { font-size:32px; margin:8px 0 14px; }
+.order-pay > div > p { color:#7d7469; font-size:13px; line-height:1.7; max-width:640px; }
+.order-pay > aside { background:#fff; border-radius:16px; padding:28px; height:fit-content; }
+.order-pay > aside h3 { font-size:13px; margin-bottom:8px; }
+.order-pay > aside > strong { display:block; font:32px "Playfair Display",serif; margin-bottom:12px; }
+.order-pay > aside p { color:#7d7469; font-size:10px; line-height:1.6; margin-bottom:8px; }
+.order-pay > aside > div { display:flex; flex-direction:column; gap:8px; margin-top:18px; }
+.order-pay > aside a { border-radius:22px; }
+.pay-positions { display:flex; flex-direction:column; gap:12px; margin-top:28px; }
+.pay-positions article { display:grid; grid-template-columns:92px 1fr auto; gap:16px; align-items:center; padding:14px; border:1px solid var(--line); border-radius:14px; }
+.pay-positions img { width:92px; height:92px; object-fit:cover; border-radius:10px; }
+.pay-positions small { display:block; color:#9a7240; text-transform:uppercase; letter-spacing:.08em; font-size:8px; margin-bottom:4px; }
+.pay-positions h3 { font-size:16px; margin-bottom:6px; }
+.pay-positions strong { font-size:14px; }
+.pay-positions a, .pay-positions button { border-radius:22px; white-space:normal; height:auto; min-height:40px; padding:8px 14px; text-align:center; }
 
 .favorites-page { padding:35px 0 70px; }
 .favorites-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
@@ -853,6 +870,8 @@ button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
 .order-history > article i { background:#e7efe9; color:var(--green); border-radius:15px; padding:6px 10px; font-style:normal; font-size:8px; }
 .order-history > article strong { font-size:13px; }
 .order-history > article p { font-size:9px; margin:13px 0 4px; color:#665d53; }
+.order-history .pay-positions { margin-top:16px; }
+.order-history .pay-positions article { background:#faf8f4; }
 
 /* Help and legal pages */
 .faq-page { display:grid; grid-template-columns:1fr 330px; gap:25px; padding:55px 0 70px; }
@@ -924,7 +943,10 @@ button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
 
 @media (max-width:900px) {
   .category-grid { grid-template-columns:repeat(2,1fr); }
-  .cart-layout, .checkout-layout { grid-template-columns:1fr; }
+  .cart-layout, .checkout-layout, .order-pay { grid-template-columns:1fr; }
+  .pay-positions article { grid-template-columns:72px 1fr; }
+  .pay-positions img { width:72px; height:72px; }
+  .pay-positions a, .pay-positions button { grid-column:1/-1; }
   .cart-summary { position:static; }
   .cart-list article { grid-template-columns:100px 1fr auto; }
   .cart-list article > img { width:100px; height:100px; }
