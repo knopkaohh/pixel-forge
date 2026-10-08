@@ -1199,10 +1199,6 @@ body.is-loading { overflow:hidden; }
 /* Phone layout — last so it wins over later editorial resets. Rules above 900px stay unchanged. */
 .filters-toggle { display:none; }
 
-@media (min-width:901px) {
-  .mobile-menu { display:none; }
-}
-
 @media (max-width:900px) {
   html, body { overflow-x:clip; }
   .shell { width:calc(100% - 32px); }
@@ -1285,7 +1281,8 @@ body.is-loading { overflow:hidden; }
   .header-icon, .mobile-menu, .header-actions button { width:40px; height:40px; }
   .hero { height:min(68vh, 520px); }
   .hero h1 { font-size:clamp(30px, 11vw, 40px); line-height:1.05; }
-  .hero-content > span br, .hero-controls > span { display:none; }
+  .hero-content > span br { display:inline-block; width:.35em; height:0; overflow:hidden; }
+  .hero-controls > span { display:none; }
   .hero-content { padding-bottom:70px; }
   .hero .light-button { height:44px; width:auto; }
   .benefits { grid-template-columns:1fr 1fr; padding:16px 8px 18px; }
@@ -1348,7 +1345,8 @@ body.is-loading { overflow:hidden; }
   .extra-options, .estimate-lead { grid-template-columns:1fr; }
   .estimate-card { padding:24px 18px; }
   .steps { overflow-x:auto; justify-content:flex-start; }
-  .steps i { width:28px; margin:0 8px; }
+  .steps span:not(.active) { width:auto; overflow:visible; }
+  .steps i { width:16px; margin:0 6px; }
   .how > div { grid-template-columns:1fr; }
   .thumbnails { max-height:none; overflow:visible; }
   .product-detail, .product-description, .about-intro, .founder { padding:14px; }
@@ -1415,6 +1413,5 @@ body.is-loading { overflow:hidden; }
 @media (max-width:390px) {
   .shell { width:calc(100% - 16px); }
   .hero h1 { font-size:28px; }
-  .benefits { grid-template-columns:1fr; }
   .page-hero, .stats, .warranty-cta { width:calc(100% - 16px); }
 }
