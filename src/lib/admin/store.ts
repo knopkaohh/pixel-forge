@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
-import type { AdminStore, AnalyticsSession, InboxItem } from "@/lib/admin/types";
+import { normalizeOrderStatus, type AdminStore, type AnalyticsSession, type InboxItem } from "@/lib/admin/types";
 
 const FILE = path.join(process.cwd(), "data", "admin-store.json");
 
@@ -25,7 +25,9 @@ async function readStore(): Promise<AdminStore> {
     const raw = await readFile(FILE, "utf8");
     const parsed = JSON.parse(raw) as Partial<AdminStore>;
     return {
-      inbox: Array.isArray(parsed.inbox) ? parsed.inbox : [],
+      inbox: Array.isArray(parsed.inbox)
+        ? parsed.inbox.map(item => ({ ...item, status: normalizeOrderStatus(item.status) }))
+        : [],
       payUrls: parsed.payUrls && typeof parsed.payUrls === "object" ? parsed.payUrls : {},
       sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
       visitors: parsed.visitors && typeof parsed.visitors === "object" ? parsed.visitors : {},
@@ -201,7 +203,7 @@ export function analyticsSummary(store: AdminStore) {
   const todayRange = analyticsRange(store, today, today);
   const unreadOrders = store.inbox.filter(item => item.unread).length;
   const todayOrders = store.inbox.filter(item => item.createdAt.slice(0, 10) === today).length;
-  const openOrders = store.inbox.filter(item => !["Доставлен", "Отменён", "Закрыта"].includes(item.status)).length;
+  const openOrders = store.inbox.filter(item => item.status !== "Доставлен").length;
 
   return {
     todayVisitors: todayRange.visitors,

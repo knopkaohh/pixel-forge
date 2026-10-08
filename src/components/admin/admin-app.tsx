@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ADMIN_DISPLAY_NAME, ORDER_STATUSES, kindLabel, type InboxItem } from "@/lib/admin/types";
 
 type View = "overview" | "orders" | "catalog" | "visitors";
@@ -52,8 +52,8 @@ function when(value: string) {
 }
 
 function statusClass(status: string) {
-  if (["Новый", "Новая"].includes(status)) return "hot";
-  if (["Ожидает оплату", "В обработке"].includes(status)) return "warn";
+  if (status === "Новый") return "hot";
+  if (status === "В обработке") return "warn";
   return "";
 }
 
@@ -131,7 +131,7 @@ export function AdminApp() {
   }, [authed, view, period, customFrom, customTo]);
 
   const unread = stats?.unreadOrders ?? inbox.filter(item => item.unread).length;
-  const visible = inbox.filter(item => filter === "all" || (filter === "unread" ? item.unread : filter === item.kind || item.status === filter));
+  const visible = inbox.filter(item => filter === "all" || item.status === filter);
 
   async function submitLogin(event: React.FormEvent) {
     event.preventDefault();
@@ -242,15 +242,11 @@ export function AdminApp() {
             <header>
               <div>
                 <h1>Заказы</h1>
-                <p>Оформления с сайта, сообщения с контактов и заявки с калькулятора — в одном списке.</p>
+                <p>Статус можно поставить: новый, в обработке, отправлен, доставлен.</p>
               </div>
             </header>
             <div className="admin-toolbar">
               <button className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>Все</button>
-              <button className={filter === "unread" ? "active" : ""} onClick={() => setFilter("unread")}>Новые</button>
-              <button className={filter === "order" ? "active" : ""} onClick={() => setFilter("order")}>С сайта</button>
-              <button className={filter === "contact" ? "active" : ""} onClick={() => setFilter("contact")}>Сообщения</button>
-              <button className={filter === "calculator" ? "active" : ""} onClick={() => setFilter("calculator")}>Калькулятор</button>
               {ORDER_STATUSES.map(status => (
                 <button key={status} className={filter === status ? "active" : ""} onClick={() => setFilter(status)}>{status}</button>
               ))}

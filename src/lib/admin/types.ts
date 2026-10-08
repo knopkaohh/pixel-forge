@@ -1,12 +1,16 @@
 export const ORDER_STATUSES = [
   "Новый",
   "В обработке",
-  "Ожидает оплату",
-  "Оплачен",
   "Отправлен",
   "Доставлен",
-  "Отменён",
 ] as const;
+
+export function normalizeOrderStatus(status: string) {
+  if (status === "Доставлен" || status === "Закрыта") return "Доставлен";
+  if (status === "Отправлен") return "Отправлен";
+  if (status === "Новый" || status === "Новая") return "Новый";
+  return "В обработке";
+}
 
 export type InboxKind = "order" | "contact" | "calculator";
 
