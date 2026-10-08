@@ -1120,8 +1120,6 @@ body.is-loading { overflow:hidden; }
 .portfolio-intro p { color:var(--muted); line-height:1.7; margin:0; }
 .portfolio-collage { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:10px 0 70px; }
 .portfolio-collage button { position:relative; width:100%; aspect-ratio:3/4; margin:0; padding:0; border:0; background:#eee7dc; border-radius:14px; overflow:hidden; display:block; }
-.portfolio-collage button:nth-child(5n) { aspect-ratio:4/5; }
-.portfolio-collage button:nth-child(7n) { aspect-ratio:3/5; }
 .portfolio-collage img { object-fit:cover; transition:transform .45s; }
 .portfolio-collage button:hover img { transform:scale(1.03); }
 .portfolio-lightbox { position:fixed; inset:0; z-index:80; background:#1118; display:grid; place-items:center; padding:28px; }
