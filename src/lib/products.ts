@@ -16,7 +16,9 @@ export type ProductReview = {
 export type CatalogProduct = {
   id: string;
   slug: string;
+  family: string;
   name: string;
+  sizeLabel: string;
   category: string;
   price: number;
   image: string;
@@ -33,6 +35,8 @@ export type CatalogProduct = {
     care: string;
   };
   reviews: ProductReview[];
+  wbUrl?: string;
+  featured?: boolean;
   comingSoon?: boolean;
 };
 
@@ -86,92 +90,102 @@ const TABLE_REVIEWS: ProductReview[] = [
   { author: "Ольга", rating: 5, date: "10 мая 2026", text: "Спасибо всем, кто приложил руку к такой красоте." },
 ];
 
-function variant(id: string, label: string, price: number, folder: string, count: number, nm: number): ProductVariant {
-  const images = shots(folder, count);
+const RUG_DESCRIPTION = "Ковер из натурального джута ручной работы. Безворсовое плетение и живая фактура делают его тёплым акцентом в интерьере — особенно в стиле бохо, скандинавском или джапанди.\n\nИзносостойкий, подходит для гостиной, спальни, прихожей и террасы. Каждое изделие проходит через руки мастера: от первого витка до последнего стежка. Фотографии на странице относятся к выбранному размеру.";
+
+function rug(opts: {
+  id: string;
+  sizeId: string;
+  sizeLabel: string;
+  price: number;
+  count: number;
+  nm: number;
+  featured?: boolean;
+  reviews?: ProductReview[];
+}): CatalogProduct {
+  const images = shots(`kover/${opts.sizeId}`, opts.count);
   return {
-    id,
-    label,
-    price,
+    id: opts.id,
+    slug: opts.id,
+    family: "kover",
+    name: `Ковер джутовый ${opts.sizeLabel}`,
+    sizeLabel: opts.sizeLabel,
+    category: "Ковры",
+    price: opts.price,
+    image: images[0],
     images,
-    wbUrl: `https://www.wildberries.ru/catalog/${nm}/detail.aspx`,
+    description: RUG_DESCRIPTION,
+    variantKind: "size",
+    variants: [],
+    specs: { ...SHARED_SPECS, diameter: opts.sizeLabel },
+    reviews: opts.reviews ?? RUG_REVIEWS,
+    wbUrl: `https://www.wildberries.ru/catalog/${opts.nm}/detail.aspx`,
+    featured: opts.featured,
   };
 }
 
 export const products: CatalogProduct[] = [
+  rug({ id: "kover-50x70", sizeId: "50x70", sizeLabel: "50×70 см", price: 1785, count: 12, nm: 906040555, featured: true, reviews: MAT_REVIEWS }),
+  rug({ id: "kover-60", sizeId: "60", sizeLabel: "60 см", price: 1742, count: 8, nm: 913792634, featured: true, reviews: MAT_REVIEWS }),
+  rug({ id: "kover-60x100", sizeId: "60x100", sizeLabel: "60×100 см", price: 2448, count: 8, nm: 367215284, reviews: MAT_REVIEWS }),
+  rug({ id: "kover-80x120", sizeId: "80x120", sizeLabel: "80×120 см", price: 3971, count: 11, nm: 367153827, featured: true }),
+  rug({ id: "kover-80x150", sizeId: "80x150", sizeLabel: "80×150 см", price: 5162, count: 5, nm: 1139994991 }),
+  rug({ id: "kover-90", sizeId: "90", sizeLabel: "90 см", price: 2892, count: 5, nm: 367163313 }),
+  rug({ id: "kover-100", sizeId: "100", sizeLabel: "100 см", price: 3479, count: 6, nm: 367171769, featured: true }),
+  rug({ id: "kover-120", sizeId: "120", sizeLabel: "120 см", price: 4766, count: 6, nm: 367183187 }),
+  rug({ id: "kover-150", sizeId: "150", sizeLabel: "150 см", price: 7666, count: 4, nm: 465222124, featured: true }),
+  rug({ id: "kover-200", sizeId: "200", sizeLabel: "200 см", price: 12619, count: 6, nm: 1099926509, featured: true }),
   {
-    id: "kover",
-    slug: "kover-dzhutovyy",
-    name: "Ковер джутовый",
-    category: "Ковры",
-    price: 2892,
-    image: "/images/products/kover/80x120/1.jpg",
-    images: shots("kover/80x120", 8),
-    description: "Ковер из натурального джута ручной работы. Безворсовое плетение и живая фактура делают его тёплым акцентом в интерьере — особенно в стиле бохо, скандинавском или джапанди.\n\nИзносостойкий, подходит для гостиной, спальни, прихожей и террасы. Каждое изделие проходит через руки мастера: от первого витка до последнего стежка. Фотографии на странице относятся к выбранному размеру.",
-    variantKind: "size",
-    variants: [
-      variant("80x120", "80×120 см", 3971, "kover/80x120", 8, 367153827),
-      variant("80x150", "80×150 см", 5162, "kover/80x150", 6, 1139994991),
-      variant("90x90", "90×90 см", 2892, "kover/90x90", 4, 367163313),
-      variant("100x100", "100×100 см", 3479, "kover/100x100", 5, 367171769),
-      variant("120x120", "120×120 см", 4766, "kover/120x120", 8, 367183187),
-      variant("150x150", "150×150 см", 7666, "kover/150x150", 8, 465222124),
-      variant("200x200", "200×200 см", 12619, "kover/200x200", 5, 1099926509),
-    ],
-    specs: { ...SHARED_SPECS, diameter: "90×90 см" },
-    reviews: RUG_REVIEWS,
-  },
-  {
-    id: "kovrik",
-    slug: "kovrik-dzhutovyy",
-    name: "Коврик джутовый",
-    category: "Ковры",
-    price: 1742,
-    image: "/images/products/kovrik/100x100/1.jpg",
-    images: shots("kovrik/100x100", 8),
-    description: "Экологичный коврик из натурального джута — для уютной и гармоничной атмосферы дома. Плетеная структура лаконично вписывается в любой стиль и добавляет интерьеру естественность.\n\nБезворсовая поверхность легко чистится и не собирает пыль, поэтому коврик удобен для семей с детьми и животными. В линейке круглые модели и овальные дорожки: фотографии меняются вместе с размером.",
-    variantKind: "size",
-    variants: [
-      variant("60x100", "60×100 см", 2448, "kovrik/60x100", 5, 367215284),
-      variant("80x80", "80×80 см", 2144, "kovrik/80x80", 4, 367204028),
-      variant("100x100", "100×100 см", 3631, "kovrik/100x100", 8, 367195504),
-      variant("60x60", "60×60 см", 1742, "kovrik/60x60", 3, 913792634),
-      variant("50x70", "50×70 см", 1785, "kovrik/50x70", 3, 906040555),
-    ],
-    specs: { ...SHARED_SPECS, diameter: "60×100 см" },
-    reviews: MAT_REVIEWS,
-  },
-  {
-    id: "salfetki",
-    slug: "salfetki-servirovochnye",
-    name: "Салфетки сервировочные",
+    id: "salfetki-2",
+    slug: "salfetki-2",
+    family: "salfetki",
+    name: "Салфетки сервировочные, набор 2 шт",
+    sizeLabel: "Набор 2 шт",
     category: "Салфетки сервировочные",
     price: 1290,
     image: "/images/products/salfetki/2/1.jpg",
-    images: shots("salfetki/2", 8),
-    description: "Сервировочные салфетки-плейсматы из джута диаметром 35 см. Термостойкие, толщиной 8 мм — защитят стол от горячего, влаги и царапин.\n\nКруглые ажурные изделия ручной работы подходят для тарелок, сковород и горшочков и собирают сервировку в тёплом экостиле. В наборе 2 или 5 штук — для семьи и для гостей.",
+    images: shots("salfetki/2", 5),
+    description: "Сервировочные салфетки-плейсматы из джута диаметром 35 см. Термостойкие, толщиной 8 мм — защитят стол от горячего, влаги и царапин.\n\nКруглые ажурные изделия ручной работы подходят для тарелок, сковород и горшочков и собирают сервировку в тёплом экостиле. В этом наборе 2 штуки.",
     variantKind: "set",
-    variants: [
-      variant("2", "Набор 2 шт", 1290, "salfetki/2", 8, 367079668),
-      variant("5", "Набор 5 шт", 2136, "salfetki/5", 7, 367093533),
-    ],
+    variants: [],
     specs: { ...SHARED_SPECS, diameter: "35 см" },
     reviews: TABLE_REVIEWS,
+    wbUrl: "https://www.wildberries.ru/catalog/367079668/detail.aspx",
+    featured: true,
   },
   {
-    id: "podstavka",
-    slug: "podstavka-pod-goryachee",
-    name: "Подставка под горячее",
+    id: "salfetki-5",
+    slug: "salfetki-5",
+    family: "salfetki",
+    name: "Салфетки сервировочные, набор 5 шт",
+    sizeLabel: "Набор 5 шт",
+    category: "Салфетки сервировочные",
+    price: 2136,
+    image: "/images/products/salfetki/5/1.jpg",
+    images: shots("salfetki/5", 5),
+    description: "Сервировочные салфетки-плейсматы из джута диаметром 35 см. Термостойкие, толщиной 8 мм — защитят стол от горячего, влаги и царапин.\n\nКруглые ажурные изделия ручной работы подходят для тарелок, сковород и горшочков. В этом наборе 5 штук — для семьи и для гостей.",
+    variantKind: "set",
+    variants: [],
+    specs: { ...SHARED_SPECS, diameter: "35 см" },
+    reviews: TABLE_REVIEWS,
+    wbUrl: "https://www.wildberries.ru/catalog/367093533/detail.aspx",
+  },
+  {
+    id: "podstavka-20",
+    slug: "podstavka-20",
+    family: "podstavka",
+    name: "Подставка под горячее, 20×20 см",
+    sizeLabel: "20×20 см",
     category: "Подставка под горячее",
     price: 1089,
-    image: "/images/products/podstavka/4/1.jpg",
-    images: shots("podstavka/4", 4),
+    image: "/images/products/podstavka/20/1.jpg",
+    images: shots("podstavka/20", 4),
     description: "Подставки под горячее из джута, 20×20 см. В наборе 4 штуки — для чашек, кокотниц, чайника и подсвечников.\n\nТермостойкие, многоразовые, сделаны вручную на собственном производстве. Натуральный цвет джута сочетается с деревянной посудой и льняной скатертью.",
     variantKind: "set",
-    variants: [
-      variant("4", "Набор 4 шт", 1089, "podstavka/4", 4, 934817522),
-    ],
+    variants: [],
     specs: { ...SHARED_SPECS, diameter: "20 см" },
     reviews: TABLE_REVIEWS,
+    wbUrl: "https://www.wildberries.ru/catalog/934817522/detail.aspx",
+    featured: true,
   },
 ];
 
@@ -179,7 +193,9 @@ export const comingSoonItems: CatalogProduct[] = [
   {
     id: "korzina",
     slug: "korzina-dzhutovaya",
+    family: "korzina",
     name: "Корзина джутовая",
+    sizeLabel: "",
     category: "Корзины",
     price: 0,
     image: "/images/products/soon/korziny/1.jpg",
@@ -194,7 +210,9 @@ export const comingSoonItems: CatalogProduct[] = [
   {
     id: "kashpo",
     slug: "kashpo-dzhutovoe",
+    family: "kashpo",
     name: "Кашпо из джута",
+    sizeLabel: "",
     category: "Кашпо",
     price: 0,
     image: "/images/products/soon/korziny/5.jpg",
@@ -213,7 +231,9 @@ export const comingSoonItems: CatalogProduct[] = [
   {
     id: "panno",
     slug: "panno-dzhutovoe",
+    family: "panno",
     name: "Панно из джута",
+    sizeLabel: "",
     category: "Панно",
     price: 0,
     image: "/images/products/soon/panno/1.jpg",
@@ -248,8 +268,24 @@ export const categories = [
   { name: "Панно", image: "/images/wall-art.png", href: "/catalog?category=Панно", soon: true },
 ];
 
+const SLUG_ALIASES: Record<string, string> = {
+  "kover-dzhutovyy": "kover-80x120",
+  "kovrik-dzhutovyy": "kover-60x100",
+  "salfetki-servirovochnye": "salfetki-2",
+  "podstavka-pod-goryachee": "podstavka-20",
+};
+
+export function resolveProductSlug(slug: string) {
+  return SLUG_ALIASES[slug] ?? slug;
+}
+
 export function getProduct(slug: string) {
-  return products.find(product => product.slug === slug) ?? comingSoonItems.find(product => product.slug === slug);
+  const resolved = resolveProductSlug(slug);
+  return products.find(product => product.slug === resolved) ?? comingSoonItems.find(product => product.slug === resolved);
+}
+
+export function familyProducts(product: CatalogProduct) {
+  return products.filter(item => item.family === product.family);
 }
 
 export function minPrice(product: CatalogProduct) {
@@ -257,7 +293,7 @@ export function minPrice(product: CatalogProduct) {
   return Math.min(...product.variants.map(item => item.price));
 }
 
-export function toCartItem(product: CatalogProduct, variantItem = product.variants[0]): CartProduct {
+export function toCartItem(product: CatalogProduct, variantItem?: ProductVariant): CartProduct {
   const chosen = variantItem ?? product.variants[0];
   return {
     id: chosen ? `${product.id}__${chosen.id}` : product.id,
@@ -268,7 +304,7 @@ export function toCartItem(product: CatalogProduct, variantItem = product.varian
 }
 
 export function specRows(product: CatalogProduct, variantItem?: ProductVariant) {
-  const diameter = product.variantKind === "size" && variantItem ? variantItem.label : (product.specs.diameter || "—");
+  const diameter = variantItem?.label || product.sizeLabel || product.specs.diameter || "—";
   return [
     ["Материал", product.specs.material],
     ["Диаметр", diameter],
@@ -278,3 +314,5 @@ export function specRows(product: CatalogProduct, variantItem?: ProductVariant) 
     ["Уход", product.specs.care],
   ] as const;
 }
+
+export const featuredProducts = products.filter(product => product.featured);

@@ -215,8 +215,8 @@ h1, h2, h3, .brand { font-family: "Playfair Display", Georgia, serif; font-weigh
 .option { margin-bottom:25px; }
 .option label { display:block; font-size:12px; margin-bottom:12px; }
 .option > div { display:flex; flex-wrap:wrap; gap:8px; }
-.option button { border:1px solid var(--line); background:white; padding:9px 15px; font-size:11px; }
-.option button.selected { border:2px solid var(--green); color:var(--green); }
+.option button, .option a { border:1px solid var(--line); background:white; padding:9px 15px; font-size:11px; }
+.option button.selected, .option a.selected { border:2px solid var(--green); color:var(--green); }
 .color-option button { width:26px; height:26px; padding:0; border-radius:50%; }
 .color-option button.selected { box-shadow:0 0 0 2px var(--paper),0 0 0 3px var(--green); border:0; }
 .buy-row { display:flex; gap:12px; margin:30px 0; }

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -38,6 +39,8 @@ import {
   categories,
   comingSoonCategories,
   comingSoonItems,
+  familyProducts,
+  featuredProducts,
   getProduct,
   minPrice,
   products,
@@ -177,7 +180,7 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
         <Link href={href}><h3>{product.name}</h3></Link>
         <p>{soon ? "Коллекция готовится к публикации" : "Натуральный джут · в наличии"}</p>
         <div className="product-bottom">
-          {soon ? <strong>Скоро в каталоге</strong> : <strong>{product.variants.length > 1 ? `от ${formatPrice(price)}` : formatPrice(price)}</strong>}
+          {soon ? <strong>Скоро в каталоге</strong> : <strong>{formatPrice(price)}</strong>}
           {!soon && <button onClick={() => { addToCart(toCartItem(product)); setAdded(true); }}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button>}
         </div>
       </div>
@@ -250,7 +253,7 @@ export function HomePage() {
       </section>
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные товары</SectionTitle>
-        <div className="product-grid">{products.map((p) => <ProductCard key={p.id} product={p} />)}</div>
+        <div className="product-grid">{featuredProducts.map((p) => <ProductCard key={p.id} product={p} />)}</div>
       </section>
       <section className="shell promo">
         <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
@@ -309,11 +312,9 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
   }, [requested]);
 
   useEffect(() => {
-    [...products, ...comingSoonItems].forEach(item => {
-      [item.image, ...item.images.slice(0, 4)].forEach(src => {
-        const preload = new window.Image();
-        preload.src = src;
-      });
+    products.forEach(item => {
+      const preload = new window.Image();
+      preload.src = item.image;
     });
   }, []);
 
@@ -433,32 +434,29 @@ export function CalculatorPage() {
 
 export function ProductPage({ slug }: { slug: string }) {
   const product = getProduct(slug) ?? products[0];
-  const comingSoon = Boolean(product.comingSoon) || product.variants.length === 0;
+  const comingSoon = Boolean(product.comingSoon);
+  const router = useRouter();
   const { addToCart, toggleFavorite, isFavorite } = useShop();
-  const [variantId, setVariantId] = useState(product.variants[0]?.id ?? "");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики" | "Отзывы">("Описание");
-  const variant = product.variants.find(item => item.id === variantId) ?? product.variants[0];
-  const gallery = variant?.images?.length ? variant.images : product.images;
+  const siblings = familyProducts(product);
+  const gallery = product.images.length ? product.images : [product.image];
   const [imageIndex, setImageIndex] = useState(0);
   const image = gallery[imageIndex] ?? gallery[0] ?? product.image;
-  const related = products.filter(item => item.id !== product.id);
-  const bundle = comingSoon ? [] : products.filter(item => item.id !== product.id).slice(0, 2);
+  const related = products.filter(item => item.family !== product.family || item.id !== product.id).slice(0, 4);
+  const bundle = comingSoon ? [] : products.filter(item => item.family !== product.family).slice(0, 2);
   const bundleItems = [product, ...bundle];
   const tabs = ["Описание", "Характеристики", "Отзывы"] as const;
   const reviews = product.reviews ?? [];
+  const wbUrl = product.wbUrl;
 
   useEffect(() => {
-    setVariantId(product.variants[0]?.id ?? "");
     setQty(1);
     setAdded(false);
     setActiveTab("Описание");
-  }, [product]);
-
-  useEffect(() => {
     setImageIndex(0);
-  }, [variant?.id, product.id]);
+  }, [product.id]);
 
   return (
     <Page>
@@ -473,7 +471,7 @@ export function ProductPage({ slug }: { slug: string }) {
                 <button type="button" className="gallery-nav next" onClick={() => setImageIndex((imageIndex + 1) % gallery.length)} aria-label="Следующее фото"><ArrowRight /></button>
               </>
             )}
-            <button className={isFavorite(product.id) ? "active" : ""} onClick={() => toggleFavorite({ id: product.id, name: product.name, price: variant?.price ?? minPrice(product), image })}>
+            <button className={isFavorite(product.id) ? "active" : ""} onClick={() => toggleFavorite({ id: product.id, name: product.name, price: product.price, image })}>
               <Heart />
             </button>
           </div>
@@ -489,14 +487,14 @@ export function ProductPage({ slug }: { slug: string }) {
         </div>
         <div className="product-info">
           <h1>{product.name}</h1>
-          {comingSoon ? <strong className="detail-price">Скоро в каталоге</strong> : <strong className="detail-price">{formatPrice(variant.price)}</strong>}
-          {variant?.wbUrl && (
-            <p className="rating">★★★★★ <a href={variant.wbUrl} target="_blank" rel="noopener noreferrer">Отзывы на Wildberries</a></p>
+          {comingSoon ? <strong className="detail-price">Скоро в каталоге</strong> : <strong className="detail-price">{formatPrice(product.price)}</strong>}
+          {wbUrl && (
+            <p className="rating">★★★★★ <a href={wbUrl} target="_blank" rel="noopener noreferrer">Отзывы на Wildberries</a></p>
           )}
-          {product.variants.length > 1 && (
+          {siblings.length > 1 && (
             <div className="option">
               <label>{product.variantKind === "set" ? "Комплектация" : "Размер"}</label>
-              <div>{product.variants.map(item => <button className={variant.id === item.id ? "selected" : ""} onClick={() => setVariantId(item.id)} key={item.id}>{item.label}</button>)}</div>
+              <div>{siblings.map(item => <button type="button" className={item.id === product.id ? "selected" : ""} onClick={() => router.push(`/product/${item.slug}`)} key={item.id}>{item.sizeLabel}</button>)}</div>
             </div>
           )}
           {comingSoon ? (
@@ -511,7 +509,7 @@ export function ProductPage({ slug }: { slug: string }) {
                 <span>{qty}</span>
                 <button onClick={() => setQty(qty + 1)}><Plus /></button>
               </div>
-              <Button onClick={() => { addToCart(toCartItem(product, variant), qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button>
+              <Button onClick={() => { addToCart(toCartItem(product), qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button>
             </div>
           )}
           <div className="mini-benefits"><span><PackageCheck />Быстрая доставка</span><span><Sparkles />Ручная работа</span><span><Truck />Возможен возврат</span></div>
@@ -526,7 +524,7 @@ export function ProductPage({ slug }: { slug: string }) {
             </div>
           )}
           {activeTab === "Характеристики" && (
-            <div className="spec-table">{specRows(product, variant).map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b></div>)}</div>
+            <div className="spec-table">{specRows(product).map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b></div>)}</div>
           )}
           {activeTab === "Отзывы" && (
             <div className="product-reviews">
@@ -542,8 +540,8 @@ export function ProductPage({ slug }: { slug: string }) {
                       <small>{review.date} · Wildberries</small>
                     </article>
                   ))}
-                  {variant?.wbUrl && (
-                    <a className="wb-reviews-link" href={variant.wbUrl} target="_blank" rel="noopener noreferrer">
+                  {wbUrl && (
+                    <a className="wb-reviews-link" href={wbUrl} target="_blank" rel="noopener noreferrer">
                       Все отзывы на Wildberries <ExternalLink />
                     </a>
                   )}
