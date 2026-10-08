@@ -24,6 +24,7 @@ import {
   Plus,
   Search,
   ShoppingBag,
+  SlidersHorizontal,
   Sparkles,
   Truck,
   UserRound,
@@ -113,7 +114,7 @@ export function Header() {
           </nav>
           <div className="header-actions">
             <a className="phone" href={PHONE_HREF}>{PHONE_DISPLAY}</a>
-            <button aria-label="Поиск"><Search /></button>
+            <button className="search-button" aria-label="Поиск"><Search /></button>
             <Link className="header-icon" href="/favorites" aria-label="Избранное"><Heart />{favorites.length > 0 && <i>{favorites.length}</i>}</Link>
             <Link className="header-icon" href="/account" aria-label="Личный кабинет"><UserRound /></Link>
             <Link className="header-icon bag" href="/cart" aria-label="Корзина"><ShoppingBag />{cartCount > 0 && <i>{cartCount}</i>}</Link>
@@ -331,7 +332,9 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("popular");
   const [sizeFilters, setSizeFilters] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const soon = comingSoonCategories.includes(category as typeof comingSoonCategories[number]);
+  const activeFilterCount = sizeFilters.length + (maxPrice < 15000 ? 1 : 0) + (query.trim() ? 1 : 0);
   const soonItem = comingSoonItems.find(item => item.category === category);
   const filteredProducts = useMemo(() => {
     if (soon) return [];
@@ -368,7 +371,17 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
       <section className="shell catalog-section">
         <div className="catalog-tabs">{catalogTabs.map(t => <button key={t} onClick={() => setCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
         <div className="catalog-layout">
-          <aside className="filters">
+          <button
+            type="button"
+            className={`filters-toggle${filtersOpen ? " is-open" : ""}`}
+            onClick={() => setFiltersOpen(open => !open)}
+            aria-expanded={filtersOpen}
+          >
+            <SlidersHorizontal />
+            Фильтры
+            {activeFilterCount > 0 && <i>{activeFilterCount}</i>}
+          </button>
+          <aside className={`filters${filtersOpen ? " is-open" : ""}`}>
             <div className="catalog-search"><h4>Поиск</h4><div><Input value={query} onChange={event => setQuery(event.target.value)} placeholder="Найти изделие" /><Search /></div></div>
             <div className="price-filter"><h4>Цена до <b>{formatPrice(maxPrice)}</b></h4><div><Input value="1 000" readOnly /><span>—</span><Input value={maxPrice.toLocaleString("ru-RU")} readOnly /></div><input type="range" min="1000" max="15000" step="500" value={maxPrice} onChange={event => setMaxPrice(Number(event.target.value))} /></div>
             <div className="filter-group">
