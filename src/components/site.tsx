@@ -169,7 +169,7 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
   return (
     <article className={`product-card${soon ? " soon" : ""}`}>
       <Link href={href} className="product-image">
-        <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" />
+        <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" unoptimized />
         <span className="product-badge">{soon ? "Скоро" : "Ручная работа"}</span>
       </Link>
       <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite({ id: product.id, name: product.name, price, image: product.image })} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
@@ -237,7 +237,7 @@ export function HomePage() {
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные категории</SectionTitle>
         <div className="category-grid">
-          {categories.map((cat) => <Link href={cat.href} className={`category-card${cat.soon ? " soon" : ""}`} key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="25vw" /><i><ArrowRight /></i></div><span>{cat.name}<small>{cat.soon ? "Скоро в каталоге" : "Смотреть коллекцию"}</small></span></Link>)}
+          {categories.map((cat) => <Link href={cat.href} className={`category-card${cat.soon ? " soon" : ""}`} key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="33vw" unoptimized /><i><ArrowRight /></i></div><span>{cat.name}<small>{cat.soon ? "Скоро в каталоге" : "Смотреть коллекцию"}</small></span></Link>)}
         </div>
       </section>
       <section className="shell collection-showcase">
@@ -308,6 +308,15 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
     if (catalogTabs.includes(requested as typeof catalogTabs[number])) setCategory(requested);
   }, [requested]);
 
+  useEffect(() => {
+    [...products, ...comingSoonItems].forEach(item => {
+      [item.image, ...item.images.slice(0, 4)].forEach(src => {
+        const preload = new window.Image();
+        preload.src = src;
+      });
+    });
+  }, []);
+
   return (
     <Page>
       <section className="page-hero compact">
@@ -335,9 +344,9 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
                 </div>
                 {soonItem && (
                   <div className="soon-preview-grid">
-                    {soonItem.images.map((src) => (
+                    {soonItem.images.slice(0, 4).map((src) => (
                       <figure className="soon-preview" key={src}>
-                        <Image src={src} alt={soonItem.name} fill sizes="(max-width: 700px) 50vw, 25vw" />
+                        <Image src={src} alt={soonItem.name} fill sizes="(max-width: 700px) 50vw, 25vw" unoptimized />
                         <span>Скоро</span>
                       </figure>
                     ))}
@@ -432,11 +441,13 @@ export function ProductPage({ slug }: { slug: string }) {
   const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики" | "Отзывы">("Описание");
   const variant = product.variants.find(item => item.id === variantId) ?? product.variants[0];
   const gallery = variant?.images?.length ? variant.images : product.images;
-  const [image, setImage] = useState(gallery[0] ?? product.image);
+  const [imageIndex, setImageIndex] = useState(0);
+  const image = gallery[imageIndex] ?? gallery[0] ?? product.image;
   const related = products.filter(item => item.id !== product.id);
   const bundle = comingSoon ? [] : products.filter(item => item.id !== product.id).slice(0, 2);
   const bundleItems = [product, ...bundle];
   const tabs = ["Описание", "Характеристики", "Отзывы"] as const;
+  const reviews = product.reviews ?? [];
 
   useEffect(() => {
     setVariantId(product.variants[0]?.id ?? "");
@@ -446,27 +457,35 @@ export function ProductPage({ slug }: { slug: string }) {
   }, [product]);
 
   useEffect(() => {
-    setImage(gallery[0] ?? product.image);
-  }, [variant?.id, product.id, gallery, product.image]);
+    setImageIndex(0);
+  }, [variant?.id, product.id]);
 
   return (
     <Page>
       <div className="shell breadcrumb">Главная / {product.category} / {product.name}</div>
       <section className="shell product-detail">
         <div className="gallery">
-          <div className="thumbnails">
-            {gallery.map((src) => (
-              <button className={image === src ? "active" : ""} onClick={() => setImage(src)} key={src}>
-                <Image src={src} alt="" fill sizes="80px" />
-              </button>
-            ))}
-          </div>
           <div className="main-image">
-            <Image src={image} alt={product.name} fill priority sizes="(max-width: 700px) 100vw, 480px" />
+            <Image src={image} alt={product.name} fill priority sizes="(max-width: 700px) 100vw, 520px" unoptimized />
+            {gallery.length > 1 && (
+              <>
+                <button type="button" className="gallery-nav prev" onClick={() => setImageIndex((gallery.length + imageIndex - 1) % gallery.length)} aria-label="Предыдущее фото"><ArrowLeft /></button>
+                <button type="button" className="gallery-nav next" onClick={() => setImageIndex((imageIndex + 1) % gallery.length)} aria-label="Следующее фото"><ArrowRight /></button>
+              </>
+            )}
             <button className={isFavorite(product.id) ? "active" : ""} onClick={() => toggleFavorite({ id: product.id, name: product.name, price: variant?.price ?? minPrice(product), image })}>
               <Heart />
             </button>
           </div>
+          {gallery.length > 1 && (
+            <div className="thumbnails">
+              {gallery.map((src, index) => (
+                <button type="button" className={imageIndex === index ? "active" : ""} onClick={() => setImageIndex(index)} key={src}>
+                  <Image src={src} alt="" fill sizes="72px" unoptimized />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="product-info">
           <h1>{product.name}</h1>
@@ -498,7 +517,7 @@ export function ProductPage({ slug }: { slug: string }) {
           <div className="mini-benefits"><span><PackageCheck />Быстрая доставка</span><span><Sparkles />Ручная работа</span><span><Truck />Возможен возврат</span></div>
         </div>
       </section>
-      <section className="shell product-description">
+      <section className={`shell product-description${activeTab === "Отзывы" ? " reviews-open" : ""}`}>
         <div className="description-copy">
           <div className="description-tabs">{tabs.map(tab => <button className={activeTab === tab ? "active" : ""} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>)}</div>
           {activeTab === "Описание" && (
@@ -511,10 +530,23 @@ export function ProductPage({ slug }: { slug: string }) {
           )}
           {activeTab === "Отзывы" && (
             <div className="product-reviews">
-              {variant?.wbUrl ? (
+              {reviews.length > 0 ? (
                 <>
-                  <p>Отзывы и фото покупателей собраны на карточке Wildberries для выбранного размера. Там же можно посмотреть оценки по конкретному артикулу.</p>
-                  <Button render={<a href={variant.wbUrl} target="_blank" rel="noopener noreferrer" />}>Читать отзывы на Wildberries <ExternalLink /></Button>
+                  {reviews.map(review => (
+                    <article key={`${review.author}-${review.date}`}>
+                      <div>
+                        <b>{review.author}</b>
+                        <span>{"★".repeat(review.rating)}</span>
+                      </div>
+                      <p>{review.text}</p>
+                      <small>{review.date} · Wildberries</small>
+                    </article>
+                  ))}
+                  {variant?.wbUrl && (
+                    <a className="wb-reviews-link" href={variant.wbUrl} target="_blank" rel="noopener noreferrer">
+                      Все отзывы на Wildberries <ExternalLink />
+                    </a>
+                  )}
                 </>
               ) : (
                 <p>Отзывы появятся вместе с коллекцией.</p>
@@ -522,9 +554,11 @@ export function ProductPage({ slug }: { slug: string }) {
             </div>
           )}
         </div>
-        <figure className="description-photo">
-          <Image src={gallery[1] ?? gallery[0] ?? product.image} alt={product.name} fill sizes="(max-width: 700px) 100vw, 420px" />
-        </figure>
+        {activeTab !== "Отзывы" && (
+          <figure className="description-photo">
+            <Image src={gallery[1] ?? gallery[0] ?? product.image} alt={product.name} fill sizes="(max-width: 700px) 100vw, 420px" unoptimized />
+          </figure>
+        )}
       </section>
       {related.length > 0 && <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{related.map(item => <ProductCard key={item.id} product={item} />)}</div></section>}
       {bundle.length > 0 && (

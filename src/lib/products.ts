@@ -6,6 +6,13 @@ export type ProductVariant = {
   wbUrl: string;
 };
 
+export type ProductReview = {
+  author: string;
+  rating: number;
+  date: string;
+  text: string;
+};
+
 export type CatalogProduct = {
   id: string;
   slug: string;
@@ -25,6 +32,7 @@ export type CatalogProduct = {
     production: string;
     care: string;
   };
+  reviews: ProductReview[];
   comingSoon?: boolean;
 };
 
@@ -46,6 +54,37 @@ const SHARED_SPECS = {
 function shots(folder: string, count: number) {
   return Array.from({ length: count }, (_, index) => `/images/products/${folder}/${index + 1}.jpg`);
 }
+
+const RUG_REVIEWS: ProductReview[] = [
+  { author: "Дарья", rating: 5, date: "17 сентября 2026", text: "Ковер понравился, запах есть, но надеемся за ночь на улице уйдёт. Тяжёлый, плотный, хорошо упакован, скручен в рулон и быстро расправился. Переживала, что будут заломы, но нет — всё ок." },
+  { author: "Ольга", rating: 5, date: "16 сентября 2026", text: "Товар очень понравился, спасибо за труд и красоту. На веранде стало уютно. Именно такой ковёр из джута и искала." },
+  { author: "Марина", rating: 5, date: "10 сентября 2026", text: "Необыкновенный коврик. Пропарила заломы — и он ровненький. Спасибо за ваш труд и радость, которую несёте людям." },
+  { author: "Екатерина", rating: 5, date: "5 сентября 2026", text: "Ковёр супер. К интерьеру в тёплом природном стиле подошёл идеально." },
+  { author: "Ирина", rating: 5, date: "18 августа 2026", text: "Очень понравился. Много лет лежала плетёная циновка, со временем начала крошиться — джут оказался прочнее. Семья довольна." },
+  { author: "Елена", rating: 5, date: "30 августа 2026", text: "Замечательный коврик. Качество на высоте, приятно ходить." },
+  { author: "Наталья", rating: 5, date: "7 октября 2026", text: "Упаковка хорошая, качество и вид понравились. Есть лёгкий запах натурального джута, но не критично. Если нужен эффект больше — берите размер с запасом." },
+  { author: "Марина", rating: 5, date: "18 сентября 2026", text: "Мэри Джут, вы лучшие. С огромной благодарностью за ваш труд и красоту." },
+];
+
+const MAT_REVIEWS: ProductReview[] = [
+  { author: "Валерия", rating: 5, date: "5 сентября 2026", text: "Идеальный коврик, отлично вписался в интерьер, не мнётся, можно пылесосить без проблем." },
+  { author: "Нина", rating: 5, date: "7 сентября 2026", text: "Замечательный коврик. Очень довольна работой команды Мэри Джут — просто поднимаете настроение." },
+  { author: "Ираида", rating: 5, date: "31 августа 2026", text: "Ждала этот коврик с нетерпением. Подходит по стилю к деревянному дому. Доставка быстрая, упакован очень качественно и с заботой о покупателе." },
+  { author: "Марина", rating: 5, date: "8 августа 2026", text: "Коврик просто потрясающий, один в один как хотела. Добротный, тяжёленький, приятный и красивый. Отдельное спасибо за аккуратную упаковку." },
+  { author: "Мария", rating: 5, date: "31 июля 2026", text: "10 из 10: с трудом заворачивается и гнётся, не будет постоянно задираться. Долговечный и очень красивый." },
+  { author: "Екатерина", rating: 5, date: "31 августа 2026", text: "Очень понравился, для душевой подошёл идеально." },
+  { author: "Танзиля", rating: 5, date: "3 октября 2026", text: "Прекрасно смотрится, всё соответствует описанию, качество на высоте." },
+];
+
+const TABLE_REVIEWS: ProductReview[] = [
+  { author: "Алла", rating: 5, date: "3 сентября 2026", text: "Очень милые уютные салфетки, упаковано с любовью, спасибо продавцу." },
+  { author: "Любовь", rating: 5, date: "15 мая 2026", text: "Просто супер подставки. Стол выглядит с ними очень красиво." },
+  { author: "Ольга", rating: 5, date: "2 мая 2026", text: "Замечательные салфетки. Спасибо за очередную красоту в доме." },
+  { author: "Татьяна", rating: 5, date: "29 августа 2026", text: "Очень дорого смотрится. Для большого стола — то, что нужно." },
+  { author: "Марина", rating: 5, date: "17 июля 2026", text: "Украшают комнату, функциональные. Спасибо за ваш труд." },
+  { author: "Ольга", rating: 5, date: "16 сентября 2026", text: "Маленькие и уютные. Приобретение порадовало." },
+  { author: "Ольга", rating: 5, date: "10 мая 2026", text: "Спасибо всем, кто приложил руку к такой красоте." },
+];
 
 function variant(id: string, label: string, price: number, folder: string, count: number, nm: number): ProductVariant {
   const images = shots(folder, count);
@@ -79,6 +118,7 @@ export const products: CatalogProduct[] = [
       variant("200x200", "200×200 см", 12619, "kover/200x200", 5, 1099926509),
     ],
     specs: { ...SHARED_SPECS, diameter: "90×90 см" },
+    reviews: RUG_REVIEWS,
   },
   {
     id: "kovrik",
@@ -98,6 +138,7 @@ export const products: CatalogProduct[] = [
       variant("50x70", "50×70 см", 1785, "kovrik/50x70", 3, 906040555),
     ],
     specs: { ...SHARED_SPECS, diameter: "60×100 см" },
+    reviews: MAT_REVIEWS,
   },
   {
     id: "salfetki",
@@ -114,6 +155,7 @@ export const products: CatalogProduct[] = [
       variant("5", "Набор 5 шт", 2136, "salfetki/5", 7, 367093533),
     ],
     specs: { ...SHARED_SPECS, diameter: "35 см" },
+    reviews: TABLE_REVIEWS,
   },
   {
     id: "podstavka",
@@ -129,6 +171,7 @@ export const products: CatalogProduct[] = [
       variant("4", "Набор 4 шт", 1089, "podstavka/4", 4, 934817522),
     ],
     specs: { ...SHARED_SPECS, diameter: "20 см" },
+    reviews: TABLE_REVIEWS,
   },
 ];
 
@@ -145,6 +188,7 @@ export const comingSoonItems: CatalogProduct[] = [
     variantKind: "size",
     variants: [],
     specs: { ...SHARED_SPECS, diameter: "" },
+    reviews: [],
     comingSoon: true,
   },
   {
@@ -163,6 +207,7 @@ export const comingSoonItems: CatalogProduct[] = [
     variantKind: "size",
     variants: [],
     specs: { ...SHARED_SPECS, diameter: "" },
+    reviews: [],
     comingSoon: true,
   },
   {
@@ -177,20 +222,7 @@ export const comingSoonItems: CatalogProduct[] = [
     variantKind: "size",
     variants: [],
     specs: { ...SHARED_SPECS, diameter: "" },
-    comingSoon: true,
-  },
-  {
-    id: "dekor",
-    slug: "dekor-dzhutovyy",
-    name: "Декор для стола",
-    category: "Декор",
-    price: 0,
-    image: "/images/products/soon/dekor/1.jpg",
-    images: shots("soon/dekor", 4),
-    description: "Декор из джута для сервировки. Коллекция готовится к публикации.",
-    variantKind: "size",
-    variants: [],
-    specs: { ...SHARED_SPECS, diameter: "" },
+    reviews: [],
     comingSoon: true,
   },
 ];
@@ -203,10 +235,9 @@ export const catalogTabs = [
   "Корзины",
   "Кашпо",
   "Панно",
-  "Декор",
 ] as const;
 
-export const comingSoonCategories = ["Корзины", "Кашпо", "Панно", "Декор"] as const;
+export const comingSoonCategories = ["Корзины", "Кашпо", "Панно"] as const;
 
 export const categories = [
   { name: "Ковры", image: "/images/products/kover/80x120/1.jpg", href: "/catalog?category=Ковры", soon: false },
@@ -215,7 +246,6 @@ export const categories = [
   { name: "Корзины", image: "/images/products/soon/korziny/1.jpg", href: "/catalog?category=Корзины", soon: true },
   { name: "Кашпо", image: "/images/products/soon/korziny/5.jpg", href: "/catalog?category=Кашпо", soon: true },
   { name: "Панно", image: "/images/products/soon/panno/1.jpg", href: "/catalog?category=Панно", soon: true },
-  { name: "Декор", image: "/images/products/soon/dekor/1.jpg", href: "/catalog?category=Декор", soon: true },
 ];
 
 export function getProduct(slug: string) {
