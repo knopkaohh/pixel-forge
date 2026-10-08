@@ -136,7 +136,7 @@ export function WarrantyPage() {
 }
 
 export function PromotionsPage() {
-  return <Page><Hero title="Акции" text="Особые предложения для ещё большего уюта" /><section className="shell promotions-grid"><article><Image src="/images/hero.png" alt="" fill /><div><span>До 30 сентября</span><h2>Бесплатная доставка</h2><p>При заказе от 15 000 ₽ до пункта выдачи.</p><Button render={<Link href="/catalog" />}>Выбрать изделия</Button></div></article><article><Image src="/images/basket.png" alt="" fill /><div><span>Для нового дома</span><h2>Комплект выгоднее</h2><p>Скидка 10% при покупке трёх изделий.</p><Button render={<Link href="/catalog" />}>Смотреть подборку</Button></div></article></section></Page>;
+  return <Page><Hero title="Акции" text="Особые предложения для ещё большего уюта" /><section className="shell promotions-grid"><article><Image src="/images/hero.png" alt="" fill /><div><span>До 30 октября</span><h2>Бесплатная доставка</h2><p>При заказе от 15 000 ₽ до пункта выдачи.</p><Button render={<Link href="/catalog" />}>Выбрать изделия</Button></div></article><article><Image src="/images/basket.png" alt="" fill /><div><span>Для нового дома</span><h2>Комплект выгоднее</h2><p>Скидка 10% при покупке трёх изделий.</p><Button render={<Link href="/catalog" />}>Смотреть подборку</Button></div></article></section></Page>;
 }
 
 export function CertificatesPage() {

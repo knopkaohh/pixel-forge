@@ -8,6 +8,7 @@ import { Header, Footer } from "@/components/site";
 import { useShop, type Order } from "@/components/shop-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/phone-input";
 import { paymentUnits } from "@/lib/payments";
 
 const price = (value: number) => `${value.toLocaleString("ru-RU")} ₽`;
@@ -115,7 +116,7 @@ export function CheckoutPage() {
 
   return <ShopPage><section className="shell shop-heading"><p>Корзина / Оформление</p><h1>Оформление заказа</h1><span>Остался один шаг</span></section>
     <form className="shell checkout-layout" onSubmit={submit}><div className="checkout-form">
-      <section><b>01</b><div><h2>Получатель</h2><div className="checkout-fields"><label>Имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<Input name="phone" required type="tel" placeholder="+7 (___) ___-__-__" /></label><label>E-mail<Input name="email" required type="email" placeholder="mail@example.ru" /></label></div></div></section>
+      <section><b>01</b><div><h2>Получатель</h2><div className="checkout-fields"><label>Имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<PhoneInput name="phone" required /></label><label>E-mail<Input name="email" required type="email" placeholder="mail@example.ru" /></label></div></div></section>
       <section><b>02</b><div><h2>Способ доставки</h2><div className="delivery-options">{["СДЭК", "Ozon"].map(value => <button type="button" onClick={() => { setDelivery(value); setPickup(value === "СДЭК" ? "СДЭК · ул. Гончарова, 23" : "Ozon · ул. Радищева, 71"); }} className={delivery === value ? "selected" : ""} key={value}><i>{delivery === value && "✓"}</i><span><b>{value}</b><small>Доставка до пункта выдачи</small></span></button>)}</div><label className="pickup-field">Пункт выдачи<select value={pickup} onChange={event => setPickup(event.target.value)}>{delivery === "СДЭК" ? <><option>СДЭК · ул. Гончарова, 23</option><option>СДЭК · пр-т Нариманова, 64</option></> : <><option>Ozon · ул. Радищева, 71</option><option>Ozon · ул. Федерации, 11</option></>}</select></label></div></section>
       <section><b>03</b><div><h2>Комментарий</h2><textarea name="comment" placeholder="Пожелания к заказу или доставке" /></div></section>
     </div><aside className="cart-summary checkout-summary"><h3>Итого</h3>{cart.map(item => <div key={item.id}><span>{item.name} × {item.quantity}</span><b>{price(item.price * item.quantity)}</b></div>)}<div className="cart-total"><span>К оплате</span><strong>{price(cartTotal)}</strong></div><Button type="submit" disabled={submitting}>{submitting ? "Оформляем..." : "Оплатить заказ"} <ArrowRight /></Button><p>После кнопки откроются ссылки оплаты Ozon под каждой позицией</p></aside></form>

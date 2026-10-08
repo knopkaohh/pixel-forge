@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ADMIN_DISPLAY_NAME, ORDER_STATUSES, kindLabel, type InboxItem } from "@/lib/admin/types";
+import { PhoneInput } from "@/components/phone-input";
 
-type View = "overview" | "orders" | "catalog" | "visitors";
+type View = "overview" | "orders" | "catalog" | "visitors" | "mailings";
 type Stats = {
   todayVisitors: number;
   todayNewVisitors: number;
@@ -11,10 +12,12 @@ type Stats = {
   weekNewVisitors: number;
   todayGeo: { label: string; count: number }[];
   unreadOrders: number;
+  unreadSubscribers: number;
   todayOrders: number;
   openOrders: number;
   inboxTotal: number;
 };
+type Subscriber = { id: string; email: string; note: string; createdAt: string; unread: boolean };
 type CatalogRow = { id: string; name: string; category: string; price: number; comingSoon: boolean; payUrl: string };
 type VisitorReport = {
   from: string;
@@ -31,6 +34,7 @@ const views: [View, string][] = [
   ["orders", "Заказы"],
   ["catalog", "Каталог"],
   ["visitors", "Посетители"],
+  ["mailings", "Рассылки"],
 ];
 
 const periods: [Period, string][] = [
@@ -82,6 +86,7 @@ export function AdminApp() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [report, setReport] = useState<VisitorReport | null>(null);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
 
   const refreshOverview = useCallback(async () => {
     const data = await api("/api/admin/overview");
@@ -117,7 +122,17 @@ export function AdminApp() {
   useEffect(() => {
     if (!authed) return;
     if (view === "catalog") api("/api/admin/catalog").then(data => setCatalog(data.items)).catch(() => null);
-  }, [authed, view]);
+    if (view === "mailings") {
+      api("/api/admin/subscribers").then(async data => {
+        setSubscribers(data.subscribers || []);
+        if ((data.subscribers || []).some((item: Subscriber) => item.unread)) {
+          await api("/api/admin/subscribers", { method: "PATCH", body: JSON.stringify({ allRead: true }) });
+          setSubscribers((data.subscribers || []).map((item: Subscriber) => ({ ...item, unread: false })));
+          refreshOverview().catch(() => null);
+        }
+      }).catch(() => null);
+    }
+  }, [authed, view, refreshOverview]);
 
   useEffect(() => {
     if (!authed || view !== "visitors") return;
@@ -201,6 +216,7 @@ export function AdminApp() {
             <button key={id} className={view === id ? "active" : ""} onClick={() => { setView(id); setSelected(null); setFilter("all"); }}>
               <span>{label}</span>
               {id === "orders" && unread > 0 && <i className="admin-siren">{unread}</i>}
+              {id === "mailings" && (stats?.unreadSubscribers ?? 0) > 0 && <i className="admin-siren">{stats?.unreadSubscribers}</i>}
             </button>
           ))}
         </nav>
@@ -334,6 +350,47 @@ export function AdminApp() {
             </div>
           </>
         )}
+
+        {view === "mailings" && (
+          <>
+            <header>
+              <div>
+                <h1>Рассылки</h1>
+                <p>E-mail и пожелания с формы подписки в подвале сайта.</p>
+              </div>
+            </header>
+            <div className="admin-panel">
+              {subscribers.length === 0 ? (
+                <p className="admin-empty">Пока никто не подписался.</p>
+              ) : (
+                <table className="admin-table">
+                  <thead><tr><th>Когда</th><th>E-mail</th><th>Пожелание</th><th></th></tr></thead>
+                  <tbody>
+                    {subscribers.map(item => (
+                      <tr key={item.id} className={item.unread ? "unread" : ""}>
+                        <td>{when(item.createdAt)}</td>
+                        <td><b>{item.email}</b></td>
+                        <td>{item.note || "—"}</td>
+                        <td>
+                          <div className="admin-actions">
+                            <button
+                              className="danger"
+                              onClick={async () => {
+                                if (!confirm("Удалить адрес из рассылки?")) return;
+                                await api(`/api/admin/subscribers?id=${encodeURIComponent(item.id)}`, { method: "DELETE" });
+                                setSubscribers(current => current.filter(entry => entry.id !== item.id));
+                              }}
+                            >Удалить</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
@@ -410,7 +467,7 @@ function ItemEditor({ item, onChange, onSave, onDelete }: {
           </select>
         </label>
         <label>Имя<input value={item.customer.name} onChange={event => onChange({ ...item, customer: { ...item.customer, name: event.target.value } })} /></label>
-        <label>Телефон<input value={item.customer.phone} onChange={event => onChange({ ...item, customer: { ...item.customer, phone: event.target.value } })} /></label>
+        <label>Телефон<PhoneInput value={item.customer.phone} onValueChange={phone => onChange({ ...item, customer: { ...item.customer, phone } })} /></label>
         <label>E-mail<input value={item.customer.email} onChange={event => onChange({ ...item, customer: { ...item.customer, email: event.target.value } })} /></label>
         <label>Комментарий клиента<textarea value={item.comment} onChange={event => onChange({ ...item, comment: event.target.value })} /></label>
         <label>Заметка для себя<textarea value={item.notes} onChange={event => onChange({ ...item, notes: event.target.value })} /></label>

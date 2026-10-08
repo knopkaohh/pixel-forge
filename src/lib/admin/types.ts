@@ -47,12 +47,21 @@ export type AnalyticsSession = {
   city?: string;
 };
 
+export type Subscriber = {
+  id: string;
+  email: string;
+  note: string;
+  createdAt: string;
+  unread: boolean;
+};
+
 export type AdminStore = {
   inbox: InboxItem[];
   payUrls: Record<string, string>;
   sessions: AnalyticsSession[];
   visitors: Record<string, string[]>;
   geoCache?: Record<string, { country: string; city: string }>;
+  subscribers: Subscriber[];
 };
 
 export const ADMIN_DISPLAY_NAME = "Елена Варакина";

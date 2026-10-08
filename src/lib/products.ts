@@ -308,6 +308,20 @@ export function minPrice(product: CatalogProduct) {
   return Math.min(...product.variants.map(item => item.price));
 }
 
+export function productSizeCm(product: CatalogProduct) {
+  const fromSpec = [...(product.specs.diameter || "").matchAll(/(\d+)/g)].map(match => Number(match[1]));
+  if (fromSpec.length) return Math.max(...fromSpec);
+  const fromLabel = [...(product.sizeLabel || "").matchAll(/(\d+)/g)].map(match => Number(match[1]));
+  return fromLabel.length ? Math.max(...fromLabel) : 0;
+}
+
+export const SIZE_FILTERS = [
+  { id: "to60", label: "до 60 см", match: (cm: number) => cm > 0 && cm <= 60 },
+  { id: "60-100", label: "60–100 см", match: (cm: number) => cm > 60 && cm <= 100 },
+  { id: "100-150", label: "100–150 см", match: (cm: number) => cm > 100 && cm <= 150 },
+  { id: "over150", label: "более 150 см", match: (cm: number) => cm > 150 },
+] as const;
+
 export function specRows(product: CatalogProduct, variantItem?: ProductVariant) {
   const diameter = variantItem?.label || product.sizeLabel || product.specs.diameter || "—";
   return [

@@ -43,13 +43,17 @@ import {
   featuredProducts,
   getProduct,
   minPrice,
+  productSizeCm,
   products,
+  SIZE_FILTERS,
   specRows,
   toCartItem,
   type CatalogProduct,
 } from "@/lib/products";
 import { PHONE_DISPLAY, PHONE_HREF } from "@/lib/contacts";
+import { isCompleteRuPhone } from "@/lib/phone";
 import { portfolioPhotos, socialLinks } from "@/lib/portfolio";
+import { PhoneInput } from "@/components/phone-input";
 
 const JUTE_PRICE_PER_METER = 65;
 const formatPrice = (price: number) => `${price.toLocaleString("ru-RU")} ₽`;
@@ -98,7 +102,7 @@ export function Header() {
 
   return (
     <>
-      <div className="announcement">Бесплатная доставка при заказе от 15 000 ₽</div>
+      <div className="announcement">Бесплатная доставка при заказе от 15 000 ₽ до 30 октября</div>
       <header className="site-header">
         <div className="shell header-inner">
           <Logo />
@@ -134,12 +138,51 @@ export function Header() {
 }
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
+  const [subscribeState, setSubscribeState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [subscribeError, setSubscribeError] = useState("");
+
+  async function submitSubscribe(event: React.FormEvent) {
+    event.preventDefault();
+    setSubscribeError("");
+    setSubscribeState("sending");
+    try {
+      const response = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, note }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setSubscribeError(data.error || "Не удалось подписаться");
+        setSubscribeState("error");
+        return;
+      }
+      setSubscribeState("done");
+      setEmail("");
+      setNote("");
+    } catch {
+      setSubscribeError("Не удалось подписаться");
+      setSubscribeState("error");
+    }
+  }
+
   return (
     <footer className="footer" id="contacts">
       <div className="newsletter">
         <div className="shell newsletter-inner">
           <div><span>Письма о натуральном уюте</span><h3>Будьте в курсе новинок и акций</h3></div>
-          <div className="subscribe"><Input placeholder="Ваш e-mail" /><Button>Подписаться <ArrowRight /></Button></div>
+          {subscribeState === "done" ? (
+            <p className="subscribe-done">Записали. Новинки придут на почту.</p>
+          ) : (
+            <form className="subscribe" onSubmit={submitSubscribe}>
+              <Input type="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="Ваш e-mail" />
+              <Input value={note} onChange={event => setNote(event.target.value)} placeholder="Имя или пожелание" />
+              <Button type="submit" disabled={subscribeState === "sending"}>{subscribeState === "sending" ? "Отправляем" : "Подписаться"} <ArrowRight /></Button>
+              {subscribeError && <span className="subscribe-error">{subscribeError}</span>}
+            </form>
+          )}
         </div>
       </div>
       <div className="shell footer-grid">
@@ -270,23 +313,14 @@ export function HomePage() {
             ["Елена П.", "Ковёр великолепный — плотный, аккуратный и очень уютный. Видно, что сделан руками."],
             ["Ольга К.", "Корзина идеально вписалась в интерьер. Упаковка бережная, доставка быстрая."],
             ["Наталья С.", "Заказывала нестандартный размер. Всё подробно согласовали, результат превзошёл ожидания."],
-          ].map(([name, text], i) => <article key={name}><div className="review-top"><Image src={i === 1 ? "/images/craftswoman.png" : "/images/hero.png"} alt="" width={52} height={52} /><span><b>{name}</b><small>Покупатель</small></span><i>“</i></div><div className="stars">★★★★★</div><p>{text}</p><a href="#">Читать полностью</a></article>)}
+          ].map(([name, text], i) => <article key={name}><div className="review-top"><Image src={i === 1 ? "/images/craftswoman.png" : "/images/hero.png"} alt="" width={52} height={52} /><span><b>{name}</b><small>Покупатель</small></span><i>“</i></div><div className="stars">★★★★★</div><p>{text}</p></article>)}
         </div>
         <div className="review-summary"><strong>4,9</strong><span><b>★★★★★</b>На основе 186 отзывов</span><div>{["Яндекс", "Ozon", "Wildberries"].map((v) => <i key={v}><Check />{v}</i>)}</div></div>
       </section>
       <section className="shell home-bottom-grid">
         <div className="faq-preview"><span>Помогаем с выбором</span><h2>Частые вопросы</h2>{homeFaqs.map(([question, answer], i) => <div className={`home-faq-item ${homeFaqOpen === i ? "open" : ""}`} key={question}><button type="button" onClick={() => setHomeFaqOpen(homeFaqOpen === i ? null : i)} aria-expanded={homeFaqOpen === i}><b>0{i + 1}</b><span>{question}</span><Plus /></button>{homeFaqOpen === i && <p>{answer}</p>}</div>)}<Link href="/faq">Все вопросы <ArrowRight /></Link></div>
-        <div className="where-buy"><Image src="/images/basket.png" alt="" fill /><div><span>Удобно покупать</span><h2>Мы также<br />на маркетплейсах</h2><p>Wildberries · Ozon · Яндекс Маркет</p><Button variant="secondary">Где купить</Button></div></div>
       </section>
     </Page>
-  );
-}
-
-function FilterGroup({ title, values }: { title: string; values: string[] }) {
-  return (
-    <div className="filter-group"><h4>{title}<ChevronDown /></h4>
-      {values.map((v, i) => <label key={v}><Checkbox defaultChecked={i === 0} />{v}</label>)}
-    </div>
   );
 }
 
@@ -296,19 +330,23 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
   const [maxPrice, setMaxPrice] = useState(15000);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("popular");
+  const [sizeFilters, setSizeFilters] = useState<string[]>([]);
   const soon = comingSoonCategories.includes(category as typeof comingSoonCategories[number]);
   const soonItem = comingSoonItems.find(item => item.category === category);
   const filteredProducts = useMemo(() => {
     if (soon) return [];
-    const result = products.filter(product =>
-      (category === "Все" || product.category === category) &&
-      minPrice(product) <= maxPrice &&
-      product.name.toLocaleLowerCase("ru").includes(query.trim().toLocaleLowerCase("ru"))
-    );
+    const result = products.filter(product => {
+      const size = productSizeCm(product);
+      const sizeOk = sizeFilters.length === 0 || SIZE_FILTERS.some(filter => sizeFilters.includes(filter.id) && filter.match(size));
+      return (category === "Все" || product.category === category)
+        && minPrice(product) <= maxPrice
+        && product.name.toLocaleLowerCase("ru").includes(query.trim().toLocaleLowerCase("ru"))
+        && sizeOk;
+    });
     if (sort === "price-asc") return [...result].sort((a, b) => minPrice(a) - minPrice(b));
     if (sort === "price-desc") return [...result].sort((a, b) => minPrice(b) - minPrice(a));
     return result;
-  }, [category, maxPrice, query, sort, soon]);
+  }, [category, maxPrice, query, sort, soon, sizeFilters]);
 
   useEffect(() => {
     if (catalogTabs.includes(requested as typeof catalogTabs[number])) setCategory(requested);
@@ -333,9 +371,22 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
           <aside className="filters">
             <div className="catalog-search"><h4>Поиск</h4><div><Input value={query} onChange={event => setQuery(event.target.value)} placeholder="Найти изделие" /><Search /></div></div>
             <div className="price-filter"><h4>Цена до <b>{formatPrice(maxPrice)}</b></h4><div><Input value="1 000" readOnly /><span>—</span><Input value={maxPrice.toLocaleString("ru-RU")} readOnly /></div><input type="range" min="1000" max="15000" step="500" value={maxPrice} onChange={event => setMaxPrice(Number(event.target.value))} /></div>
-            <FilterGroup title="Размер" values={["до 60 см", "60–100 см", "100–150 см", "более 150 см"]} />
-            <div className="filter-group swatch-filter"><h4>Цвет<ChevronDown /></h4><div>{["#d5bd91", "#b17c43", "#6f5b42", "#204b31", "#eee9de"].map((value, i) => <button className={i === 0 ? "selected" : ""} style={{background:value}} key={value} aria-label={`Цвет ${i + 1}`}>{i === 0 && <Check />}</button>)}</div></div>
-            <FilterGroup title="Материал" values={["Джут", "Хлопок", "Смешанный"]} />
+            <div className="filter-group">
+              <h4>Размер</h4>
+              {SIZE_FILTERS.map(filter => (
+                <label key={filter.id}>
+                  <Checkbox
+                    checked={sizeFilters.includes(filter.id)}
+                    onCheckedChange={checked => {
+                      setSizeFilters(current => checked === true
+                        ? [...current, filter.id]
+                        : current.filter(id => id !== filter.id));
+                    }}
+                  />
+                  {filter.label}
+                </label>
+              ))}
+            </div>
           </aside>
           <div className="catalog-content">
             {soon ? (
@@ -363,7 +414,7 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
                 <div className="product-grid catalog-products">
                   {filteredProducts.map(p => <ProductCard key={p.id} product={p} />)}
                 </div>
-                {filteredProducts.length === 0 && <div className="catalog-empty"><Search /><h3>Ничего не найдено</h3><p>Измените категорию, цену или поисковый запрос.</p><Button variant="outline" onClick={() => { setCategory("Все"); setMaxPrice(15000); setQuery(""); }}>Сбросить фильтры</Button></div>}
+                {filteredProducts.length === 0 && <div className="catalog-empty"><Search /><h3>Ничего не найдено</h3><p>Измените категорию, цену, размер или поисковый запрос.</p><Button variant="outline" onClick={() => { setCategory("Все"); setMaxPrice(15000); setQuery(""); setSizeFilters([]); }}>Сбросить фильтры</Button></div>}
               </>
             )}
           </div>
@@ -426,7 +477,7 @@ export function CalculatorPage() {
             <label className="calc-check"><Checkbox defaultChecked />Я согласен с отклонением готового изделия ± 2 см</label>
           </div>
           <aside className="estimate-card">
-            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>{calculation.lengthMeters.toFixed(1)} м джута</span><span>{material}</span><span>{pattern}</span><span>{color}</span></div><span>Расчёт по спирали, толщина 8 мм<br />и тариф {JUTE_PRICE_PER_METER} ₽/м. Итог подтвердит мастер.</span><div className="estimate-lead"><Input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="Ваше имя" /><Input value={leadPhone} onChange={e => setLeadPhone(e.target.value)} placeholder="+7 (___) ___-__-__" /></div><Button disabled={!leadName || !leadPhone || requestSent} onClick={async () => { const response = await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "calculator", contact: { name: leadName, phone: leadPhone }, calculation: { shape, size, length, material, pattern, color, rows, edge, backing, ...calculation } }) }); setRequestSent(response.ok); }}>{requestSent ? "Заявка отправлена" : "Отправить заявку"} <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
+            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>{calculation.lengthMeters.toFixed(1)} м джута</span><span>{material}</span><span>{pattern}</span><span>{color}</span></div><span>Расчёт по спирали, толщина 8 мм<br />и тариф {JUTE_PRICE_PER_METER} ₽/м. Итог подтвердит мастер.</span><div className="estimate-lead"><Input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="Ваше имя" /><PhoneInput value={leadPhone} onValueChange={setLeadPhone} /></div><Button disabled={!leadName || !isCompleteRuPhone(leadPhone) || requestSent} onClick={async () => { const response = await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "calculator", contact: { name: leadName, phone: leadPhone }, calculation: { shape, size, length, material, pattern, color, rows, edge, backing, ...calculation } }) }); setRequestSent(response.ok); }}>{requestSent ? "Заявка отправлена" : "Отправить заявку"} <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
           </aside>
         </div>
       </section>
@@ -726,7 +777,7 @@ export function ContactsPage() {
       <InfoHero title="Контакты" subtitle="Всегда готовы помочь с выбором и заказом" />
       <section className="shell contacts-layout">
         <div className="contact-details"><p className="eyebrow">Связаться с нами</p><h2>Давайте обсудим ваш будущий уют</h2><p>Расскажем об изделиях, поможем подобрать размер и рассчитаем индивидуальный заказ.</p><div><a href={PHONE_HREF}><span><MessageCircle /></span><b>{PHONE_DISPLAY}<small>Ежедневно с 9:00 до 20:00</small></b></a><a href="mailto:hello@mary-jute.ru"><span><Mail /></span><b>hello@mary-jute.ru<small>Ответим в течение рабочего дня</small></b></a><p><span><MapPin /></span><b>Ульяновская область<small>Мастерская работает без шоурума</small></b></p></div><div className="contact-socials">{socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.name}</a>)}</div></div>
-        <form className="contact-form" onSubmit={submitContact}><span>Напишите нам</span><h3>Ответим на ваш вопрос</h3><label>Ваше имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<Input name="phone" required type="tel" placeholder="+7 (___) ___-__-__" /></label><label>E-mail<Input name="email" type="email" placeholder="mail@example.ru" /></label><label>Сообщение<textarea name="message" required placeholder="Расскажите, чем мы можем помочь" /></label><label className="calc-check"><Checkbox defaultChecked />Согласен с политикой конфиденциальности</label><Button type="submit" disabled={sending || sent}>{sent ? "Сообщение отправлено" : sending ? "Отправляем..." : "Отправить сообщение"} <ArrowRight /></Button></form>
+        <form className="contact-form" onSubmit={submitContact}><span>Напишите нам</span><h3>Ответим на ваш вопрос</h3><label>Ваше имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<PhoneInput name="phone" required /></label><label>E-mail<Input name="email" type="email" placeholder="mail@example.ru" /></label><label>Сообщение<textarea name="message" required placeholder="Расскажите, чем мы можем помочь" /></label><label className="calc-check"><Checkbox defaultChecked />Согласен с политикой конфиденциальности</label><Button type="submit" disabled={sending || sent}>{sent ? "Сообщение отправлено" : sending ? "Отправляем..." : "Отправить сообщение"} <ArrowRight /></Button></form>
       </section>
     </Page>
   );

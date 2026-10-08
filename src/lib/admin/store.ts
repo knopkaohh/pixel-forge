@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
-import { normalizeOrderStatus, type AdminStore, type AnalyticsSession, type InboxItem } from "@/lib/admin/types";
+import { normalizeOrderStatus, type AdminStore, type AnalyticsSession, type InboxItem, type Subscriber } from "@/lib/admin/types";
 
 const FILE = path.join(process.cwd(), "data", "admin-store.json");
 
@@ -10,6 +10,7 @@ const emptyStore = (): AdminStore => ({
   sessions: [],
   visitors: {},
   geoCache: {},
+  subscribers: [],
 });
 
 let queue: Promise<unknown> = Promise.resolve();
@@ -32,6 +33,7 @@ async function readStore(): Promise<AdminStore> {
       sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
       visitors: parsed.visitors && typeof parsed.visitors === "object" ? parsed.visitors : {},
       geoCache: parsed.geoCache && typeof parsed.geoCache === "object" ? parsed.geoCache : {},
+      subscribers: Array.isArray(parsed.subscribers) ? parsed.subscribers as Subscriber[] : [],
     };
   } catch {
     return emptyStore();
@@ -212,6 +214,7 @@ export function analyticsSummary(store: AdminStore) {
     weekNewVisitors: week.newVisitors,
     todayGeo: todayRange.geo,
     unreadOrders,
+    unreadSubscribers: store.subscribers.filter(item => item.unread).length,
     todayOrders,
     openOrders,
     inboxTotal: store.inbox.length,
