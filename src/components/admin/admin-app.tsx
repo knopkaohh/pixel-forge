@@ -228,7 +228,7 @@ export function AdminApp() {
               <article><small>Посетители сегодня</small><strong>{stats?.todayVisitors ?? 0}</strong><p>новых: {stats?.todayNewVisitors ?? 0}</p></article>
               <article><small>Новые за неделю</small><strong>{stats?.weekNewVisitors ?? 0}</strong><p>всего за неделю: {stats?.weekVisitors ?? 0}</p></article>
               <article><small>Заказы сегодня</small><strong>{stats?.todayOrders ?? 0}</strong><p>открытых: {stats?.openOrders ?? 0}</p></article>
-              <article><small>География сегодня</small><strong>{stats?.todayGeo?.[0]?.count ?? 0}</strong><p>{stats?.todayGeo?.[0]?.label || "Пока нет данных"}</p></article>
+              <article><small>География сегодня</small><strong>{stats?.todayGeo?.length ?? 0}</strong><p>{stats?.todayGeo?.[0]?.label || "Пока нет данных"}</p></article>
             </div>
             <div className="admin-panel">
               <h3 style={{ font: "22px Playfair Display, serif", margin: "0 0 12px" }}>Последние обращения</h3>
@@ -305,7 +305,15 @@ export function AdminApp() {
             </header>
             <div className="admin-toolbar">
               {periods.map(([id, label]) => (
-                <button key={id} className={period === id ? "active" : ""} onClick={() => setPeriod(id)}>{label}</button>
+                <button key={id} className={period === id ? "active" : ""} onClick={() => {
+                  setPeriod(id);
+                  if (id === "custom" && !customFrom && !customTo) {
+                    const to = new Date().toLocaleDateString("sv-SE");
+                    const from = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toLocaleDateString("sv-SE");
+                    setCustomFrom(from);
+                    setCustomTo(to);
+                  }
+                }}>{label}</button>
               ))}
               {period === "custom" && (
                 <span className="admin-dates">
@@ -335,11 +343,16 @@ export function AdminApp() {
   );
 }
 
+function chartLabel(date: string, index: number, total: number) {
+  const hourly = /^\d{2}:\d{2}$/.test(date);
+  if (hourly) return index % 4 === 0 ? date : "";
+  const day = date.length > 5 ? date.slice(5) : date;
+  if (total <= 14) return day;
+  return index === 0 || index === total - 1 || index % Math.ceil(total / 6) === 0 ? day : "";
+}
+
 function VisitorChart({ points }: { points: { date: string; visitors: number }[] }) {
   const max = Math.max(1, ...points.map(point => point.visitors));
-  const labels = points.length > 14
-    ? points.map((point, index) => index === 0 || index === points.length - 1 || index % Math.ceil(points.length / 6) === 0 ? point.date.slice(5) : "")
-    : points.map(point => point.date.length > 5 ? point.date.slice(5) : point.date);
   return (
     <div className="admin-chart">
       <h3>Посетители по периоду</h3>
@@ -347,12 +360,15 @@ function VisitorChart({ points }: { points: { date: string; visitors: number }[]
         <div className="admin-chart-empty">За этот период визитов ещё нет</div>
       ) : (
         <div className="admin-chart-plot">
-          {points.map((point, index) => (
-            <div className="admin-chart-col" key={`${point.date}-${index}`} title={`${point.date}: ${point.visitors}`}>
-              <i style={{ height: `${Math.max(6, Math.round((point.visitors / max) * 100))}%` }} />
-              <span>{labels[index]}</span>
-            </div>
-          ))}
+          {points.map((point, index) => {
+            const height = point.visitors === 0 ? 0 : Math.max(6, Math.round((point.visitors / max) * 100));
+            return (
+              <div className="admin-chart-col" key={`${point.date}-${index}`} title={`${point.date}: ${point.visitors}`}>
+                <i style={{ height: `${height}%` }} />
+                <span>{chartLabel(point.date, index, points.length)}</span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
