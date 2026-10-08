@@ -326,9 +326,13 @@ export function HomePage() {
   );
 }
 
-export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: string }) {
+export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: string } = {}) {
   const requested = catalogTabs.includes(initialCategory as typeof catalogTabs[number]) ? initialCategory : "Все";
   const [category, setCategory] = useState(requested);
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("category") || requested;
+    if (catalogTabs.includes(fromUrl as typeof catalogTabs[number])) setCategory(fromUrl);
+  }, [requested]);
   const [maxPrice, setMaxPrice] = useState(15000);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("popular");

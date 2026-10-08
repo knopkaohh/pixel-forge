@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ProductPage } from "@/components/site";
 import { comingSoonItems, getProduct, products, resolveProductSlug } from "@/lib/products";
 
@@ -20,6 +20,5 @@ export default async function Product({
   const { slug } = await params;
   const resolved = resolveProductSlug(slug);
   if (!getProduct(resolved)) notFound();
-  if (resolved !== slug) redirect(`/product/${resolved}`);
   return <ProductPage slug={resolved} />;
 }

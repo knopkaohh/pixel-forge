@@ -1,0 +1,23 @@
+Мэри Джут — выгрузка на обычный PHP-хостинг (ISPmanager)
+
+Это обычный сайт: HTML + PHP. Отдельная кнопка «Запустить» не нужна.
+
+Как залить на mary-jute.ru:
+
+1. В ISPmanager откройте «Менеджер файлов».
+2. Зайдите в папку /www/mary-jute.ru/
+3. Выделите ВСЁ старое и удалите
+   (server.js, start.sh, node_modules, .next — это от прошлого архива, они не нужны).
+4. Загрузите этот архив в /www/mary-jute.ru/ и разархивируйте.
+5. В корне папки должны появиться index.html, .htaccess, папки api, data, images, _next.
+6. Откройте https://mary-jute.ru — сайт сразу откроется.
+
+Админка: https://mary-jute.ru/admin
+Логин: admin
+Пароль: admin
+
+После показа клиенту смените пароль в файле config.php
+(строки admin_login, admin_password, admin_secret).
+
+Папка data/ должна быть доступна на запись — в ней заявки и рассылки.
+Обработчик сайта в ISPmanager оставьте PHP (как сейчас).
