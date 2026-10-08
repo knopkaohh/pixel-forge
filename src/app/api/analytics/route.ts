@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { clientIp, geoFromHeaders, lookupGeo } from "@/lib/admin/geo";
 import { trackVisit, withStore } from "@/lib/admin/store";
 
 function id(value: unknown, fallback: string) {
@@ -14,6 +15,20 @@ export async function POST(request: Request) {
   const visitorId = id(body?.visitorId, `v-${Date.now().toString(36)}`);
   const sessionId = id(body?.sessionId, `s-${Date.now().toString(36)}`);
   const referrer = typeof body?.referrer === "string" ? body.referrer.slice(0, 300) : "";
-  await withStore(store => trackVisit(store, { visitorId, sessionId, path, referrer }));
+  const ip = clientIp(request);
+  const headerGeo = geoFromHeaders(request);
+  await withStore(async store => {
+    const cached = ip ? store.geoCache?.[ip] : undefined;
+    const geo = headerGeo || await lookupGeo(ip, cached);
+    trackVisit(store, {
+      visitorId,
+      sessionId,
+      path,
+      referrer,
+      ip,
+      country: geo.country,
+      city: geo.city,
+    });
+  });
   return NextResponse.json({ ok: true, visitorId, sessionId });
 }

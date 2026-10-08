@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin/auth";
 import { withStore } from "@/lib/admin/store";
-import { LEAD_STATUSES, ORDER_STATUSES } from "@/lib/admin/types";
+import { ORDER_STATUSES } from "@/lib/admin/types";
 
 type Patch = {
   status?: string;
@@ -21,8 +21,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   const item = await withStore(store => {
     const current = store.inbox.find(entry => entry.id === id);
     if (!current) return null;
-    const allowed = current.kind === "order" ? ORDER_STATUSES : LEAD_STATUSES;
-    if (typeof body.status === "string" && (allowed as readonly string[]).includes(body.status)) current.status = body.status;
+    if (typeof body.status === "string" && (ORDER_STATUSES as readonly string[]).includes(body.status)) current.status = body.status;
     if (typeof body.notes === "string") current.notes = body.notes;
     if (typeof body.comment === "string") current.comment = body.comment;
     if (typeof body.unread === "boolean") current.unread = body.unread;

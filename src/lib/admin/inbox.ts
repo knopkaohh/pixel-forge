@@ -44,7 +44,7 @@ export function inboxFromPayload(payload: { type?: unknown } & Record<string, un
       kind: "contact",
       createdAt: now,
       updatedAt: now,
-      status: "Новая",
+      status: "Новый",
       unread: true,
       title: "Сообщение с формы контактов",
       customer: {
@@ -66,7 +66,7 @@ export function inboxFromPayload(payload: { type?: unknown } & Record<string, un
       kind: "calculator",
       createdAt: now,
       updatedAt: now,
-      status: "Новая",
+      status: "Новый",
       unread: true,
       title: "Заявка с калькулятора",
       customer: {

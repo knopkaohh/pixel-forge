@@ -8,8 +8,6 @@ export const ORDER_STATUSES = [
   "Отменён",
 ] as const;
 
-export const LEAD_STATUSES = ["Новая", "Написали", "В работе", "Закрыта"] as const;
-
 export type InboxKind = "order" | "contact" | "calculator";
 
 export type InboxCustomer = {
@@ -40,6 +38,9 @@ export type AnalyticsSession = {
   lastAt: string;
   referrer: string;
   pages: string[];
+  hits?: string[];
+  country?: string;
+  city?: string;
 };
 
 export type AdminStore = {
@@ -47,6 +48,7 @@ export type AdminStore = {
   payUrls: Record<string, string>;
   sessions: AnalyticsSession[];
   visitors: Record<string, string[]>;
+  geoCache?: Record<string, { country: string; city: string }>;
 };
 
 export const ADMIN_DISPLAY_NAME = "Елена Варакина";

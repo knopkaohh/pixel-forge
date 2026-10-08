@@ -1,33 +1,46 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ADMIN_DISPLAY_NAME, LEAD_STATUSES, ORDER_STATUSES, kindLabel, type InboxItem } from "@/lib/admin/types";
+import { ADMIN_DISPLAY_NAME, ORDER_STATUSES, kindLabel, type InboxItem } from "@/lib/admin/types";
 
-type View = "overview" | "orders" | "leads" | "catalog" | "visitors";
+type View = "overview" | "orders" | "catalog" | "visitors";
 type Stats = {
   todayVisitors: number;
+  todayNewVisitors: number;
   weekVisitors: number;
-  todayPageviews: number;
-  weekPageviews: number;
-  todayDepth: number;
-  weekDepth: number;
-  todaySessions: number;
-  weekSessions: number;
-  topPages: { path: string; views: number }[];
+  weekNewVisitors: number;
+  todayGeo: { label: string; count: number }[];
   unreadOrders: number;
   todayOrders: number;
   openOrders: number;
   inboxTotal: number;
 };
 type CatalogRow = { id: string; name: string; category: string; price: number; comingSoon: boolean; payUrl: string };
-type SessionRow = { id: string; visitorId: string; startedAt: string; lastAt: string; referrer: string; pages: string[] };
+type VisitorReport = {
+  from: string;
+  to: string;
+  visitors: number;
+  newVisitors: number;
+  chart: { date: string; visitors: number }[];
+  geo: { label: string; country: string; city: string; count: number }[];
+};
+type Period = "today" | "yesterday" | "week" | "month" | "quarter" | "year" | "custom";
 
 const views: [View, string][] = [
   ["overview", "Обзор"],
   ["orders", "Заказы"],
-  ["leads", "Заявки"],
   ["catalog", "Каталог"],
   ["visitors", "Посетители"],
+];
+
+const periods: [Period, string][] = [
+  ["today", "Сегодня"],
+  ["yesterday", "Вчера"],
+  ["week", "Неделя"],
+  ["month", "Месяц"],
+  ["quarter", "Квартал"],
+  ["year", "Год"],
+  ["custom", "Свой период"],
 ];
 
 function money(value?: number) {
@@ -40,7 +53,7 @@ function when(value: string) {
 
 function statusClass(status: string) {
   if (["Новый", "Новая"].includes(status)) return "hot";
-  if (["Ожидает оплату", "В обработке", "В работе"].includes(status)) return "warn";
+  if (["Ожидает оплату", "В обработке"].includes(status)) return "warn";
   return "";
 }
 
@@ -64,8 +77,11 @@ export function AdminApp() {
   const [inbox, setInbox] = useState<InboxItem[]>([]);
   const [selected, setSelected] = useState<InboxItem | null>(null);
   const [catalog, setCatalog] = useState<CatalogRow[]>([]);
-  const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [filter, setFilter] = useState("all");
+  const [period, setPeriod] = useState<Period>("week");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [report, setReport] = useState<VisitorReport | null>(null);
 
   const refreshOverview = useCallback(async () => {
     const data = await api("/api/admin/overview");
@@ -101,13 +117,21 @@ export function AdminApp() {
   useEffect(() => {
     if (!authed) return;
     if (view === "catalog") api("/api/admin/catalog").then(data => setCatalog(data.items)).catch(() => null);
-    if (view === "visitors") api("/api/admin/visitors").then(data => { setStats(data.stats); setSessions(data.sessions); }).catch(() => null);
   }, [authed, view]);
 
-  const orders = useMemo(() => inbox.filter(item => item.kind === "order"), [inbox]);
-  const leads = useMemo(() => inbox.filter(item => item.kind !== "order"), [inbox]);
-  const unread = stats?.unreadOrders ?? orders.filter(item => item.unread).length;
-  const visible = (view === "orders" ? orders : leads).filter(item => filter === "all" || (filter === "unread" ? item.unread : item.status === filter));
+  useEffect(() => {
+    if (!authed || view !== "visitors") return;
+    const params = new URLSearchParams({ preset: period });
+    if (period === "custom" && customFrom && customTo) {
+      params.set("from", customFrom);
+      params.set("to", customTo);
+    }
+    if (period === "custom" && (!customFrom || !customTo)) return;
+    api(`/api/admin/visitors?${params}`).then(data => setReport(data)).catch(() => null);
+  }, [authed, view, period, customFrom, customTo]);
+
+  const unread = stats?.unreadOrders ?? inbox.filter(item => item.unread).length;
+  const visible = inbox.filter(item => filter === "all" || (filter === "unread" ? item.unread : filter === item.kind || item.status === filter));
 
   async function submitLogin(event: React.FormEvent) {
     event.preventDefault();
@@ -201,38 +225,39 @@ export function AdminApp() {
               </div>
             )}
             <div className="admin-cards">
-              <article><small>Посетители сегодня</small><strong>{stats?.todayVisitors ?? 0}</strong><p>{stats?.todaySessions ?? 0} сессий</p></article>
-              <article><small>Глубина просмотра</small><strong>{stats?.todayDepth ?? 0}</strong><p>страниц за сессию · за неделю {stats?.weekDepth ?? 0}</p></article>
+              <article><small>Посетители сегодня</small><strong>{stats?.todayVisitors ?? 0}</strong><p>новых: {stats?.todayNewVisitors ?? 0}</p></article>
+              <article><small>Новые за неделю</small><strong>{stats?.weekNewVisitors ?? 0}</strong><p>всего за неделю: {stats?.weekVisitors ?? 0}</p></article>
               <article><small>Заказы сегодня</small><strong>{stats?.todayOrders ?? 0}</strong><p>открытых: {stats?.openOrders ?? 0}</p></article>
-              <article><small>За 7 дней</small><strong>{stats?.weekVisitors ?? 0}</strong><p>{stats?.weekPageviews ?? 0} просмотров</p></article>
+              <article><small>География сегодня</small><strong>{stats?.todayGeo?.[0]?.count ?? 0}</strong><p>{stats?.todayGeo?.[0]?.label || "Пока нет данных"}</p></article>
             </div>
             <div className="admin-panel">
               <h3 style={{ font: "22px Playfair Display, serif", margin: "0 0 12px" }}>Последние обращения</h3>
-              <InboxTable items={recent} onOpen={item => { setView(item.kind === "order" ? "orders" : "leads"); openItem(item); }} />
+              <InboxTable items={recent} onOpen={item => { setView("orders"); openItem(item); }} />
             </div>
           </>
         )}
 
-        {(view === "orders" || view === "leads") && (
+        {view === "orders" && (
           <>
             <header>
               <div>
-                <h1>{view === "orders" ? "Заказы" : "Заявки"}</h1>
-                <p>{view === "orders" ? "Статусы, правка данных и удаление. Новые заказы подсвечены сиреной." : "Сообщения с контактов и заявки с калькулятора."}</p>
+                <h1>Заказы</h1>
+                <p>Оформления с сайта, сообщения с контактов и заявки с калькулятора — в одном списке.</p>
               </div>
             </header>
             <div className="admin-toolbar">
               <button className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>Все</button>
               <button className={filter === "unread" ? "active" : ""} onClick={() => setFilter("unread")}>Новые</button>
-              {(view === "orders" ? ORDER_STATUSES : LEAD_STATUSES).map(status => (
+              <button className={filter === "order" ? "active" : ""} onClick={() => setFilter("order")}>С сайта</button>
+              <button className={filter === "contact" ? "active" : ""} onClick={() => setFilter("contact")}>Сообщения</button>
+              <button className={filter === "calculator" ? "active" : ""} onClick={() => setFilter("calculator")}>Калькулятор</button>
+              {ORDER_STATUSES.map(status => (
                 <button key={status} className={filter === status ? "active" : ""} onClick={() => setFilter(status)}>{status}</button>
               ))}
             </div>
             <div className="admin-panel">
               <InboxTable items={visible} onOpen={openItem} />
-              {selected && (view === "orders" ? selected.kind === "order" : selected.kind !== "order") && (
-                <ItemEditor item={selected} onChange={setSelected} onSave={saveItem} onDelete={removeItem} />
-              )}
+              {selected && <ItemEditor item={selected} onChange={setSelected} onSave={saveItem} onDelete={removeItem} />}
             </div>
           </>
         )}
@@ -275,35 +300,61 @@ export function AdminApp() {
             <header>
               <div>
                 <h1>Посетители</h1>
-                <p>Сколько людей заходило, сколько страниц смотрели и какие разделы открывали чаще.</p>
+                <p>Количество людей, новые визиты и откуда заходили. График можно смотреть за любой период.</p>
               </div>
             </header>
-            <div className="admin-cards">
-              <article><small>Сегодня</small><strong>{stats?.todayVisitors ?? 0}</strong><p>{stats?.todayPageviews ?? 0} просмотров</p></article>
-              <article><small>Глубина сегодня</small><strong>{stats?.todayDepth ?? 0}</strong><p>уникальных страниц в сессии</p></article>
-              <article><small>Неделя</small><strong>{stats?.weekVisitors ?? 0}</strong><p>{stats?.weekSessions ?? 0} сессий</p></article>
-              <article><small>Глубина за неделю</small><strong>{stats?.weekDepth ?? 0}</strong><p>{stats?.weekPageviews ?? 0} просмотров</p></article>
+            <div className="admin-toolbar">
+              {periods.map(([id, label]) => (
+                <button key={id} className={period === id ? "active" : ""} onClick={() => setPeriod(id)}>{label}</button>
+              ))}
+              {period === "custom" && (
+                <span className="admin-dates">
+                  <input type="date" value={customFrom} onChange={event => setCustomFrom(event.target.value)} />
+                  <input type="date" value={customTo} onChange={event => setCustomTo(event.target.value)} />
+                </span>
+              )}
             </div>
-            <div className="admin-drawer">
-              <section>
-                <h3>Популярные страницы</h3>
-                <ul className="admin-list">
-                  {(stats?.topPages || []).map(page => <li key={page.path}>{page.path} — {page.views}</li>)}
-                  {!stats?.topPages?.length && <p className="admin-empty">Пока мало данных — походите по сайту, цифры появятся.</p>}
+            <div className="admin-cards three">
+              <article><small>Посетители</small><strong>{report?.visitors ?? 0}</strong><p>{report?.from} — {report?.to}</p></article>
+              <article><small>Новые посетители</small><strong>{report?.newVisitors ?? 0}</strong><p>впервые за выбранный период</p></article>
+              <article><small>География</small><strong>{report?.geo?.length ?? 0}</strong><p>{report?.geo?.[0]?.label || "Пока нет точек"}</p></article>
+            </div>
+            <VisitorChart points={report?.chart || []} />
+            <div className="admin-panel">
+              <h3 style={{ font: "22px Playfair Display, serif", margin: "0 0 12px" }}>Откуда заходили</h3>
+              {report?.geo?.length ? (
+                <ul className="admin-geo">
+                  {report.geo.map(place => <li key={place.label}><span>{place.label}</span><b>{place.count}</b></li>)}
                 </ul>
-              </section>
-              <section>
-                <h3>Последние сессии</h3>
-                <ul className="admin-list">
-                  {sessions.map(session => (
-                    <li key={session.id}>{when(session.startedAt)} · {session.pages.length} стр. · {session.pages[session.pages.length - 1]}</li>
-                  ))}
-                </ul>
-              </section>
+              ) : <p className="admin-empty">География появится после визитов с сайта. Локальные заходы считаются отдельно.</p>}
             </div>
           </>
         )}
       </main>
+    </div>
+  );
+}
+
+function VisitorChart({ points }: { points: { date: string; visitors: number }[] }) {
+  const max = Math.max(1, ...points.map(point => point.visitors));
+  const labels = points.length > 14
+    ? points.map((point, index) => index === 0 || index === points.length - 1 || index % Math.ceil(points.length / 6) === 0 ? point.date.slice(5) : "")
+    : points.map(point => point.date.length > 5 ? point.date.slice(5) : point.date);
+  return (
+    <div className="admin-chart">
+      <h3>Посетители по периоду</h3>
+      {points.length === 0 || points.every(point => point.visitors === 0) ? (
+        <div className="admin-chart-empty">За этот период визитов ещё нет</div>
+      ) : (
+        <div className="admin-chart-plot">
+          {points.map((point, index) => (
+            <div className="admin-chart-col" key={`${point.date}-${index}`} title={`${point.date}: ${point.visitors}`}>
+              <i style={{ height: `${Math.max(6, Math.round((point.visitors / max) * 100))}%` }} />
+              <span>{labels[index]}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -334,7 +385,7 @@ function ItemEditor({ item, onChange, onSave, onDelete }: {
   onSave: (patch: Record<string, unknown>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }) {
-  const statuses = item.kind === "order" ? ORDER_STATUSES : LEAD_STATUSES;
+  const statuses = ORDER_STATUSES;
   const items = Array.isArray(item.payload.items) ? item.payload.items as { name?: string; quantity?: number; price?: number }[] : [];
   const calculation = item.payload.calculation && typeof item.payload.calculation === "object" ? item.payload.calculation as Record<string, unknown> : null;
   return (

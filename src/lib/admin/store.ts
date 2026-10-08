@@ -9,6 +9,7 @@ const emptyStore = (): AdminStore => ({
   payUrls: {},
   sessions: [],
   visitors: {},
+  geoCache: {},
 });
 
 let queue: Promise<unknown> = Promise.resolve();
@@ -28,6 +29,7 @@ async function readStore(): Promise<AdminStore> {
       payUrls: parsed.payUrls && typeof parsed.payUrls === "object" ? parsed.payUrls : {},
       sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
       visitors: parsed.visitors && typeof parsed.visitors === "object" ? parsed.visitors : {},
+      geoCache: parsed.geoCache && typeof parsed.geoCache === "object" ? parsed.geoCache : {},
     };
   } catch {
     return emptyStore();
@@ -62,19 +64,56 @@ export function todayKey(date = new Date()) {
 }
 
 export function pruneAnalytics(store: AdminStore) {
-  const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
-  store.sessions = store.sessions.filter(session => new Date(session.lastAt).getTime() >= cutoff).slice(0, 800);
+  const cutoff = Date.now() - 400 * 24 * 60 * 60 * 1000;
+  store.sessions = store.sessions.filter(session => new Date(session.lastAt).getTime() >= cutoff).slice(0, 2000);
   for (const day of Object.keys(store.visitors)) {
     if (new Date(`${day}T00:00:00.000Z`).getTime() < cutoff) delete store.visitors[day];
   }
 }
 
-export function trackVisit(store: AdminStore, input: { visitorId: string; sessionId: string; path: string; referrer: string }) {
+export function shiftDay(day: string, amount: number) {
+  const date = new Date(`${day}T12:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + amount);
+  return date.toISOString().slice(0, 10);
+}
+
+export function daysBetween(from: string, to: string) {
+  const days: string[] = [];
+  let cursor = from;
+  while (cursor <= to) {
+    days.push(cursor);
+    cursor = shiftDay(cursor, 1);
+    if (days.length > 400) break;
+  }
+  return days;
+}
+
+export function firstSeenMap(visitors: Record<string, string[]>) {
+  const map = new Map<string, string>();
+  for (const day of Object.keys(visitors).sort()) {
+    for (const id of visitors[day] || []) {
+      if (!map.has(id)) map.set(id, day);
+    }
+  }
+  return map;
+}
+
+export function trackVisit(store: AdminStore, input: {
+  visitorId: string;
+  sessionId: string;
+  path: string;
+  referrer: string;
+  country?: string;
+  city?: string;
+  ip?: string;
+}) {
   const now = new Date().toISOString();
   const day = todayKey();
   const visitors = store.visitors[day] ?? [];
   if (!visitors.includes(input.visitorId)) visitors.push(input.visitorId);
   store.visitors[day] = visitors;
+  if (!store.geoCache) store.geoCache = {};
+  if (input.ip && input.country) store.geoCache[input.ip] = { country: input.country, city: input.city || "" };
 
   let session: AnalyticsSession | undefined = store.sessions.find(item => item.id === input.sessionId);
   if (!session) {
@@ -85,46 +124,91 @@ export function trackVisit(store: AdminStore, input: { visitorId: string; sessio
       lastAt: now,
       referrer: input.referrer || "",
       pages: [input.path],
+      hits: [now],
+      country: input.country,
+      city: input.city,
     };
     store.sessions.unshift(session);
   } else {
     session.lastAt = now;
     session.pages.push(input.path);
+    session.hits = [...(session.hits || []), now].slice(-80);
+    if (input.country && !session.country) session.country = input.country;
+    if (input.city && !session.city) session.city = input.city;
     if (session.pages.length > 40) session.pages = session.pages.slice(-40);
   }
   pruneAnalytics(store);
 }
 
-export function analyticsSummary(store: AdminStore) {
-  const today = todayKey();
-  const weekStart = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const weekDays = Object.entries(store.visitors).filter(([day]) => new Date(`${day}T00:00:00.000Z`).getTime() >= weekStart);
-  const weekVisitors = new Set(weekDays.flatMap(([, ids]) => ids));
-  const todaySessions = store.sessions.filter(session => session.startedAt.slice(0, 10) === today);
-  const weekSessions = store.sessions.filter(session => new Date(session.startedAt).getTime() >= weekStart);
-  const depth = (sessions: AnalyticsSession[]) => {
-    if (!sessions.length) return 0;
-    return Math.round((sessions.reduce((sum, session) => sum + new Set(session.pages).size, 0) / sessions.length) * 10) / 10;
-  };
-  const pageCounts = new Map<string, number>();
-  for (const session of weekSessions) {
-    for (const page of session.pages) pageCounts.set(page, (pageCounts.get(page) || 0) + 1);
+export function analyticsRange(store: AdminStore, from: string, to: string) {
+  const days = daysBetween(from, to);
+  const firstSeen = firstSeenMap(store.visitors);
+  const visitorIds = new Set(days.flatMap(day => store.visitors[day] || []));
+  const newVisitorIds = [...visitorIds].filter(id => {
+    const seen = firstSeen.get(id);
+    return seen ? seen >= from && seen <= to : false;
+  });
+  const chart = days.map(date => ({ date, visitors: (store.visitors[date] || []).length }));
+  const geoMap = new Map<string, { country: string; city: string; visitors: Set<string> }>();
+  for (const session of store.sessions) {
+    const day = session.startedAt.slice(0, 10);
+    if (day < from || day > to || !session.country) continue;
+    const country = session.country;
+    const city = session.city || "";
+    const key = `${country}|${city}`;
+    const current = geoMap.get(key) || { country, city, visitors: new Set<string>() };
+    current.visitors.add(session.visitorId);
+    geoMap.set(key, current);
   }
-  const topPages = [...pageCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([path, views]) => ({ path, views }));
-  const unreadOrders = store.inbox.filter(item => item.kind === "order" && item.unread).length;
-  const todayOrders = store.inbox.filter(item => item.kind === "order" && item.createdAt.slice(0, 10) === today).length;
-  const openOrders = store.inbox.filter(item => item.kind === "order" && !["Доставлен", "Отменён"].includes(item.status)).length;
+  const geo = [...geoMap.values()]
+    .map(item => ({ country: item.country, city: item.city, label: item.city ? `${item.country}, ${item.city}` : item.country, count: item.visitors.size }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 12);
+
+  const inRangeSessions = store.sessions.filter(session => {
+    const day = session.startedAt.slice(0, 10);
+    return day >= from && day <= to;
+  });
+  const hourly = from === to
+    ? Array.from({ length: 24 }, (_, hour) => {
+      const ids = new Set<string>();
+      for (const session of inRangeSessions) {
+        const stamps = session.hits?.length ? session.hits : [session.startedAt];
+        if (stamps.some(stamp => {
+          const local = new Date(stamp).toLocaleString("sv-SE", { timeZone: "Europe/Moscow" });
+          return local.slice(0, 10) === from && Number(local.slice(11, 13)) === hour;
+        })) ids.add(session.visitorId);
+      }
+      return { date: `${String(hour).padStart(2, "0")}:00`, visitors: ids.size };
+    })
+    : chart;
 
   return {
-    todayVisitors: store.visitors[today]?.length ?? 0,
-    weekVisitors: weekVisitors.size,
-    todayPageviews: todaySessions.reduce((sum, session) => sum + session.pages.length, 0),
-    weekPageviews: weekSessions.reduce((sum, session) => sum + session.pages.length, 0),
-    todayDepth: depth(todaySessions),
-    weekDepth: depth(weekSessions),
-    todaySessions: todaySessions.length,
-    weekSessions: weekSessions.length,
-    topPages,
+    from,
+    to,
+    visitors: visitorIds.size,
+    newVisitors: newVisitorIds.length,
+    chart: from === to ? hourly : chart,
+    geo,
+    sessions: inRangeSessions.slice(0, 40),
+  };
+}
+
+export function analyticsSummary(store: AdminStore) {
+  const today = todayKey();
+  const weekFrom = shiftDay(today, -6);
+  const week = analyticsRange(store, weekFrom, today);
+  const todayRange = analyticsRange(store, today, today);
+  const unreadOrders = store.inbox.filter(item => item.unread).length;
+  const todayOrders = store.inbox.filter(item => item.createdAt.slice(0, 10) === today).length;
+  const openOrders = store.inbox.filter(item => !["Доставлен", "Отменён", "Закрыта"].includes(item.status)).length;
+
+  return {
+    todayVisitors: todayRange.visitors,
+    todayNewVisitors: todayRange.newVisitors,
+    weekVisitors: week.visitors,
+    weekNewVisitors: week.newVisitors,
+    todayGeo: todayRange.geo,
     unreadOrders,
     todayOrders,
     openOrders,

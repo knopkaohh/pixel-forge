@@ -28,6 +28,7 @@ body:has(.admin-app), body:has(.admin-login) { overflow:auto; }
 .admin-alert span { display:block; color:#f0d2c8; font-size:12px; margin-top:4px; }
 .admin-alert i { width:38px; height:38px; border-radius:50%; background:#d24b3a; display:grid; place-items:center; animation:admin-pulse 1.4s ease infinite; font-style:normal; }
 .admin-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.admin-cards.three { grid-template-columns:repeat(3,1fr); }
 .admin-cards article { background:#fffdf8; border:1px solid #ded6c9; border-radius:14px; padding:16px 18px; }
 .admin-cards small { color:#9a7240; letter-spacing:.08em; text-transform:uppercase; font-size:9px; }
 .admin-cards strong { display:block; font:28px "Playfair Display",serif; margin:8px 0 4px; }
@@ -58,14 +59,26 @@ body:has(.admin-app), body:has(.admin-login) { overflow:auto; }
 .admin-list { margin:0; padding-left:18px; color:#5f564c; font-size:13px; line-height:1.6; }
 .admin-empty { padding:40px 12px; text-align:center; color:#7d7469; }
 .admin-catalog input { width:100%; }
+.admin-chart { background:#fffdf8; border:1px solid #ded6c9; border-radius:16px; padding:18px 18px 10px; margin-bottom:18px; }
+.admin-chart h3 { font:22px "Playfair Display",serif; margin:0 0 14px; }
+.admin-chart-plot { display:flex; align-items:flex-end; gap:3px; height:180px; padding:0 4px; }
+.admin-chart-col { flex:1; min-width:0; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px; }
+.admin-chart-col i { display:block; width:100%; max-width:28px; border-radius:6px 6px 0 0; background:#143f29; min-height:3px; }
+.admin-chart-col span { font-size:8px; color:#8a8074; white-space:nowrap; }
+.admin-chart-empty { height:180px; display:grid; place-items:center; color:#7d7469; font-size:13px; }
+.admin-geo { display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none; }
+.admin-geo li { display:flex; justify-content:space-between; gap:12px; font-size:13px; }
+.admin-geo b { font-weight:600; }
+.admin-dates { display:flex; gap:8px; align-items:center; }
+.admin-dates input { height:36px; border:1px solid #ded6c9; background:#fff; border-radius:10px; padding:0 10px; }
 @keyframes admin-pulse { 50% { transform:scale(1.08); box-shadow:0 0 0 6px #d24b3a33; } }
 @media (max-width:980px) {
   .admin-app { grid-template-columns:1fr; }
   .admin-side { padding:16px; }
   .admin-side nav { flex-direction:row; overflow:auto; }
-  .admin-cards, .admin-drawer { grid-template-columns:1fr 1fr; }
+  .admin-cards, .admin-cards.three, .admin-drawer { grid-template-columns:1fr 1fr; }
   .admin-main { padding:18px 16px 40px; }
 }
 @media (max-width:680px) {
-  .admin-cards, .admin-drawer { grid-template-columns:1fr; }
+  .admin-cards, .admin-cards.three, .admin-drawer { grid-template-columns:1fr; }
 }
