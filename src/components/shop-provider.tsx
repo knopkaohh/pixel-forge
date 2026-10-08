@@ -40,7 +40,7 @@ type ShopContextValue = {
   updateQuantity: (id: string, quantity: number) => void;
   toggleFavorite: (product: ShopProduct) => void;
   isFavorite: (id: string) => boolean;
-  createOrder: (customer: Order["customer"]) => Order;
+  createOrder: (customer: Order["customer"], payUrls?: Record<string, string>) => Order;
 };
 
 const ShopContext = createContext<ShopContextValue | null>(null);
@@ -109,13 +109,16 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     isFavorite(id) {
       return favorites.some(item => item.id === id);
     },
-    createOrder(customer) {
+    createOrder(customer, payUrls = {}) {
       const order: Order = {
         id: `MJ-${Date.now().toString().slice(-8)}`,
         createdAt: new Date().toISOString(),
         status: "Ожидает оплату",
         total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-        items: cart.map(item => ({ ...item, payUrl: payUrlFor(item.id) || item.payUrl || "" })),
+        items: cart.map(item => ({
+          ...item,
+          payUrl: payUrls[item.id.split("__")[0]] || payUrlFor(item.id) || item.payUrl || "",
+        })),
         customer,
       };
       setOrders(current => [order, ...current]);

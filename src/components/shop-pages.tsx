@@ -74,7 +74,8 @@ export function CheckoutPage() {
       delivery,
       pickupPoint: pickup,
     };
-    const created = createOrder(customer);
+    const payUrls = await fetch("/api/pay-urls").then(response => response.json()).catch(() => ({})) as Record<string, string>;
+    const created = createOrder(customer, payUrls);
     await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "order", order: created }) }).catch(() => null);
     setOrder(created);
     setSubmitting(false);

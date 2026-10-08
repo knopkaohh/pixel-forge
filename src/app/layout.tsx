@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { ShopProvider } from "@/components/shop-provider";
-import { SitePreloader } from "@/components/site-preloader";
+import { AppShell } from "@/components/app-shell";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +10,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ru">
-      <body className="is-loading"><ShopProvider><SitePreloader />{children}</ShopProvider></body>
+      <body className="is-loading">
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }
