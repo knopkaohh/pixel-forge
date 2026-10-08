@@ -48,7 +48,8 @@ cat > "$DEST/ЗАПУСК.txt" <<EOF
 
 1. Распакуйте архив на сервере.
 2. В панели хостинга укажите команду запуска:
-     node server.js
+     ./start.sh
+   или: node server.js
    Рабочая папка — корень распакованного архива.
 3. Порт возьмите из панели (часто переменная PORT). Хостинг сам подставит.
 4. Привяжите домен mary-jute.ru (и www, если есть) к этому приложению.
@@ -63,7 +64,18 @@ cat > "$DEST/ЗАПУСК.txt" <<EOF
 Все фото лежат в public/images и открываются как /images/...
 Страницы, корзина и API относительные — работают на этом домене без правок кода.
 EOF
-chmod +x "$DEST/server.js" 2>/dev/null || true
+cat > "$DEST/start.sh" <<'EOF'
+#!/bin/sh
+set -a
+if [ -f ./.env ]; then
+  . ./.env
+fi
+set +a
+export HOSTNAME="${HOSTNAME:-0.0.0.0}"
+export PORT="${PORT:-3000}"
+exec node server.js
+EOF
+chmod +x "$DEST/start.sh" "$DEST/server.js" 2>/dev/null || true
 
 mkdir -p "$OUT_DIR"
 ZIP="$OUT_DIR/mary-jute.ru.zip"
