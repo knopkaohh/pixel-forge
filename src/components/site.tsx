@@ -612,7 +612,7 @@ export function AboutPage() {
         <div className="about-preview-grid">
           {preview.map(photo => (
             <Link href="/portfolio" key={photo.src} className="about-preview-card">
-              <Image src={photo.src} alt={photo.alt} fill sizes="16vw" unoptimized />
+              <Image src={photo.src} alt={photo.alt} fill sizes="16vw" unoptimized loading="eager" />
             </Link>
           ))}
         </div>
@@ -647,7 +647,7 @@ export function PortfolioPage() {
       <section className="shell portfolio-collage">
         {portfolioPhotos.map((item, index) => (
           <button type="button" key={item.src} onClick={() => setOpen(index)} aria-label={item.alt}>
-            <Image src={item.src} alt={item.alt} fill sizes="33vw" unoptimized />
+            <Image src={item.src} alt={item.alt} fill sizes="33vw" unoptimized loading="eager" />
           </button>
         ))}
       </section>
