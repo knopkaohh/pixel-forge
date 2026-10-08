@@ -911,11 +911,16 @@ button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
 .promotions-grid a { border-radius:20px; }
 .legal-page { padding:70px 0 90px; max-width:900px; }
 .legal-page > p { color:#9a7240; text-transform:uppercase; letter-spacing:.1em; font-size:8px; }
-.legal-page > h1 { font-size:48px; margin:18px 0 45px; }
+.legal-page > h1 { font-size:42px; line-height:1.15; margin:18px 0 45px; }
 .legal-page > div { background:#fff; border-radius:15px; padding:45px; }
-.legal-page h2 { font-size:23px; margin-top:30px; }
-.legal-page h2:first-child { margin-top:0; }
-.legal-page div p { color:#736a60; line-height:1.8; font-size:11px; }
+.legal-page article + article { margin-top:36px; padding-top:28px; border-top:1px solid var(--line); }
+.legal-page h2 { font-size:23px; margin:0 0 14px; }
+.legal-page article p { color:#736a60; line-height:1.8; font-size:13px; margin:0 0 12px; }
+.legal-page article ul { margin:0 0 14px; padding-left:18px; color:#736a60; font-size:13px; line-height:1.75; }
+.legal-page article li { margin-bottom:6px; }
+.legal-page dl { margin:0; display:flex; flex-direction:column; gap:14px; }
+.legal-page dt { color:var(--jute); font-size:10px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:4px; }
+.legal-page dd { margin:0; color:#736a60; font-size:13px; line-height:1.7; }
 
 @media (max-width:900px) {
   .category-grid { grid-template-columns:repeat(2,1fr); }

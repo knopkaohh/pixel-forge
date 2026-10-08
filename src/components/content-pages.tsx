@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ArrowRight, ChevronDown, Heart, Leaf, PackageCheck, ShieldCheck, Sparkles } from "lucide-react";
 import { Header, Footer } from "@/components/site";
 import { Button } from "@/components/ui/button";
+import { privacyPolicy, userAgreement, type LegalBlock } from "@/lib/legal";
 
 function Page({ children }: { children: React.ReactNode }) {
   return <><Header /><main>{children}</main><Footer /></>;
@@ -142,8 +143,34 @@ export function CertificatesPage() {
   return <Page><Hero title="Сертификаты" text="Документы и подтверждение качества материалов" /><section className="shell certificates-page"><div><ShieldCheck /><p className="eyebrow">Документы мастерской</p><h2>Мы готовим документы к публикации</h2><p>Изделия из джута не входят в перечень продукции, подлежащей обязательной сертификации. Добровольные документы сейчас находятся в процессе оформления и появятся здесь после получения.</p><Button render={<Link href="/contacts" />}>Задать вопрос о материалах</Button></div><Image src="/images/process.png" alt="Натуральный джут и ручная работа" width={620} height={460} /></section></Page>;
 }
 
+function LegalBlocks({ blocks }: { blocks: LegalBlock[] }) {
+  return (
+    <>
+      {blocks.map((block, index) => {
+        if (block.type === "p") return <p key={index}>{block.text}</p>;
+        if (block.type === "list") return <ul key={index}>{block.items.map(item => <li key={item}>{item}</li>)}</ul>;
+        return <dl key={index}>{block.rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;
+      })}
+    </>
+  );
+}
+
 export function LegalPage({ type }: { type: "privacy" | "terms" }) {
-  const privacy = type === "privacy";
-  const title = privacy ? "Политика конфиденциальности" : "Пользовательское соглашение";
-  return <Page><section className="shell legal-page"><p>Обновлено 19 сентября 2026</p><h1>{title}</h1><div><h2>1. Общие положения</h2><p>Настоящий документ регулирует использование сайта «Мэри Джут». Перед публикацией юридические формулировки и реквизиты должны быть проверены владельцем сайта.</p><h2>2. Данные и обращения</h2><p>{privacy ? "Данные, указанные при оформлении заказа или обращении, используются только для обработки запроса, доставки и связи с покупателем." : "Информация на сайте носит справочный характер. Итоговая стоимость, сроки изготовления и доставки подтверждаются при оформлении заказа."}</p><h2>3. Контакты</h2><p>По вопросам обработки данных и работы сайта обращайтесь по адресу hello@mary-jute.ru.</p></div></section></Page>;
+  const document = type === "privacy" ? privacyPolicy : userAgreement;
+  return (
+    <Page>
+      <section className="shell legal-page">
+        <p>{document.updated}</p>
+        <h1>{document.title}</h1>
+        <div>
+          {document.sections.map(section => (
+            <article key={section.title}>
+              <h2>{section.title}</h2>
+              <LegalBlocks blocks={section.blocks} />
+            </article>
+          ))}
+        </div>
+      </section>
+    </Page>
+  );
 }
