@@ -263,8 +263,8 @@ export const categories = [
   { name: "Ковры", image: "/images/categories/kovry.jpg", href: "/catalog?category=Ковры", soon: false },
   { name: "Салфетки сервировочные", image: "/images/categories/salfetki.jpg", href: "/catalog?category=Салфетки сервировочные", soon: false },
   { name: "Подставка под горячее", image: "/images/categories/podstavki.jpg", href: "/catalog?category=Подставка под горячее", soon: false },
-  { name: "Корзины", image: "/images/basket.png", href: "/catalog?category=Корзины", soon: true },
-  { name: "Кашпо", image: "/images/basket.png", href: "/catalog?category=Кашпо", soon: true },
+  { name: "Корзины", image: "/images/categories/korziny.jpg", href: "/catalog?category=Корзины", soon: true },
+  { name: "Кашпо", image: "/images/categories/kashpo.jpg", href: "/catalog?category=Кашпо", soon: true },
   { name: "Панно", image: "/images/wall-art.png", href: "/catalog?category=Панно", soon: true },
 ];
 
