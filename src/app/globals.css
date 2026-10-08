@@ -863,7 +863,8 @@ button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
 .history-empty p { color:#8e857a; font-size:9px; }
 .history-empty a { margin-top:10px; border-radius:20px; }
 .order-history > article { padding:20px 0; border-top:1px solid var(--line); }
-.order-history > article > div { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:20px; }
+.order-history > article > div:first-child { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:20px; }
+.order-history .pay-positions { display:flex; flex-direction:column; }
 .order-history > article span { display:flex; flex-direction:column; gap:4px; }
 .order-history > article span b { font-size:11px; }
 .order-history > article small { color:#8d8377; font-size:8px; }
@@ -977,8 +978,8 @@ button, input, .desktop-nav, .product-card h3, .filters h4, .choice-row button,
   .favorites-grid article > div { height:190px; }
   .favorites-grid h3 { font-size:15px; }
   .account-layout > aside, .order-history { padding:22px; }
-  .order-history > article > div { grid-template-columns:1fr auto; }
-  .order-history > article > div strong { grid-column:1/-1; }
+  .order-history > article > div:first-child { grid-template-columns:1fr auto; }
+  .order-history > article > div:first-child strong { grid-column:1/-1; }
   .faq-page { padding-top:35px; }
   .editorial-cta { align-items:flex-start; flex-direction:column; gap:15px; }
   .promotions-grid { grid-template-columns:1fr; }
