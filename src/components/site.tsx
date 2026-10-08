@@ -48,6 +48,7 @@ import {
   toCartItem,
   type CatalogProduct,
 } from "@/lib/products";
+import { portfolioPhotos, socialLinks } from "@/lib/portfolio";
 
 const JUTE_PRICE_PER_METER = 65;
 const formatPrice = (price: number) => `${price.toLocaleString("ru-RU")} ₽`;
@@ -82,6 +83,7 @@ export function Header() {
     ["Уход за изделиями", "/care"],
     ["Вопросы и ответы", "/faq"],
     ["Сертификаты", "/certificates"],
+    ["Портфолио", "/portfolio"],
     ["Избранное", "/favorites"],
     ["Личный кабинет", "/account"],
     ["Политика конфиденциальности", "/privacy"],
@@ -142,11 +144,11 @@ export function Footer() {
       <div className="shell footer-grid">
         <div>
           <Logo />
-          <p>Интерьерные изделия из натурального джута,<br />созданные вручную с душой в России.</p>
-          <div className="socials"><a href="#">VK</a><a href="#">TG</a><a href="#">MAX</a></div>
+          <p>Интерьерные изделия из натурального джута.<br />Собственное производство с душой — в России.</p>
+          <div className="socials">{socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.name}>{item.label}</a>)}</div>
         </div>
         <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><Link href="/promotions">Акции</Link><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link></div>
-        <div><h4>О мастерской</h4><Link href="/about">О компании</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link><Link href="/contacts">Контакты</Link><Link href="/privacy">Конфиденциальность</Link><Link href="/terms">Соглашение</Link></div>
+        <div><h4>О компании</h4><Link href="/about">О нас</Link><Link href="/portfolio">Портфолио</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link><Link href="/contacts">Контакты</Link><Link href="/privacy">Конфиденциальность</Link><Link href="/terms">Соглашение</Link></div>
         <div className="footer-contact"><h4>Связаться с нами</h4><a href="tel:+79278000000">+7 (927) 800-00-00</a><a href="mailto:hello@mary-jute.ru">hello@mary-jute.ru</a><p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p><Button variant="outline" render={<Link href="/contacts" />}>Написать нам</Button></div>
       </div>
       <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span><Link href="/privacy">Политика конфиденциальности</Link> · <Link href="/terms">Пользовательское соглашение</Link></span></div>
@@ -257,7 +259,7 @@ export function HomePage() {
       </section>
       <section className="shell promo">
         <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
-        <div><small>За кулисами мастерской</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
+        <div><small>За кулисами производства</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
         <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
       <section className="shell section reviews">
@@ -573,12 +575,88 @@ export function ProductPage({ slug }: { slug: string }) {
 }
 
 export function AboutPage() {
+  const preview = portfolioPhotos.slice(0, 6);
   return (
     <Page>
-      <section className="page-hero about-hero"><Image src="/images/hero.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / О компании</p><h1>О компании</h1><span>Создаём уют из натуральных материалов</span></div></section>
-      <section className="shell about-intro"><div><p className="eyebrow">Мэри Джут — это</p><h2>Семейная мастерская по производству интерьерных изделий из джута</h2><p>Мы верим, что у каждого дома есть характер. Наши изделия помогают наполнить пространство теплом натуральных материалов и живой энергией ручной работы.</p><div className="about-points"><span><Leaf />Ручная работа</span><span><Sparkles />Собственное производство</span><span><PackageCheck />Натуральные материалы</span><span><Heart />Любовь к своему делу</span></div></div><Image src="/images/craftswoman.png" alt="Мастер плетёт корзину из джута" width={480} height={620} /></section>
-      <section className="shell founder"><Image src="/images/basket.png" alt="Корзина ручной работы" width={460} height={460} /><div><p className="eyebrow">Наша история</p><h2>Начиналось всё с желания создавать красивые и нужные вещи</h2><p>Первая корзина появилась как вещь для собственного дома. Затем были ковры, панно и десятки экспериментов с формой. Сегодня каждое изделие по-прежнему проходит через руки мастера.</p><Button render={<Link href="/catalog" />}>Наши работы <ArrowRight /></Button></div></section>
-      <section className="stats"><div className="shell"><span><b>5 лет</b>создаём уют</span><span><b>10 000+</b>изделий нашли дом</span><span><b>100%</b>ручная работа</span></div></section>
+      <section className="page-hero about-hero"><Image src="/images/hero.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>Производство интерьерных изделий из джута</span></div></section>
+      <section className="shell about-intro">
+        <div>
+          <p className="eyebrow">Мэри Джут — это</p>
+          <h2>Производство интерьерных изделий из джута — фабрика с душой</h2>
+          <div className="about-copy">
+            <p>Мы делаем вещи для дома из натурального джута: ковры, салфетки, подставки и декор. Это своё производство в России — с ритмом фабрики и теплом ручной работы.</p>
+            <p>Специализируемся на уникальных предметах интерьера из экологичных материалов. Каждое изделие помогает собрать в доме уют и спокойную гармонию: живая фактура каната, спокойный цвет, форма, которую хочется оставлять на виду.</p>
+            <p>Плетём сами — от первого витка до готовой вещи. Поэтому джут остаётся натуральным, а серия не теряет характера: свои формы, свой материал, своя сборка.</p>
+          </div>
+          <div className="about-points"><span><Leaf />Ручная работа</span><span><Sparkles />Собственное производство</span><span><PackageCheck />Натуральный джут</span><span><Heart />С душой к детали</span></div>
+        </div>
+        <Image src="/images/about/craft.jpg" alt="Джутовый ковёр ручной работы" width={480} height={720} unoptimized />
+      </section>
+      <section className="shell founder">
+        <Image src="/images/about/home.jpg" alt="Овальный ковёр из джута в интерьере" width={460} height={620} unoptimized />
+        <div>
+          <p className="eyebrow">Как мы работаем</p>
+          <h2>Полный цикл — у нас, характер изделия — в вашем доме</h2>
+          <div className="about-copy">
+            <p>Производство в Ульяновской области. Берём джутовый канат, собираем форму и доводим край так, чтобы вещь можно было сразу поставить на пол, на стол или в нишу.</p>
+            <p>В каталоге уже ковры разных размеров, сервировочные салфетки и подставки под горячее. Корзины, кашпо и панно готовим следующей коллекцией. Если нужен нестандарт — считаем индивидуально.</p>
+          </div>
+          <div className="about-actions">
+            <Button render={<Link href="/portfolio" />}>Наши работы <ArrowRight /></Button>
+            <Button variant="outline" render={<Link href="/portfolio" />}>Портфолио</Button>
+          </div>
+        </div>
+      </section>
+      <section className="shell about-preview">
+        <SectionTitle link="/portfolio">Из портфолио</SectionTitle>
+        <div className="about-preview-grid">
+          {preview.map(photo => (
+            <Link href="/portfolio" key={photo.src} className="about-preview-card">
+              <Image src={photo.src} alt={photo.alt} fill sizes="16vw" unoptimized />
+            </Link>
+          ))}
+        </div>
+      </section>
+      <section className="stats"><div className="shell"><span><b>Своё</b>производство в России</span><span><b>100%</b>натуральный джут</span><span><b>Вручную</b>каждая вещь</span></div></section>
+    </Page>
+  );
+}
+
+export function PortfolioPage() {
+  const [open, setOpen] = useState<number | null>(null);
+  const photo = open === null ? null : portfolioPhotos[open];
+  useEffect(() => {
+    document.body.style.overflow = photo ? "hidden" : "";
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(null); };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [photo]);
+  return (
+    <Page>
+      <section className="page-hero about-hero"><Image src="/images/about/home.jpg" alt="" fill priority unoptimized /><div className="hero-shade" /><div className="shell"><p>Главная / Портфолио</p><h1>Портфолио</h1><span>Живые кадры наших работ — без инфографики</span></div></section>
+      <section className="shell portfolio-intro">
+        <div>
+          <p className="eyebrow">Наши работы</p>
+          <h2>Коллаж изделий, которые уже живут в домах</h2>
+        </div>
+        <p>Ковры, салфетки, подставки и корзины с собственного производства. Открывайте кадр, чтобы рассмотреть фактуру.</p>
+      </section>
+      <section className="shell portfolio-collage">
+        {portfolioPhotos.map((item, index) => (
+          <button type="button" key={item.src} onClick={() => setOpen(index)} aria-label={item.alt}>
+            <Image src={item.src} alt={item.alt} width={item.width} height={item.height} unoptimized />
+          </button>
+        ))}
+      </section>
+      {photo && (
+        <div className="portfolio-lightbox" role="dialog" aria-modal="true" aria-label={photo.alt} onClick={() => setOpen(null)}>
+          <button type="button" className="lightbox-close" onClick={() => setOpen(null)} aria-label="Закрыть"><X /></button>
+          <Image src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} unoptimized onClick={event => event.stopPropagation()} />
+        </div>
+      )}
     </Page>
   );
 }
@@ -633,7 +711,7 @@ export function ContactsPage() {
     <Page>
       <InfoHero title="Контакты" subtitle="Всегда готовы помочь с выбором и заказом" />
       <section className="shell contacts-layout">
-        <div className="contact-details"><p className="eyebrow">Связаться с нами</p><h2>Давайте обсудим ваш будущий уют</h2><p>Расскажем об изделиях, поможем подобрать размер и рассчитаем индивидуальный заказ.</p><div><a href="tel:+79278000000"><span><MessageCircle /></span><b>+7 (927) 800-00-00<small>Ежедневно с 9:00 до 20:00</small></b></a><a href="mailto:hello@mary-jute.ru"><span><Mail /></span><b>hello@mary-jute.ru<small>Ответим в течение рабочего дня</small></b></a><p><span><MapPin /></span><b>Ульяновская область<small>Мастерская работает без шоурума</small></b></p></div><div className="contact-socials"><a href="#">Telegram</a><a href="#">ВКонтакте</a><a href="#">MAX</a></div></div>
+        <div className="contact-details"><p className="eyebrow">Связаться с нами</p><h2>Давайте обсудим ваш будущий уют</h2><p>Расскажем об изделиях, поможем подобрать размер и рассчитаем индивидуальный заказ.</p><div><a href="tel:+79278000000"><span><MessageCircle /></span><b>+7 (927) 800-00-00<small>Ежедневно с 9:00 до 20:00</small></b></a><a href="mailto:hello@mary-jute.ru"><span><Mail /></span><b>hello@mary-jute.ru<small>Ответим в течение рабочего дня</small></b></a><p><span><MapPin /></span><b>Ульяновская область<small>Мастерская работает без шоурума</small></b></p></div><div className="contact-socials">{socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.name}</a>)}</div></div>
         <form className="contact-form" onSubmit={submitContact}><span>Напишите нам</span><h3>Ответим на ваш вопрос</h3><label>Ваше имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<Input name="phone" required type="tel" placeholder="+7 (___) ___-__-__" /></label><label>E-mail<Input name="email" type="email" placeholder="mail@example.ru" /></label><label>Сообщение<textarea name="message" required placeholder="Расскажите, чем мы можем помочь" /></label><label className="calc-check"><Checkbox defaultChecked />Согласен с политикой конфиденциальности</label><Button type="submit" disabled={sending || sent}>{sent ? "Сообщение отправлено" : sending ? "Отправляем..." : "Отправить сообщение"} <ArrowRight /></Button></form>
       </section>
     </Page>
