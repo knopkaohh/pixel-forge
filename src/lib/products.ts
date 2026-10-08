@@ -240,12 +240,12 @@ export const catalogTabs = [
 export const comingSoonCategories = ["Корзины", "Кашпо", "Панно"] as const;
 
 export const categories = [
-  { name: "Ковры", image: "/images/products/kover/80x120/1.jpg", href: "/catalog?category=Ковры", soon: false },
-  { name: "Салфетки сервировочные", image: "/images/products/salfetki/2/1.jpg", href: "/catalog?category=Салфетки сервировочные", soon: false },
-  { name: "Подставка под горячее", image: "/images/products/podstavka/4/1.jpg", href: "/catalog?category=Подставка под горячее", soon: false },
-  { name: "Корзины", image: "/images/products/soon/korziny/1.jpg", href: "/catalog?category=Корзины", soon: true },
-  { name: "Кашпо", image: "/images/products/soon/korziny/5.jpg", href: "/catalog?category=Кашпо", soon: true },
-  { name: "Панно", image: "/images/products/soon/panno/1.jpg", href: "/catalog?category=Панно", soon: true },
+  { name: "Ковры", image: "/images/categories/kovry.jpg", href: "/catalog?category=Ковры", soon: false },
+  { name: "Салфетки сервировочные", image: "/images/categories/salfetki.jpg", href: "/catalog?category=Салфетки сервировочные", soon: false },
+  { name: "Подставка под горячее", image: "/images/categories/podstavki.jpg", href: "/catalog?category=Подставка под горячее", soon: false },
+  { name: "Корзины", image: "/images/basket.png", href: "/catalog?category=Корзины", soon: true },
+  { name: "Кашпо", image: "/images/basket.png", href: "/catalog?category=Кашпо", soon: true },
+  { name: "Панно", image: "/images/wall-art.png", href: "/catalog?category=Панно", soon: true },
 ];
 
 export function getProduct(slug: string) {

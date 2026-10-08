@@ -242,7 +242,7 @@ export function HomePage() {
       </section>
       <section className="shell collection-showcase">
         <div className="collection-main"><Image src="/images/hero-dining.png" alt="Коллекция джутовых ковров" fill /><div><span>Новая коллекция</span><h2>Дом, в котором<br />хочется остаться</h2><Link href="/catalog">Смотреть коллекцию <ArrowRight /></Link></div></div>
-        <Link href="/catalog?category=Салфетки сервировочные" className="collection-small"><Image src="/images/products/salfetki/2/1.jpg" alt="Сервировочные салфетки из джута" fill /><span>Салфетки и сервировка<small>Наборы 2 и 5 шт</small></span></Link>
+        <Link href="/catalog?category=Салфетки сервировочные" className="collection-small"><Image src="/images/categories/salfetki.jpg" alt="Сервировочные салфетки из джута" fill /><span>Салфетки и сервировка<small>Наборы 2 и 5 шт</small></span></Link>
       </section>
       <section className="shell story-banner">
         <Image src="/images/hero.png" alt="" fill sizes="100vw" />
