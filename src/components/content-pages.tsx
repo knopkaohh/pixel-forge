@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, ChevronDown, Leaf, PackageCheck, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronDown, Heart, Leaf, PackageCheck, ShieldCheck, Sparkles } from "lucide-react";
 import { Header, Footer } from "@/components/site";
 import { Button } from "@/components/ui/button";
 
@@ -50,21 +50,88 @@ const infoPages = {
       ["Индивидуальные изделия", "Товары, изготовленные по персональным размерам, подлежат возврату только при наличии производственного дефекта."],
     ],
   },
-  warranty: {
-    title: "Гарантия качества",
-    text: "Мы отвечаем за материалы и работу наших мастеров",
-    icon: <ShieldCheck />,
-    sections: [
-      ["Проверка перед отправкой", "Каждое изделие проходит ручную проверку формы, плетения и обработки края."],
-      ["Гарантийный случай", "Если вы обнаружили производственный недостаток, сообщите нам в течение 30 дней после получения."],
-      ["Ручная работа", "Небольшие различия фактуры и оттенка не являются дефектом — они подтверждают натуральность материала."],
-    ],
-  },
 };
 
 export function InformationPage({ type }: { type: keyof typeof infoPages }) {
   const data = infoPages[type];
   return <Page><Hero title={data.title} text={data.text} /><section className="shell editorial-info"><div className="editorial-icon">{data.icon}</div>{data.sections.map(([title, text], i) => <article key={title}><b>0{i + 1}</b><h2>{title}</h2><p>{text}</p></article>)}<div className="editorial-cta"><h3>Остались вопросы?</h3><Button render={<Link href="/contacts" />}>Связаться с нами</Button></div></section></Page>;
+}
+
+const warrantyPromises = [
+  [ShieldCheck, "Проверка перед отправкой", "Смотрим форму, плотность плетения и обработку края. С производства уезжает только то, что готовы поставить в свой дом."],
+  [Leaf, "Натуральный джут", "Работаем с природным волокном, без синтетического ворса. Лёгкий растительный запах — норма, он уходит после проветривания."],
+  [Sparkles, "Собственное производство", "Полный цикл в России: от каната до готовой вещи. Знаем, кто плёл, и отвечаем за результат, а не за чужой конвейер."],
+  [PackageCheck, "Бережная упаковка", "Укладываем так, чтобы изделие доехало таким же, каким ушло с производства. Если перевозка подвела — разберёмся."],
+  [Heart, "30 дней на недостаток", "Нашли производственный дефект — напишите в течение месяца после получения. Предложим решение: исправление, замена или возврат."],
+  [ShieldCheck, "Честно про ручную работу", "Небольшие отличия оттенка, фактуры и размера до ±2 см — характер джута и ручного плетения, а не брак."],
+] as const;
+
+export function WarrantyPage() {
+  return (
+    <Page>
+      <Hero title="Гарантия качества" text="Отвечаем за материал, плетение и то, как изделие приедет к вам" />
+      <section className="shell about-intro">
+        <div>
+          <p className="eyebrow">Наше обещание</p>
+          <h2>Качество, за которое не стыдно отвечать</h2>
+          <div className="about-copy">
+            <p>Мэри Джут — собственное производство интерьерных изделий из джута. Мы не прячемся за чужой фабрикой и не обещаем невозможного: обещаем аккуратную работу, честный материал и поддержку после покупки.</p>
+            <p>Каждая вещь проходит через руки мастера и финальный осмотр. Если с изделием что-то не так по нашей вине — это наша ответственность. Если джут живёт своей природной жизнью — расскажем, как это отличить от брака.</p>
+          </div>
+        </div>
+        <Image src="/images/about/craft.jpg" alt="Джутовый ковёр ручной работы" width={480} height={640} unoptimized />
+      </section>
+      <section className="shell warranty-promises">
+        {warrantyPromises.map(([Icon, title, text]) => (
+          <article key={title}>
+            <Icon />
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
+      </section>
+      <section className="shell warranty-split">
+        <article>
+          <p className="eyebrow">Гарантийный случай</p>
+          <h2>Когда мы всё исправим</h2>
+          <ul>
+            <li>Ошибка размера больше допустимых ±2 см</li>
+            <li>Распущенный край, слабый узел, дыра в плетении</li>
+            <li>Изделие приехало повреждённым при целой претензии к перевозке</li>
+            <li>Отправили не ту модель или не тот размер</li>
+          </ul>
+        </article>
+        <article>
+          <p className="eyebrow">Характер материала</p>
+          <h2>Что не считается дефектом</h2>
+          <ul>
+            <li>Небольшой разный тон джута в пределах натурального волокна</li>
+            <li>Живая фактура каната и лёгкая асимметрия ручной работы</li>
+            <li>Растительный запах в первые дни, который выветривается</li>
+            <li>Следы естественного износа при неправильном уходе</li>
+          </ul>
+        </article>
+      </section>
+      <section className="shell warranty-steps">
+        <div>
+          <p className="eyebrow">Если что-то не так</p>
+          <h2>Три шага — и мы на связи</h2>
+        </div>
+        <ol>
+          <li><b>Напишите нам</b><span>В течение 30 дней после получения: почта, форма на сайте или сообщение в Telegram и ВКонтакте.</span></li>
+          <li><b>Пришлите фото</b><span>Изделие целиком, крупный план участка и упаковку — так быстрее понять, производство это или дорога.</span></li>
+          <li><b>Согласуем решение</b><span>Замена, доработка или возврат. Не оставляем вас один на один с канатом и вопросами.</span></li>
+        </ol>
+      </section>
+      <section className="shell editorial-cta warranty-cta">
+        <h3>Остались вопросы по качеству?</h3>
+        <div className="about-actions">
+          <Button render={<Link href="/contacts" />}>Написать нам <ArrowRight /></Button>
+          <Button variant="outline" render={<Link href="/care" />}>Уход за изделиями</Button>
+        </div>
+      </section>
+    </Page>
+  );
 }
 
 export function PromotionsPage() {

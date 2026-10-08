@@ -602,8 +602,7 @@ export function AboutPage() {
             <p>В каталоге уже ковры разных размеров, сервировочные салфетки и подставки под горячее. Корзины, кашпо и панно готовим следующей коллекцией. Если нужен нестандарт — считаем индивидуально.</p>
           </div>
           <div className="about-actions">
-            <Button render={<Link href="/portfolio" />}>Наши работы <ArrowRight /></Button>
-            <Button variant="outline" render={<Link href="/portfolio" />}>Портфолио</Button>
+            <Button render={<Link href="/portfolio" />}>Портфолио <ArrowRight /></Button>
           </div>
         </div>
       </section>
