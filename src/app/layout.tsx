@@ -17,6 +17,13 @@ export const metadata: Metadata = {
     description: "Ковры, корзины, панно и декор ручной работы из натурального джута.",
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   other: { "application-name": SITE_HOST },
 };
 
