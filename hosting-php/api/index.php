@@ -87,7 +87,10 @@ function write_store(string $file, array $store): void
     if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
         send_json(["ok" => false, "error" => "Нет папки data"], 500);
     }
-    $ok = file_put_contents($file, json_encode($store, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT), LOCK_EX);
+    if ($store["payUrls"] === []) $store["payUrls"] = new stdClass();
+    if ($store["visitors"] === []) $store["visitors"] = new stdClass();
+    if ($store["geoCache"] === []) $store["geoCache"] = new stdClass();
+    $ok = file_put_contents($file, json_encode($store, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     if ($ok === false) {
         send_json(["ok" => false, "error" => "Папка data недоступна для записи"], 500);
     }
@@ -95,7 +98,8 @@ function write_store(string $file, array $store): void
 
 function with_store(string $file, callable $work): mixed
 {
-    $handle = fopen($file, file_exists($file) ? "c+" : "w+");
+    $lockFile = $file . ".lock";
+    $handle = fopen($lockFile, "c");
     if ($handle === false) send_json(["ok" => false, "error" => "Не удалось открыть хранилище"], 500);
     flock($handle, LOCK_EX);
     $store = read_store($file);
@@ -514,7 +518,7 @@ if ($path === "/api/requests" && $method === "POST") {
 
 if ($path === "/api/pay-urls" && $method === "GET") {
     $store = read_store($storeFile);
-    send_json($store["payUrls"]);
+    send_json((object) $store["payUrls"]);
 }
 
 if ($path === "/api/analytics" && $method === "POST") {
