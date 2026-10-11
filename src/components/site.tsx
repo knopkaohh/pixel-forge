@@ -18,6 +18,7 @@ import {
   Mail,
   Menu,
   MessageCircle,
+  Phone,
   Minus,
   MapPin,
   PackageCheck,
@@ -113,6 +114,7 @@ export function Header() {
             <Link className="header-icon fav" href="/favorites" aria-label="Избранное"><Heart />{favorites.length > 0 && <i>{favorites.length}</i>}</Link>
             <Link className="header-icon" href="/account" aria-label="Личный кабинет"><UserRound /></Link>
             <Link className="header-icon bag" href="/cart" aria-label="Корзина"><ShoppingBag />{cartCount > 0 && <i>{cartCount}</i>}</Link>
+            <a className="header-icon phone-link" href={PHONE_HREF} aria-label="Позвонить"><Phone /></a>
             <button className="mobile-menu" onClick={() => setOpen(true)} aria-label="Открыть меню"><Menu /></button>
           </div>
         </div>
@@ -251,44 +253,32 @@ function Benefits() {
 
 export function HomePage() {
   const live = useLiveCatalog();
-  const slides = [
-    { desktop: "/images/hero/slide-1-desktop.jpg", mobile: "/images/hero/slide-1-mobile.jpg", title: <>Природный<br />уют в вашем<br />доме</>, text: "Ковры, корзины, панно и декор ручной работы из натурального джута" },
-    { desktop: "/images/hero/slide-2-desktop.jpg", mobile: "/images/hero/slide-2-mobile.jpg", title: <>Фактура природы<br />в каждой<br />детали</>, text: "Уникальные изделия, созданные для вашего пространства" },
-    { desktop: "/images/hero/slide-3-desktop.jpg", mobile: "/images/hero/slide-3-mobile.jpg", title: <>С душой.<br />Для вашего<br />дома.</>, text: "Собственное производство в России и натуральный джут" },
-  ];
-  const [slide, setSlide] = useState(0);
   const [homeFaqOpen, setHomeFaqOpen] = useState<number | null>(null);
   const homeFaqs = [
     ["Как ухаживать за изделиями?", "Используйте сухую чистку мягкой щёткой или пылесосом на небольшой мощности. Не замачивайте изделие полностью."],
     ["Можно ли заказать свой размер?", "Да. Укажите форму и размеры в калькуляторе, а мастер уточнит детали и подтвердит итоговую стоимость."],
     ["Почему новое изделие имеет запах?", "Это естественный аромат натурального джута. После проветривания он становится значительно слабее в течение нескольких дней."],
   ];
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSlide((slide + 1) % slides.length), 4500);
-    return () => window.clearTimeout(timer);
-  }, [slide, slides.length]);
 
   return (
     <Page>
       <section className="hero">
-        <div className="hero-slides" aria-live="polite">
-          {slides.map((item, index) => (
-            <picture key={item.desktop} className={`${slide === index ? "active" : ""}${index === 0 ? " curtain" : ""}`}>
-              <source media="(max-width: 900px)" srcSet={item.mobile} />
-              <img src={item.desktop} alt="Светлый интерьер с джутовым ковром" />
-            </picture>
-          ))}
+        <div className="hero-slides">
+          <picture className="active curtain">
+            <source media="(max-width: 900px)" srcSet="/images/hero/slide-1-mobile.jpg" />
+            <img src="/images/hero/slide-1-desktop.jpg" alt="Светлый интерьер с джутовым ковром" />
+          </picture>
         </div>
         <div className="hero-content">
           <p className="hero-kicker"><i /><span>Натуральные материалы<br />для уютного дома</span></p>
-          <h1>{slides[slide].title}</h1>
-          <span>{slides[slide].text}</span>
+          <h1>Природный<br />уют в вашем<br />доме</h1>
+          <span>Ковры, корзины, панно и декор ручной работы из натурального джута</span>
           <Button className="hero-cta" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
         </div>
-        <div className="hero-index">
-          {slides.map((_, i) => (
-            <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`}>{slide === i && <i />}0{i + 1}</button>
-          ))}
+        <div className="hero-index" aria-hidden="true">
+          <span className="active"><i />01</span>
+          <span>02</span>
+          <span>03</span>
         </div>
       </section>
       <Benefits />
