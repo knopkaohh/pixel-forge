@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowRight, Heart, Minus, PackageCheck, Plus, ShoppingBag, Trash2, UserRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, ExternalLink, Heart, Minus, PackageCheck, Plus, ShoppingBag, Trash2, UserRound } from "lucide-react";
 import { Header, Footer } from "@/components/site";
-import { useShop } from "@/components/shop-provider";
+import { useShop, type Order } from "@/components/shop-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/phone-input";
 
 const price = (value: number) => `${value.toLocaleString("ru-RU")} ₽`;
 
@@ -31,11 +32,32 @@ export function CartPage() {
   </ShopPage>;
 }
 
+function OrderPayment({ id, total }: { id: string; total: number }) {
+  const [payUrl, setPayUrl] = useState("");
+  useEffect(() => {
+    fetch(`/api/order-pay?id=${encodeURIComponent(id)}`)
+      .then(response => response.json())
+      .then(data => { if (typeof data?.payUrl === "string") setPayUrl(data.payUrl); })
+      .catch(() => null);
+  }, [id]);
+  return (
+    <div className="order-single-pay">
+      <p>К оплате одной суммой</p>
+      <strong>{price(total)}</strong>
+      {payUrl ? (
+        <Button render={<a href={payUrl} target="_blank" rel="noopener noreferrer" />}>Оплатить заказ <ExternalLink /></Button>
+      ) : (
+        <span>Менеджер отправит одну ссылку на всю сумму — на телефон и почту из заказа.</span>
+      )}
+    </div>
+  );
+}
+
 export function CheckoutPage() {
   const { cart, cartTotal, createOrder } = useShop();
   const [delivery, setDelivery] = useState("СДЭК");
   const [pickup, setPickup] = useState("СДЭК · ул. Гончарова, 23");
-  const [orderId, setOrderId] = useState("");
+  const [order, setOrder] = useState<Order | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -51,21 +73,50 @@ export function CheckoutPage() {
       delivery,
       pickupPoint: pickup,
     };
-    const order = createOrder(customer);
-    await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "order", order }) }).catch(() => null);
-    setOrderId(order.id);
+    const created = createOrder(customer);
+    await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "order", order: created }) }).catch(() => null);
+    setOrder(created);
     setSubmitting(false);
   }
 
-  if (orderId) return <ShopPage><section className="shell order-success"><PackageCheck /><p>Заказ оформлен</p><h1>Спасибо за заказ!</h1><span>Номер заказа: <b>{orderId}</b></span><p>Мы свяжемся с вами для подтверждения и отправим статус на e-mail.</p><div><Button render={<Link href="/account" />}>Посмотреть заказ</Button><Button variant="outline" render={<Link href="/catalog" />}>Продолжить покупки</Button></div></section></ShopPage>;
+  if (order) {
+    return (
+      <ShopPage>
+        <section className="shell shop-heading">
+          <p>Оформление / Оплата</p>
+          <h1>Заказ принят</h1>
+          <span>Номер заказа: {order.id}</span>
+        </section>
+        <section className="shell order-pay">
+          <div>
+            <p className="eyebrow">Одна оплата</p>
+            <h2>Весь заказ — одной суммой</h2>
+            <p>Отдельных ссылок на каждое изделие нет. Когда ссылка будет готова, она появится здесь и придёт на телефон и почту.</p>
+            <OrderPayment id={order.id} total={order.total} />
+          </div>
+          <aside>
+            <h3>Итого</h3>
+            <strong>{price(order.total)}</strong>
+            <p>{order.customer.delivery}: {order.customer.pickupPoint}</p>
+            <p>Ссылки сохранятся в личном кабинете, если закроете страницу.</p>
+            <div>
+              <Button render={<Link href="/account" />}>Личный кабинет</Button>
+              <Button variant="outline" render={<Link href="/catalog" />}>Продолжить покупки</Button>
+            </div>
+          </aside>
+        </section>
+      </ShopPage>
+    );
+  }
+
   if (!cart.length) return <ShopPage><section className="shell cart-layout"><EmptyState icon={<ShoppingBag />} title="Нечего оформлять" text="Сначала добавьте хотя бы одно изделие в корзину." action="Перейти в каталог" /></section></ShopPage>;
 
   return <ShopPage><section className="shell shop-heading"><p>Корзина / Оформление</p><h1>Оформление заказа</h1><span>Остался один шаг</span></section>
     <form className="shell checkout-layout" onSubmit={submit}><div className="checkout-form">
-      <section><b>01</b><div><h2>Получатель</h2><div className="checkout-fields"><label>Имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<Input name="phone" required type="tel" placeholder="+7 (___) ___-__-__" /></label><label>E-mail<Input name="email" required type="email" placeholder="mail@example.ru" /></label></div></div></section>
+      <section><b>01</b><div><h2>Получатель</h2><div className="checkout-fields"><label>Имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<PhoneInput name="phone" required /></label><label>E-mail<Input name="email" required type="email" placeholder="mail@example.ru" /></label></div></div></section>
       <section><b>02</b><div><h2>Способ доставки</h2><div className="delivery-options">{["СДЭК", "Ozon"].map(value => <button type="button" onClick={() => { setDelivery(value); setPickup(value === "СДЭК" ? "СДЭК · ул. Гончарова, 23" : "Ozon · ул. Радищева, 71"); }} className={delivery === value ? "selected" : ""} key={value}><i>{delivery === value && "✓"}</i><span><b>{value}</b><small>Доставка до пункта выдачи</small></span></button>)}</div><label className="pickup-field">Пункт выдачи<select value={pickup} onChange={event => setPickup(event.target.value)}>{delivery === "СДЭК" ? <><option>СДЭК · ул. Гончарова, 23</option><option>СДЭК · пр-т Нариманова, 64</option></> : <><option>Ozon · ул. Радищева, 71</option><option>Ozon · ул. Федерации, 11</option></>}</select></label></div></section>
       <section><b>03</b><div><h2>Комментарий</h2><textarea name="comment" placeholder="Пожелания к заказу или доставке" /></div></section>
-    </div><aside className="cart-summary checkout-summary"><h3>Итого</h3>{cart.map(item => <div key={item.id}><span>{item.name} × {item.quantity}</span><b>{price(item.price * item.quantity)}</b></div>)}<div className="cart-total"><span>К оплате</span><strong>{price(cartTotal)}</strong></div><Button type="submit" disabled={submitting}>{submitting ? "Оформляем..." : "Подтвердить заказ"} <ArrowRight /></Button><p>Оплата после подтверждения заказа менеджером</p></aside></form>
+    </div><aside className="cart-summary checkout-summary"><h3>Итого</h3>{cart.map(item => <div key={item.id}><span>{item.name} × {item.quantity}</span><b>{price(item.price * item.quantity)}</b></div>)}<div className="cart-total"><span>К оплате</span><strong>{price(cartTotal)}</strong></div><Button type="submit" disabled={submitting}>{submitting ? "Оформляем..." : "Оформить заказ"} <ArrowRight /></Button><p>Оплата будет одной ссылкой на всю сумму</p></aside></form>
   </ShopPage>;
 }
 
@@ -79,6 +130,6 @@ export function FavoritesPage() {
 export function AccountPage() {
   const { orders, favorites } = useShop();
   return <ShopPage><section className="shell shop-heading"><p>Главная / Личный кабинет</p><h1>Личный кабинет</h1><span>Ваши заказы и сохранённые изделия</span></section>
-    <section className="shell account-layout"><aside><UserRound /><h3>Гость</h3><p>История сохраняется на этом устройстве</p><Link href="/favorites"><Heart />Избранное <b>{favorites.length}</b></Link><Link href="/cart"><ShoppingBag />Корзина</Link></aside><div className="order-history"><h2>История заказов</h2>{orders.length === 0 ? <div className="history-empty"><PackageCheck /><h3>Заказов пока нет</h3><p>После оформления они появятся здесь.</p><Button render={<Link href="/catalog" />}>Перейти в каталог</Button></div> : orders.map(order => <article key={order.id}><div><span><b>{order.id}</b><small>{new Date(order.createdAt).toLocaleDateString("ru-RU")}</small></span><i>{order.status}</i><strong>{price(order.total)}</strong></div><p>{order.items.map(item => `${item.name} × ${item.quantity}`).join(", ")}</p><small>{order.customer.delivery}: {order.customer.pickupPoint}</small></article>)}</div></section>
+    <section className="shell account-layout"><aside><UserRound /><h3>Гость</h3><p>История сохраняется на этом устройстве</p><Link href="/favorites"><Heart />Избранное <b>{favorites.length}</b></Link><Link href="/cart"><ShoppingBag />Корзина</Link></aside><div className="order-history"><h2>История заказов</h2>{orders.length === 0 ? <div className="history-empty"><PackageCheck /><h3>Заказов пока нет</h3><p>После оформления они появятся здесь.</p><Button render={<Link href="/catalog" />}>Перейти в каталог</Button></div> : orders.map(order => <article key={order.id}><div><span><b>{order.id}</b><small>{new Date(order.createdAt).toLocaleDateString("ru-RU")}</small></span><i>{order.status}</i><strong>{price(order.total)}</strong></div><p>{order.items.map(item => `${item.name} × ${item.quantity}`).join(", ")}</p><small>{order.customer.delivery}: {order.customer.pickupPoint}</small><OrderPayment id={order.id} total={order.total} /></article>)}</div></section>
   </ShopPage>;
 }

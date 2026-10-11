@@ -1,0 +1,31 @@
+export const socialLinks = [
+  { label: "VK", name: "ВКонтакте", href: "https://vk.ru/meryjut" },
+  { label: "TG", name: "Telegram", href: "https://t.me/maryjute" },
+] as const;
+
+export const portfolioPhotos = [
+  { src: "/images/portfolio/01.jpg", alt: "Круглый джутовый ковёр в студии", width: 1059, height: 1600 },
+  { src: "/images/portfolio/02.jpg", alt: "Ковёр из джута крупным планом", width: 1200, height: 1600 },
+  { src: "/images/portfolio/03.jpg", alt: "Плетение круглого ковра из джутового каната", width: 1200, height: 1600 },
+  { src: "/images/portfolio/04.jpg", alt: "Овальный джутовый ковёр в интерьере", width: 1200, height: 1600 },
+  { src: "/images/portfolio/05.jpg", alt: "Овальный ковёр у дивана", width: 1200, height: 1600 },
+  { src: "/images/portfolio/06.jpg", alt: "Фактура овального ковра из джута", width: 1200, height: 1600 },
+  { src: "/images/portfolio/07.jpg", alt: "Большой круглый ковёр ручной работы", width: 1059, height: 1600 },
+  { src: "/images/portfolio/08.jpg", alt: "Крупный джутовый ковёр", width: 1059, height: 1600 },
+  { src: "/images/portfolio/09.jpg", alt: "Деталь плетения большого ковра", width: 1059, height: 1600 },
+  { src: "/images/portfolio/10.jpg", alt: "Круглый коврик с бахромой", width: 1200, height: 1600 },
+  { src: "/images/portfolio/11.jpg", alt: "Джутовый коврик в комнате", width: 1200, height: 1600 },
+  { src: "/images/portfolio/12.jpg", alt: "Коврик из джута с бахромой у дивана", width: 1200, height: 1600 },
+  { src: "/images/portfolio/13.jpg", alt: "Сервировочная салфетка из джута на столе", width: 1200, height: 1600 },
+  { src: "/images/portfolio/14.jpg", alt: "Сервировка с джутовым плейсматом", width: 1200, height: 1600 },
+  { src: "/images/portfolio/15.jpg", alt: "Салфетка из джутового каната", width: 1200, height: 1600 },
+  { src: "/images/portfolio/16.jpg", alt: "Плейсмат из джута в домашней сервировке", width: 1200, height: 1600 },
+  { src: "/images/portfolio/17.jpg", alt: "Подставка под горячее из джута", width: 1200, height: 1600 },
+  { src: "/images/portfolio/18.jpg", alt: "Ажурная подставка ручной работы", width: 1200, height: 1600 },
+  { src: "/images/portfolio/19.jpg", alt: "Джутовая корзина на белой скамье", width: 1200, height: 1600 },
+  { src: "/images/portfolio/20.jpg", alt: "Пара корзин из джутового каната", width: 1200, height: 1600 },
+  { src: "/images/portfolio/21.jpg", alt: "Корзины из джута друг на друге", width: 1200, height: 1600 },
+  { src: "/images/portfolio/22.jpg", alt: "Кашпо из джута с цветами", width: 1200, height: 1600 },
+  { src: "/images/portfolio/23.jpg", alt: "Корзина ручной работы из джута", width: 1200, height: 1600 },
+  { src: "/images/portfolio/24.jpg", alt: "Ковёр из джута в студии", width: 1200, height: 1600 },
+] as const;

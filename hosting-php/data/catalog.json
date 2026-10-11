@@ -1,0 +1,18 @@
+[
+  {"id":"kover-50x70","name":"Ковер джутовый 50×70 см","category":"Ковры","price":1785,"comingSoon":false},
+  {"id":"kover-60","name":"Ковер джутовый 60 см","category":"Ковры","price":1742,"comingSoon":false},
+  {"id":"kover-60x100","name":"Ковер джутовый 60×100 см","category":"Ковры","price":2448,"comingSoon":false},
+  {"id":"kover-80x120","name":"Ковер джутовый 80×120 см","category":"Ковры","price":3971,"comingSoon":false},
+  {"id":"kover-80x150","name":"Ковер джутовый 80×150 см","category":"Ковры","price":5162,"comingSoon":false},
+  {"id":"kover-90","name":"Ковер джутовый 90 см","category":"Ковры","price":2892,"comingSoon":false},
+  {"id":"kover-100","name":"Ковер джутовый 100 см","category":"Ковры","price":3479,"comingSoon":false},
+  {"id":"kover-120","name":"Ковер джутовый 120 см","category":"Ковры","price":4766,"comingSoon":false},
+  {"id":"kover-150","name":"Ковер джутовый 150 см","category":"Ковры","price":7666,"comingSoon":false},
+  {"id":"kover-200","name":"Ковер джутовый 200 см","category":"Ковры","price":12619,"comingSoon":false},
+  {"id":"salfetki-2","name":"Салфетки сервировочные, набор 2 шт","category":"Салфетки сервировочные","price":1290,"comingSoon":false},
+  {"id":"salfetki-5","name":"Салфетки сервировочные, набор 5 шт","category":"Салфетки сервировочные","price":2136,"comingSoon":false},
+  {"id":"podstavka-20","name":"Подставка под горячее, 20×20 см","category":"Подставка под горячее","price":1089,"comingSoon":false},
+  {"id":"korzina","name":"Корзина джутовая","category":"Корзины","price":0,"comingSoon":true},
+  {"id":"kashpo","name":"Кашпо из джута","category":"Кашпо","price":0,"comingSoon":true},
+  {"id":"panno","name":"Панно из джута","category":"Панно","price":0,"comingSoon":true}
+]
