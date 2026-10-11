@@ -252,9 +252,9 @@ function Benefits() {
 export function HomePage() {
   const live = useLiveCatalog();
   const slides = [
-    { desktop: "/images/hero/slide-1-desktop.jpg", mobile: "/images/hero/slide-1-mobile.jpg", eyebrow: "Интерьерные изделия из джута", title: <>Природный уют<br />в вашем доме</>, text: "Ковры, корзины, панно и декор ручной работы" },
-    { desktop: "/images/hero/slide-2-desktop.jpg", mobile: "/images/hero/slide-2-mobile.jpg", eyebrow: "Коллекция «Тёплый дом»", title: <>Фактура природы<br />в каждой детали</>, text: "Уникальные изделия, созданные для вашего пространства" },
-    { desktop: "/images/hero/slide-3-desktop.jpg", mobile: "/images/hero/slide-3-mobile.jpg", eyebrow: "Сделано руками мастера", title: <>С душой.<br />Для вашего дома.</>, text: "Собственное производство в России и натуральный джут" },
+    { desktop: "/images/hero/slide-1-desktop.jpg", mobile: "/images/hero/slide-1-mobile.jpg", title: <>Природный<br />уют в вашем<br />доме</>, text: "Ковры, корзины, панно и декор ручной работы из натурального джута" },
+    { desktop: "/images/hero/slide-2-desktop.jpg", mobile: "/images/hero/slide-2-mobile.jpg", title: <>Фактура природы<br />в каждой<br />детали</>, text: "Уникальные изделия, созданные для вашего пространства" },
+    { desktop: "/images/hero/slide-3-desktop.jpg", mobile: "/images/hero/slide-3-mobile.jpg", title: <>С душой.<br />Для вашего<br />дома.</>, text: "Собственное производство в России и натуральный джут" },
   ];
   const [slide, setSlide] = useState(0);
   const [homeFaqOpen, setHomeFaqOpen] = useState<number | null>(null);
@@ -281,17 +281,20 @@ export function HomePage() {
         </div>
         <div className="hero-shade" />
         <div className="shell hero-content">
-          <p className="hero-draft">Сайт в разработке</p>
-          <p className="hero-kicker">{slides[slide].eyebrow}</p>
           <h1>{slides[slide].title}</h1>
-          <span>{slides[slide].text}<br />от российского производителя</span>
-          <Button className="light-button" render={<Link href="/catalog" />}>Каталог <ArrowRight /></Button>
+          <span>{slides[slide].text}</span>
+          <Button className="light-button" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
         </div>
-        <div className="hero-controls shell">
-          <div>{slides.map((_, i) => <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`} />)}</div>
-          <span><button type="button" onClick={() => setSlide((slide - 1 + slides.length) % slides.length)} aria-label="Предыдущий слайд"><ArrowLeft /></button><b>0{slide + 1}</b><i>/</i><small>0{slides.length}</small><button type="button" onClick={() => setSlide((slide + 1) % slides.length)} aria-label="Следующий слайд"><ArrowRight /></button></span>
+        <div className="hero-points">
+          <span><Leaf /><b>Натуральный<br />материал</b></span>
+          <span><Heart /><b>Ручная<br />работа</b></span>
+          <span><Truck /><b>Доставка<br />по всей России</b></span>
         </div>
-        <div className="hero-note"><Leaf /><span>100% натуральный<br /><b>джут</b></span></div>
+        <div className="hero-index">
+          {slides.map((_, i) => (
+            <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`}>0{i + 1}</button>
+          ))}
+        </div>
       </section>
       <Benefits />
       <section className="shell section">
