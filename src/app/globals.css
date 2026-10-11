@@ -1566,3 +1566,140 @@ body.is-loading { overflow:hidden; }
   .footer-brand { grid-column: 1 / -1; }
   .footer h4 { margin-bottom: 8px; }
 }
+
+/* Readable hero copy sits on a light card. The photo stays open above it. */
+.hero-shade,
+.page-hero .hero-shade {
+  background: linear-gradient(180deg, rgba(22, 16, 12, 0) 42%, rgba(22, 16, 12, .28) 72%, rgba(22, 16, 12, .55) 100%);
+}
+.hero-content {
+  justify-content: flex-end;
+  padding-bottom: 92px;
+}
+.hero-panel {
+  width: min(560px, 100%);
+  padding: 22px 26px 20px;
+  border-radius: 18px;
+  background: rgba(248, 244, 236, .94);
+  color: #302018;
+  box-shadow: 0 18px 40px rgba(24, 16, 10, .22);
+}
+.hero-panel .hero-draft {
+  margin-bottom: 12px;
+  background: #143f29;
+  color: #fffdf8;
+}
+.hero-panel .hero-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+  color: #5c5348;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+.hero-panel .hero-kicker:before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: #143f29;
+}
+.hero-panel h1,
+.hero .hero-panel h1 {
+  margin: 0 0 10px;
+  color: #24180f;
+  font-size: clamp(36px, 4.2vw, 58px);
+  line-height: 1.02;
+  letter-spacing: -.03em;
+  text-shadow: none;
+}
+.hero-panel > span {
+  display: block;
+  max-width: 38ch;
+  margin: 0 0 16px;
+  color: #4e453c;
+  font-size: 15px;
+  line-height: 1.5;
+  opacity: 1;
+  text-shadow: none;
+}
+.hero-panel .light-button,
+.hero .hero-panel .light-button {
+  height: 46px;
+  padding: 0 22px;
+  background: #143f29;
+  color: #fffdf8;
+  border: 0;
+  box-shadow: none;
+}
+.hero-panel .light-button:hover,
+.hero .hero-panel .light-button:hover {
+  background: #9a7039;
+  color: #fff;
+}
+
+/* Burger stays a dark icon on the right. Close control is only a small cross. */
+.header-actions {
+  flex-shrink: 0;
+}
+.header-actions button.mobile-menu {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #302018;
+  box-shadow: none;
+}
+.header-actions button.mobile-menu svg {
+  width: 22px;
+  height: 22px;
+  color: #302018;
+  stroke: #302018;
+}
+.drawer-head > button {
+  width: auto;
+  height: auto;
+  padding: 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #302018;
+  box-shadow: none;
+}
+.drawer-head > button svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 900px) {
+  .site-header { overflow: visible; }
+  .header-inner { min-width: 0; gap: 8px; }
+  .brand { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+  .brand-copy { min-width: 0; overflow: hidden; }
+  .brand-copy b { overflow: hidden; text-overflow: ellipsis; }
+  .header-actions { margin-left: auto; gap: 2px; flex: 0 0 auto; }
+  .header-actions .phone,
+  .header-actions .search-button,
+  .header-actions a.header-icon:not(.fav):not(.bag) { display: none; }
+  .header-actions a.header-icon.fav,
+  .header-actions a.header-icon.bag,
+  .header-actions button.mobile-menu {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    background: transparent;
+    color: #302018;
+  }
+  .hero-content { padding-bottom: 72px; }
+  .hero-panel { width: 100%; padding: 16px 16px 14px; border-radius: 16px; }
+  .hero .hero-panel h1 { font-size: clamp(28px, 8vw, 36px); }
+  .hero-panel > span { font-size: 13px; margin-bottom: 12px; }
+  .hero-panel .light-button { height: 42px; }
+}

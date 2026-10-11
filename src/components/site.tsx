@@ -242,19 +242,6 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
   );
 }
 
-function DeliveryFacts() {
-  return (
-    <section className="shell delivery-facts" aria-label="Условия доставки">
-      <div><b>Ozon</b><span>от 350 ₽ до пункта выдачи</span></div>
-      <div><b>СДЭК</b><span>от 490 ₽ до пункта или курьером</span></div>
-      <div><b>Отправка</b><span>1–3 рабочих дня</span></div>
-      <div><b>От 15 000 ₽</b><span>доставка до пункта бесплатно</span></div>
-      <div><b>Оплата</b><span>одной суммой за весь заказ</span></div>
-      <Link href="/delivery">Доставка и оплата <ArrowRight /></Link>
-    </section>
-  );
-}
-
 function Benefits() {
   return (
     <div className="benefits shell">
@@ -297,11 +284,13 @@ export function HomePage() {
         </div>
         <div className="hero-shade" />
         <div className="shell hero-content">
-          <p className="hero-draft">Сайт в разработке</p>
-          <p>{slides[slide].eyebrow}</p>
-          <h1>{slides[slide].title}</h1>
-          <span>{slides[slide].text}<br />от российского производителя</span>
-          <Button className="light-button" render={<Link href="/catalog" />}>Каталог <ArrowRight /></Button>
+          <div className="hero-panel">
+            <p className="hero-draft">Сайт в разработке</p>
+            <p className="hero-kicker">{slides[slide].eyebrow}</p>
+            <h1>{slides[slide].title}</h1>
+            <span>{slides[slide].text}<br />от российского производителя</span>
+            <Button className="light-button" render={<Link href="/catalog" />}>Каталог <ArrowRight /></Button>
+          </div>
         </div>
         <div className="hero-controls shell">
           <div>{slides.map((_, i) => <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`} />)}</div>
@@ -310,12 +299,9 @@ export function HomePage() {
         <div className="hero-note"><Leaf /><span>100% натуральный<br /><b>джут</b></span></div>
       </section>
       <Benefits />
-      <DeliveryFacts />
       <section className="shell section">
-        <SectionTitle link="/catalog">Популярные категории</SectionTitle>
-        <div className="category-grid">
-          {categories.map((cat) => <Link href={cat.href} className={`category-card${cat.soon ? " soon" : ""}`} key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="33vw" unoptimized loading="eager" /><i><ArrowRight /></i></div><span>{cat.name}<small>{cat.soon ? "Скоро в каталоге" : "Смотреть коллекцию"}</small></span></Link>)}
-        </div>
+        <SectionTitle link="/catalog">Популярные товары</SectionTitle>
+        <div className="product-grid">{featuredProducts.map((p) => <ProductCard key={p.id} product={p} />)}</div>
       </section>
       <section className="shell collection-showcase">
         <div className="collection-main"><Image src="/images/hero-dining.png" alt="Коллекция джутовых ковров" fill /><div><span>Новая коллекция</span><h2>Дом, в котором<br />хочется остаться</h2><Link href="/catalog">Смотреть коллекцию <ArrowRight /></Link></div></div>
@@ -326,8 +312,10 @@ export function HomePage() {
         <div className="story-copy"><em>Индивидуальное изготовление</em><p>Эксклюзивные изделия для вашего пространства</p><span>Подберём форму, размер и оттенок. Каждое изделие создаём вручную — от первого витка до последнего стежка.</span><Button render={<Link href="/calculator" />}>Рассчитать стоимость <ArrowRight /></Button></div>
       </section>
       <section className="shell section">
-        <SectionTitle link="/catalog">Популярные товары</SectionTitle>
-        <div className="product-grid">{featuredProducts.map((p) => <ProductCard key={p.id} product={p} />)}</div>
+        <SectionTitle link="/catalog">Категории</SectionTitle>
+        <div className="category-grid">
+          {categories.map((cat) => <Link href={cat.href} className={`category-card${cat.soon ? " soon" : ""}`} key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="33vw" unoptimized loading="eager" /><i><ArrowRight /></i></div><span>{cat.name}<small>{cat.soon ? "Скоро в каталоге" : "Смотреть коллекцию"}</small></span></Link>)}
+        </div>
       </section>
       <section className="shell promo">
         <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
@@ -549,12 +537,9 @@ export function ProductPage({ slug }: { slug: string }) {
   const gallery = sourceImages.length <= 3
     ? sourceImages
     : [sourceImages[0], sourceImages[1], sourceImages[sourceImages.length - 1]];
-  const galleryLabels = ["Товар", "Крупный план", "Интерьер"];
   const [imageIndex, setImageIndex] = useState(0);
   const image = gallery[imageIndex] ?? gallery[0] ?? product.image;
   const related = products.filter(item => item.family !== product.family || item.id !== product.id).slice(0, 4);
-  const bundle = comingSoon ? [] : products.filter(item => item.family !== product.family).slice(0, 2);
-  const bundleItems = [product, ...bundle];
   const tabs = ["Описание", "Характеристики", "Отзывы"] as const;
   const reviews = product.reviews ?? [];
   const wbUrl = product.wbUrl;
@@ -586,9 +571,8 @@ export function ProductPage({ slug }: { slug: string }) {
           {gallery.length > 1 && (
             <div className="thumbnails">
               {gallery.map((src, index) => (
-                <button type="button" className={imageIndex === index ? "active" : ""} onClick={() => setImageIndex(index)} key={`${src}-${index}`}>
+                <button type="button" className={imageIndex === index ? "active" : ""} onClick={() => setImageIndex(index)} key={`${src}-${index}`} aria-label={`Фото ${index + 1}`}>
                   <Image src={src} alt="" fill sizes="72px" unoptimized />
-                  <small>{galleryLabels[index] || "Фото"}</small>
                 </button>
               ))}
             </div>
@@ -668,15 +652,6 @@ export function ProductPage({ slug }: { slug: string }) {
         )}
       </section>
       {related.length > 0 && <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{related.map(item => <ProductCard key={item.id} product={item} />)}</div></section>}
-      {bundle.length > 0 && (
-        <section className="shell bundle">
-          <SectionTitle>С этим товаром покупают</SectionTitle>
-          <div className="bundle-row">
-            {bundleItems.map((item, i) => <div className="bundle-product" key={item.id}><Image src={item.image} alt={item.name} width={110} height={110} /><span>{item.name}<b>{formatPrice(minPrice(item))}</b></span>{i < bundleItems.length - 1 && <Plus />}</div>)}
-            <div className="bundle-total"><span>Итого</span><strong>{formatPrice(bundleItems.reduce((sum, item) => sum + minPrice(item), 0))}</strong><Button onClick={() => bundleItems.forEach(item => addToCart(toCartItem(item)))}>Добавить всё в корзину</Button></div>
-          </div>
-        </section>
-      )}
     </Page>
   );
 }
