@@ -1,8 +1,6 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { payUrlFor } from "@/lib/payments";
-
 export type ShopProduct = {
   id: string;
   name: string;
@@ -40,7 +38,7 @@ type ShopContextValue = {
   updateQuantity: (id: string, quantity: number) => void;
   toggleFavorite: (product: ShopProduct) => void;
   isFavorite: (id: string) => boolean;
-  createOrder: (customer: Order["customer"], payUrls?: Record<string, string>) => Order;
+  createOrder: (customer: Order["customer"]) => Order;
 };
 
 const ShopContext = createContext<ShopContextValue | null>(null);
@@ -109,16 +107,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     isFavorite(id) {
       return favorites.some(item => item.id === id);
     },
-    createOrder(customer, payUrls = {}) {
+    createOrder(customer) {
       const order: Order = {
         id: `MJ-${Date.now().toString().slice(-8)}`,
         createdAt: new Date().toISOString(),
         status: "Ожидает оплату",
         total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-        items: cart.map(item => ({
-          ...item,
-          payUrl: payUrls[item.id.split("__")[0]] || payUrlFor(item.id) || item.payUrl || "",
-        })),
+        items: cart.map(item => ({ ...item })),
         customer,
       };
       setOrders(current => [order, ...current]);

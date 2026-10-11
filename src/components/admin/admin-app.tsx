@@ -471,8 +471,11 @@ function ItemEditor({ item, onChange, onSave, onDelete }: {
         <label>E-mail<input value={item.customer.email} onChange={event => onChange({ ...item, customer: { ...item.customer, email: event.target.value } })} /></label>
         <label>Комментарий клиента<textarea value={item.comment} onChange={event => onChange({ ...item, comment: event.target.value })} /></label>
         <label>Заметка для себя<textarea value={item.notes} onChange={event => onChange({ ...item, notes: event.target.value })} /></label>
+        {item.kind === "order" && (
+          <label>Одна ссылка на оплату всего заказа<input value={item.payUrl || ""} onChange={event => onChange({ ...item, payUrl: event.target.value })} placeholder="https://" /></label>
+        )}
         <div className="admin-actions">
-          <button onClick={() => onSave({ status: item.status, notes: item.notes, comment: item.comment, unread: false, customer: item.customer })}>Сохранить</button>
+          <button onClick={() => onSave({ status: item.status, notes: item.notes, comment: item.comment, unread: false, customer: item.customer, payUrl: item.payUrl || "" })}>Сохранить</button>
           <button className="ghost" onClick={() => onSave({ unread: true })}>Вернуть в новые</button>
           <button className="danger" onClick={() => onDelete(item.id)}>Удалить</button>
         </div>

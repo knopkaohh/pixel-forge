@@ -8,6 +8,7 @@ type Patch = {
   notes?: string;
   comment?: string;
   unread?: boolean;
+  payUrl?: string;
   customer?: { name?: string; phone?: string; email?: string };
 };
 
@@ -25,6 +26,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     if (typeof body.notes === "string") current.notes = body.notes;
     if (typeof body.comment === "string") current.comment = body.comment;
     if (typeof body.unread === "boolean") current.unread = body.unread;
+    if (typeof body.payUrl === "string") current.payUrl = body.payUrl.trim();
     if (body.customer) {
       if (typeof body.customer.name === "string") current.customer.name = body.customer.name;
       if (typeof body.customer.phone === "string") current.customer.phone = body.customer.phone;

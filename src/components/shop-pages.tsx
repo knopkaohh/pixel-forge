@@ -2,14 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, ExternalLink, Heart, Minus, PackageCheck, Plus, ShoppingBag, Trash2, UserRound } from "lucide-react";
 import { Header, Footer } from "@/components/site";
 import { useShop, type Order } from "@/components/shop-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/phone-input";
-import { paymentUnits } from "@/lib/payments";
 
 const price = (value: number) => `${value.toLocaleString("ru-RU")} ₽`;
 
@@ -33,24 +32,23 @@ export function CartPage() {
   </ShopPage>;
 }
 
-function PayPositions({ items }: { items: Order["items"] }) {
+function OrderPayment({ id, total }: { id: string; total: number }) {
+  const [payUrl, setPayUrl] = useState("");
+  useEffect(() => {
+    fetch(`/api/order-pay?id=${encodeURIComponent(id)}`)
+      .then(response => response.json())
+      .then(data => { if (typeof data?.payUrl === "string") setPayUrl(data.payUrl); })
+      .catch(() => null);
+  }, [id]);
   return (
-    <div className="pay-positions">
-      {paymentUnits(items).map(unit => (
-        <article key={unit.key}>
-          <Image src={unit.image} alt={unit.name} width={92} height={92} />
-          <div>
-            <small>Ozon эквайринг{unit.unitCount > 1 ? ` · ${unit.unitIndex} из ${unit.unitCount}` : ""}</small>
-            <h3>{unit.name}</h3>
-            <strong>{price(unit.price)}</strong>
-          </div>
-          {unit.payUrl ? (
-            <Button render={<a href={unit.payUrl} target="_blank" rel="noopener noreferrer" />}>Оплатить <ExternalLink /></Button>
-          ) : (
-            <Button disabled>Ожидает ссылку Ozon</Button>
-          )}
-        </article>
-      ))}
+    <div className="order-single-pay">
+      <p>К оплате одной суммой</p>
+      <strong>{price(total)}</strong>
+      {payUrl ? (
+        <Button render={<a href={payUrl} target="_blank" rel="noopener noreferrer" />}>Оплатить заказ <ExternalLink /></Button>
+      ) : (
+        <span>Менеджер отправит одну ссылку на всю сумму — на телефон и почту из заказа.</span>
+      )}
     </div>
   );
 }
@@ -75,8 +73,7 @@ export function CheckoutPage() {
       delivery,
       pickupPoint: pickup,
     };
-    const payUrls = await fetch("/api/pay-urls").then(response => response.json()).catch(() => ({})) as Record<string, string>;
-    const created = createOrder(customer, payUrls);
+    const created = createOrder(customer);
     await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "order", order: created }) }).catch(() => null);
     setOrder(created);
     setSubmitting(false);
@@ -87,15 +84,15 @@ export function CheckoutPage() {
       <ShopPage>
         <section className="shell shop-heading">
           <p>Оформление / Оплата</p>
-          <h1>Оплатите заказ</h1>
+          <h1>Заказ принят</h1>
           <span>Номер заказа: {order.id}</span>
         </section>
         <section className="shell order-pay">
           <div>
-            <p className="eyebrow">Ozon эквайринг</p>
-            <h2>Оплата по каждой позиции</h2>
-            <p>Под каждым изделием — ссылка на защищённую форму Ozon. Если в позиции несколько штук, оплатите каждую отдельно.</p>
-            <PayPositions items={order.items} />
+            <p className="eyebrow">Одна оплата</p>
+            <h2>Весь заказ — одной суммой</h2>
+            <p>Отдельных ссылок на каждое изделие нет. Когда ссылка будет готова, она появится здесь и придёт на телефон и почту.</p>
+            <OrderPayment id={order.id} total={order.total} />
           </div>
           <aside>
             <h3>Итого</h3>
@@ -119,7 +116,7 @@ export function CheckoutPage() {
       <section><b>01</b><div><h2>Получатель</h2><div className="checkout-fields"><label>Имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<PhoneInput name="phone" required /></label><label>E-mail<Input name="email" required type="email" placeholder="mail@example.ru" /></label></div></div></section>
       <section><b>02</b><div><h2>Способ доставки</h2><div className="delivery-options">{["СДЭК", "Ozon"].map(value => <button type="button" onClick={() => { setDelivery(value); setPickup(value === "СДЭК" ? "СДЭК · ул. Гончарова, 23" : "Ozon · ул. Радищева, 71"); }} className={delivery === value ? "selected" : ""} key={value}><i>{delivery === value && "✓"}</i><span><b>{value}</b><small>Доставка до пункта выдачи</small></span></button>)}</div><label className="pickup-field">Пункт выдачи<select value={pickup} onChange={event => setPickup(event.target.value)}>{delivery === "СДЭК" ? <><option>СДЭК · ул. Гончарова, 23</option><option>СДЭК · пр-т Нариманова, 64</option></> : <><option>Ozon · ул. Радищева, 71</option><option>Ozon · ул. Федерации, 11</option></>}</select></label></div></section>
       <section><b>03</b><div><h2>Комментарий</h2><textarea name="comment" placeholder="Пожелания к заказу или доставке" /></div></section>
-    </div><aside className="cart-summary checkout-summary"><h3>Итого</h3>{cart.map(item => <div key={item.id}><span>{item.name} × {item.quantity}</span><b>{price(item.price * item.quantity)}</b></div>)}<div className="cart-total"><span>К оплате</span><strong>{price(cartTotal)}</strong></div><Button type="submit" disabled={submitting}>{submitting ? "Оформляем..." : "Оплатить заказ"} <ArrowRight /></Button><p>После кнопки откроются ссылки оплаты Ozon под каждой позицией</p></aside></form>
+    </div><aside className="cart-summary checkout-summary"><h3>Итого</h3>{cart.map(item => <div key={item.id}><span>{item.name} × {item.quantity}</span><b>{price(item.price * item.quantity)}</b></div>)}<div className="cart-total"><span>К оплате</span><strong>{price(cartTotal)}</strong></div><Button type="submit" disabled={submitting}>{submitting ? "Оформляем..." : "Оформить заказ"} <ArrowRight /></Button><p>Оплата будет одной ссылкой на всю сумму</p></aside></form>
   </ShopPage>;
 }
 
@@ -133,6 +130,6 @@ export function FavoritesPage() {
 export function AccountPage() {
   const { orders, favorites } = useShop();
   return <ShopPage><section className="shell shop-heading"><p>Главная / Личный кабинет</p><h1>Личный кабинет</h1><span>Ваши заказы и сохранённые изделия</span></section>
-    <section className="shell account-layout"><aside><UserRound /><h3>Гость</h3><p>История сохраняется на этом устройстве</p><Link href="/favorites"><Heart />Избранное <b>{favorites.length}</b></Link><Link href="/cart"><ShoppingBag />Корзина</Link></aside><div className="order-history"><h2>История заказов</h2>{orders.length === 0 ? <div className="history-empty"><PackageCheck /><h3>Заказов пока нет</h3><p>После оформления они появятся здесь.</p><Button render={<Link href="/catalog" />}>Перейти в каталог</Button></div> : orders.map(order => <article key={order.id}><div><span><b>{order.id}</b><small>{new Date(order.createdAt).toLocaleDateString("ru-RU")}</small></span><i>{order.status}</i><strong>{price(order.total)}</strong></div><p>{order.items.map(item => `${item.name} × ${item.quantity}`).join(", ")}</p><small>{order.customer.delivery}: {order.customer.pickupPoint}</small><PayPositions items={order.items} /></article>)}</div></section>
+    <section className="shell account-layout"><aside><UserRound /><h3>Гость</h3><p>История сохраняется на этом устройстве</p><Link href="/favorites"><Heart />Избранное <b>{favorites.length}</b></Link><Link href="/cart"><ShoppingBag />Корзина</Link></aside><div className="order-history"><h2>История заказов</h2>{orders.length === 0 ? <div className="history-empty"><PackageCheck /><h3>Заказов пока нет</h3><p>После оформления они появятся здесь.</p><Button render={<Link href="/catalog" />}>Перейти в каталог</Button></div> : orders.map(order => <article key={order.id}><div><span><b>{order.id}</b><small>{new Date(order.createdAt).toLocaleDateString("ru-RU")}</small></span><i>{order.status}</i><strong>{price(order.total)}</strong></div><p>{order.items.map(item => `${item.name} × ${item.quantity}`).join(", ")}</p><small>{order.customer.delivery}: {order.customer.pickupPoint}</small><OrderPayment id={order.id} total={order.total} /></article>)}</div></section>
   </ShopPage>;
 }

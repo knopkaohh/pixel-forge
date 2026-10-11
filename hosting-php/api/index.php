@@ -516,6 +516,20 @@ if ($path === "/api/requests" && $method === "POST") {
     send_json(["ok" => true, "forwarded" => (bool) $webhook, "id" => $item["id"] ?? null]);
 }
 
+if ($path === "/api/order-pay" && $method === "GET") {
+    $id = text($_GET["id"] ?? "");
+    if ($id === "") send_json(["ok" => false], 400);
+    $store = read_store($storeFile);
+    $payUrl = "";
+    foreach ($store["inbox"] as $item) {
+        if (($item["id"] ?? "") === $id) {
+            $payUrl = is_string($item["payUrl"] ?? null) ? $item["payUrl"] : "";
+            break;
+        }
+    }
+    send_json(["ok" => true, "payUrl" => $payUrl]);
+}
+
 if ($path === "/api/pay-urls" && $method === "GET") {
     $store = read_store($storeFile);
     send_json((object) $store["payUrls"]);
@@ -608,6 +622,7 @@ if (preg_match("#^/api/admin/inbox/([^/]+)$#", $path, $match)) {
                 if (isset($body["notes"]) && is_string($body["notes"])) $current["notes"] = $body["notes"];
                 if (isset($body["comment"]) && is_string($body["comment"])) $current["comment"] = $body["comment"];
                 if (array_key_exists("unread", $body) && is_bool($body["unread"])) $current["unread"] = $body["unread"];
+                if (isset($body["payUrl"]) && is_string($body["payUrl"])) $current["payUrl"] = trim($body["payUrl"]);
                 if (isset($body["customer"]) && is_array($body["customer"])) {
                     if (isset($body["customer"]["name"])) $current["customer"]["name"] = $body["customer"]["name"];
                     if (isset($body["customer"]["phone"])) $current["customer"]["phone"] = $body["customer"]["phone"];

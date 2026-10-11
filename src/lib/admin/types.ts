@@ -32,6 +32,7 @@ export type InboxItem = {
   comment: string;
   notes: string;
   total?: number;
+  payUrl?: string;
   payload: Record<string, unknown>;
 };
 

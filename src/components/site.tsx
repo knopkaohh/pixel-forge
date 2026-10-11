@@ -249,7 +249,8 @@ function DeliveryFacts() {
       <div><b>СДЭК</b><span>от 490 ₽ до пункта или курьером</span></div>
       <div><b>Отправка</b><span>1–3 рабочих дня</span></div>
       <div><b>От 15 000 ₽</b><span>доставка до пункта бесплатно</span></div>
-      <Link href="/delivery">Условия доставки <ArrowRight /></Link>
+      <div><b>Оплата</b><span>одной суммой за весь заказ</span></div>
+      <Link href="/delivery">Доставка и оплата <ArrowRight /></Link>
     </section>
   );
 }
@@ -267,9 +268,9 @@ function Benefits() {
 
 export function HomePage() {
   const slides = [
-    { image: "/images/hero.png", eyebrow: "Интерьерные изделия из джута", title: <>Природный уют<br />в вашем доме</>, text: "Ковры, корзины, панно и декор ручной работы" },
-    { image: "/images/hero-dining.png", eyebrow: "Коллекция «Тёплый дом»", title: <>Фактура природы<br />в каждой детали</>, text: "Уникальные изделия, созданные для вашего пространства" },
-    { image: "/images/hero-craft.png", eyebrow: "Сделано руками мастера", title: <>С душой.<br />Для вашего дома.</>, text: "Собственное производство в России и натуральный джут" },
+    { desktop: "/images/hero/slide-1-desktop.jpg", mobile: "/images/hero/slide-1-mobile.jpg", eyebrow: "Интерьерные изделия из джута", title: <>Природный уют<br />в вашем доме</>, text: "Ковры, корзины, панно и декор ручной работы" },
+    { desktop: "/images/hero/slide-2-desktop.jpg", mobile: "/images/hero/slide-2-mobile.jpg", eyebrow: "Коллекция «Тёплый дом»", title: <>Фактура природы<br />в каждой детали</>, text: "Уникальные изделия, созданные для вашего пространства" },
+    { desktop: "/images/hero/slide-3-desktop.jpg", mobile: "/images/hero/slide-3-mobile.jpg", eyebrow: "Сделано руками мастера", title: <>С душой.<br />Для вашего дома.</>, text: "Собственное производство в России и натуральный джут" },
   ];
   const [slide, setSlide] = useState(0);
   const [homeFaqOpen, setHomeFaqOpen] = useState<number | null>(null);
@@ -287,10 +288,16 @@ export function HomePage() {
     <Page>
       <section className="hero">
         <div className="hero-slides" aria-live="polite">
-          {slides.map((item, index) => <Image key={item.image} className={slide === index ? "active" : ""} src={item.image} alt="Интерьер с изделиями из джута" fill priority={index === 0} sizes="100vw" />)}
+          {slides.map((item, index) => (
+            <picture key={item.desktop} className={slide === index ? "active" : ""}>
+              <source media="(max-width: 900px)" srcSet={item.mobile} />
+              <img src={item.desktop} alt="Светлый интерьер с джутовым ковром" />
+            </picture>
+          ))}
         </div>
         <div className="hero-shade" />
         <div className="shell hero-content">
+          <p className="hero-draft">Сайт в разработке</p>
           <p>{slides[slide].eyebrow}</p>
           <h1>{slides[slide].title}</h1>
           <span>{slides[slide].text}<br />от российского производителя</span>
@@ -538,7 +545,11 @@ export function ProductPage({ slug }: { slug: string }) {
   const [added, setAdded] = useState(false);
   const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики" | "Отзывы">("Описание");
   const siblings = familyProducts(product);
-  const gallery = product.images.length ? product.images : [product.image];
+  const sourceImages = product.images.length ? product.images : [product.image];
+  const gallery = sourceImages.length <= 3
+    ? sourceImages
+    : [sourceImages[0], sourceImages[1], sourceImages[sourceImages.length - 1]];
+  const galleryLabels = ["Товар", "Крупный план", "Интерьер"];
   const [imageIndex, setImageIndex] = useState(0);
   const image = gallery[imageIndex] ?? gallery[0] ?? product.image;
   const related = products.filter(item => item.family !== product.family || item.id !== product.id).slice(0, 4);
@@ -575,8 +586,9 @@ export function ProductPage({ slug }: { slug: string }) {
           {gallery.length > 1 && (
             <div className="thumbnails">
               {gallery.map((src, index) => (
-                <button type="button" className={imageIndex === index ? "active" : ""} onClick={() => setImageIndex(index)} key={src}>
+                <button type="button" className={imageIndex === index ? "active" : ""} onClick={() => setImageIndex(index)} key={`${src}-${index}`}>
                   <Image src={src} alt="" fill sizes="72px" unoptimized />
+                  <small>{galleryLabels[index] || "Фото"}</small>
                 </button>
               ))}
             </div>
@@ -764,7 +776,7 @@ export function DeliveryPage() {
     <Page>
       <InfoHero title="Доставка" subtitle="Бережно доставляем изделия по всей России" />
       <section className="shell info-layout">
-        <div className="info-main"><p className="eyebrow">Способы получения</p><h2>Выберите удобную доставку</h2><div className="info-card-grid">
+        <div className="info-main"><p className="eyebrow">Сразу по делу</p><h2>Доставка и оплата</h2><p>Ozon — от 350 ₽ до пункта выдачи. СДЭК — от 490 ₽. Отправка готового изделия — 1–3 рабочих дня. От 15 000 ₽ доставка до пункта бесплатная. Заказ из нескольких товаров оплачивается одной суммой, одной ссылкой.</p><div className="info-card-grid">
           <article><Truck /><span><b>СДЭК</b><small>До пункта выдачи или курьером</small></span><strong>от 490 ₽</strong></article>
           <article><PackageCheck /><span><b>Ozon Доставка</b><small>До выбранного пункта выдачи</small></span><strong>от 350 ₽</strong></article>
           <article><MapPin /><span><b>Самовывоз</b><small>По согласованию из мастерской</small></span><strong>Бесплатно</strong></article>
@@ -779,23 +791,23 @@ export function DeliveryPage() {
 export function PaymentPage() {
   return (
     <Page>
-      <InfoHero title="Оплата" subtitle="Через защищённую форму Ozon по каждой позиции" />
+      <InfoHero title="Оплата" subtitle="Один заказ — одна сумма" />
       <section className="shell payment-section">
         <div>
-          <p className="eyebrow">Ozon эквайринг</p>
-          <h2>Оплата после оформления заказа</h2>
-          <p>Заполните форму получателя и нажмите «Оплатить заказ». Под каждой позицией откроется ссылка на форму оплаты Ozon — туда мы заводим изделия, и оплата проходит на стороне Ozon. Данные карт мы не храним.</p>
+          <p className="eyebrow">Одна оплата</p>
+          <h2>Весь заказ оплачивается один раз</h2>
+          <p>В корзине может быть несколько изделий. После оформления вы видите одну сумму. Менеджер отправляет одну ссылку на оплату всего заказа — на телефон и почту. Отдельных ссылок на каждую позицию нет.</p>
         </div>
         <div className="payment-grid">
-          <article><CreditCard /><h3>Карта в форме Ozon</h3><p>МИР, Visa и Mastercard российских банков — внутри защищённой страницы эквайринга.</p><span>Ozon</span></article>
-          <article><WalletCards /><h3>СБП и другие способы</h3><p>Доступные в форме Ozon способы появятся автоматически, когда товар заведён в эквайринг.</p><span>На стороне Ozon</span></article>
-          <article><Banknote /><h3>Позиция за позицией</h3><p>Если в заказе несколько изделий, оплатите каждое по своей ссылке. Для нескольких штук одной позиции ссылка открывается на каждую единицу.</p><span>После кнопки</span></article>
+          <article><CreditCard /><h3>Одна сумма</h3><p>Стоимость всех изделий складывается в один итог. Платить пять раз за пять товаров не нужно.</p><span>Весь заказ</span></article>
+          <article><WalletCards /><h3>Ссылка от менеджера</h3><p>После заявки менеджер присылает одну ссылку на оплату. Карту мы на сайте не храним.</p><span>На телефон и почту</span></article>
+          <article><Banknote /><h3>Доставка отдельно</h3><p>Ozon от 350 ₽, СДЭК от 490 ₽. От 15 000 ₽ доставка до пункта выдачи бесплатная.</p><span>Считается в заказе</span></article>
         </div>
       </section>
       <section className="shell payment-steps">
         <h2>Как происходит оплата</h2>
         <div>
-          {["Добавьте изделия в корзину", "Заполните форму оформления", "Нажмите «Оплатить заказ»", "Оплатите каждую позицию в форме Ozon"].map((text, i) => (
+          {["Добавьте изделия в корзину", "Оформите один заказ", "Получите одну ссылку на всю сумму", "Оплатите заказ один раз"].map((text, i) => (
             <span key={text}><b>0{i + 1}</b>{text}</span>
           ))}
         </div>
