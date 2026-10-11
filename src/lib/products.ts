@@ -262,13 +262,31 @@ export const catalogTabs = [
 
 export const comingSoonCategories = ["Корзины", "Кашпо", "Панно"] as const;
 
+export const categorySlugs = {
+  "Ковры": "kovry",
+  "Салфетки сервировочные": "salfetki",
+  "Подставка под горячее": "podstavki",
+  "Корзины": "korziny",
+  "Кашпо": "kashpo",
+  "Панно": "panno",
+} as const;
+
+export function categoryPath(name: string) {
+  const slug = categorySlugs[name as keyof typeof categorySlugs];
+  return slug ? `/catalog/${slug}` : "/catalog";
+}
+
+export function categoryFromSlug(slug: string) {
+  return (Object.entries(categorySlugs).find(([, value]) => value === slug)?.[0] ?? "") as string;
+}
+
 export const categories = [
-  { name: "Ковры", image: "/images/categories/kovry.jpg", href: "/catalog?category=Ковры", soon: false },
-  { name: "Салфетки сервировочные", image: "/images/categories/salfetki.jpg", href: "/catalog?category=Салфетки сервировочные", soon: false },
-  { name: "Подставка под горячее", image: "/images/categories/podstavki.jpg", href: "/catalog?category=Подставка под горячее", soon: false },
-  { name: "Корзины", image: "/images/categories/korziny.jpg", href: "/catalog?category=Корзины", soon: true },
-  { name: "Кашпо", image: "/images/categories/kashpo.jpg", href: "/catalog?category=Кашпо", soon: true },
-  { name: "Панно", image: "/images/wall-art.png", href: "/catalog?category=Панно", soon: true },
+  { name: "Ковры", image: "/images/categories/kovry.jpg", href: categoryPath("Ковры"), soon: false },
+  { name: "Салфетки сервировочные", image: "/images/categories/salfetki.jpg", href: categoryPath("Салфетки сервировочные"), soon: false },
+  { name: "Подставка под горячее", image: "/images/categories/podstavki.jpg", href: categoryPath("Подставка под горячее"), soon: false },
+  { name: "Корзины", image: "/images/categories/korziny.jpg", href: categoryPath("Корзины"), soon: true },
+  { name: "Кашпо", image: "/images/categories/kashpo.jpg", href: categoryPath("Кашпо"), soon: true },
+  { name: "Панно", image: "/images/wall-art.png", href: categoryPath("Панно"), soon: true },
 ];
 
 const SLUG_ALIASES: Record<string, string> = {

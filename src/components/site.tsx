@@ -38,6 +38,7 @@ import { useShop } from "@/components/shop-provider";
 import {
   catalogTabs,
   categories,
+  categoryPath,
   comingSoonCategories,
   comingSoonItems,
   familyProducts,
@@ -91,7 +92,6 @@ export function Header() {
     ["Вопросы и ответы", "/faq"],
     ["Сертификаты", "/certificates"],
     ["Портфолио", "/portfolio"],
-    ["Избранное", "/favorites"],
     ["Личный кабинет", "/account"],
     ["Политика конфиденциальности", "/privacy"],
     ["Пользовательское соглашение", "/terms"],
@@ -116,7 +116,7 @@ export function Header() {
           <div className="header-actions">
             <a className="phone" href={PHONE_HREF}>{PHONE_DISPLAY}</a>
             <button className="search-button" aria-label="Поиск"><Search /></button>
-            <Link className="header-icon" href="/favorites" aria-label="Избранное"><Heart />{favorites.length > 0 && <i>{favorites.length}</i>}</Link>
+            <Link className="header-icon fav" href="/favorites" aria-label="Избранное"><Heart />{favorites.length > 0 && <i>{favorites.length}</i>}</Link>
             <Link className="header-icon" href="/account" aria-label="Личный кабинет"><UserRound /></Link>
             <Link className="header-icon bag" href="/cart" aria-label="Корзина"><ShoppingBag />{cartCount > 0 && <i>{cartCount}</i>}</Link>
             <button className="mobile-menu" onClick={() => setOpen(true)} aria-label="Открыть меню"><Menu /></button>
@@ -128,7 +128,7 @@ export function Header() {
           <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Меню сайта" onClick={event => event.stopPropagation()}>
             <div className="drawer-head"><Logo /><button onClick={() => setOpen(false)} aria-label="Закрыть меню"><X /></button></div>
             <div className="drawer-columns">
-              <nav><span>Основное</span>{nav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}<ArrowRight /></Link>)}</nav>
+              <nav><span>Основное</span>{nav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}<ArrowRight /></Link>)}<Link href="/favorites" onClick={() => setOpen(false)}>Избранное<ArrowRight /></Link><Link href="/cart" onClick={() => setOpen(false)}>Корзина<ArrowRight /></Link></nav>
               <nav><span>Покупателям</span>{moreNav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}<ArrowRight /></Link>)}</nav>
             </div>
             <div className="drawer-contact"><span>Нужна помощь с выбором?</span><a href={PHONE_HREF}>{PHONE_DISPLAY}</a><Link href="/contacts" onClick={() => setOpen(false)}>Написать нам</Link></div>
@@ -188,14 +188,20 @@ export function Footer() {
         </div>
       </div>
       <div className="shell footer-grid">
-        <div>
+        <div className="footer-brand">
           <Logo />
           <p>Интерьерные изделия из натурального джута.<br />Собственное производство с душой — в России.</p>
           <div className="socials">{socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" aria-label={item.name}>{item.label}</a>)}</div>
+          <div className="footer-contact">
+            <a href={PHONE_HREF}>{PHONE_DISPLAY}</a>
+            <a href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a>
+            <p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p>
+          </div>
         </div>
-        <div><h4>Покупателям</h4><Link href="/catalog">Каталог</Link><Link href="/promotions">Акции</Link><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link></div>
-        <div><h4>О компании</h4><Link href="/about">О нас</Link><Link href="/portfolio">Портфолио</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link><Link href="/contacts">Контакты</Link><Link href="/privacy">Конфиденциальность</Link><Link href="/terms">Соглашение</Link></div>
-        <div className="footer-contact"><h4>Связаться с нами</h4><a href={PHONE_HREF}>{PHONE_DISPLAY}</a><a href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a><p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p><Button variant="outline" render={<Link href="/contacts" />}>Написать нам</Button></div>
+        <div><h4>Каталог</h4>{categories.map(cat => <Link key={cat.name} href={cat.href}>{cat.name}</Link>)}</div>
+        <div><h4>О компании</h4><Link href="/about">О нас</Link><Link href="/portfolio">Портфолио</Link><Link href="/contacts">Контакты</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link></div>
+        <div><h4>Покупателям</h4><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link><Link href="/promotions">Акции</Link><Link href="/calculator">Свой размер</Link></div>
+        <div><h4>Документы</h4><Link href="/privacy">Политика конфиденциальности</Link><Link href="/terms">Пользовательское соглашение</Link></div>
       </div>
       <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span><Link href="/privacy">Политика конфиденциальности</Link> · <Link href="/terms">Пользовательское соглашение</Link></span></div>
     </footer>
@@ -233,6 +239,18 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
         </div>
       </div>
     </article>
+  );
+}
+
+function DeliveryFacts() {
+  return (
+    <section className="shell delivery-facts" aria-label="Условия доставки">
+      <div><b>Ozon</b><span>от 350 ₽ до пункта выдачи</span></div>
+      <div><b>СДЭК</b><span>от 490 ₽ до пункта или курьером</span></div>
+      <div><b>Отправка</b><span>1–3 рабочих дня</span></div>
+      <div><b>От 15 000 ₽</b><span>доставка до пункта бесплатно</span></div>
+      <Link href="/delivery">Условия доставки <ArrowRight /></Link>
+    </section>
   );
 }
 
@@ -276,7 +294,7 @@ export function HomePage() {
           <p>{slides[slide].eyebrow}</p>
           <h1>{slides[slide].title}</h1>
           <span>{slides[slide].text}<br />от российского производителя</span>
-          <Button className="light-button" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
+          <Button className="light-button" render={<Link href="/catalog" />}>Каталог <ArrowRight /></Button>
         </div>
         <div className="hero-controls shell">
           <div>{slides.map((_, i) => <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`} />)}</div>
@@ -285,6 +303,7 @@ export function HomePage() {
         <div className="hero-note"><Leaf /><span>100% натуральный<br /><b>джут</b></span></div>
       </section>
       <Benefits />
+      <DeliveryFacts />
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные категории</SectionTitle>
         <div className="category-grid">
@@ -293,7 +312,7 @@ export function HomePage() {
       </section>
       <section className="shell collection-showcase">
         <div className="collection-main"><Image src="/images/hero-dining.png" alt="Коллекция джутовых ковров" fill /><div><span>Новая коллекция</span><h2>Дом, в котором<br />хочется остаться</h2><Link href="/catalog">Смотреть коллекцию <ArrowRight /></Link></div></div>
-        <Link href="/catalog?category=Салфетки сервировочные" className="collection-small"><Image src="/images/categories/salfetki.jpg" alt="Сервировочные салфетки из джута" fill /><span>Салфетки и сервировка<small>Наборы 2 и 5 шт</small></span></Link>
+        <Link href={categoryPath("Салфетки сервировочные")} className="collection-small"><Image src="/images/categories/salfetki.jpg" alt="Сервировочные салфетки из джута" fill /><span>Салфетки и сервировка<small>Наборы 2 и 5 шт</small></span></Link>
       </section>
       <section className="shell story-banner">
         <Image src="/images/hero.png" alt="" fill sizes="100vw" />
@@ -327,8 +346,14 @@ export function HomePage() {
 }
 
 export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: string } = {}) {
+  const router = useRouter();
   const requested = catalogTabs.includes(initialCategory as typeof catalogTabs[number]) ? initialCategory : "Все";
   const [category, setCategory] = useState(requested);
+  function selectCategory(next: string) {
+    if (!catalogTabs.includes(next as typeof catalogTabs[number])) return;
+    setCategory(next);
+    router.push(next === "Все" ? "/catalog" : categoryPath(next));
+  }
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get("category") || requested;
     if (catalogTabs.includes(fromUrl as typeof catalogTabs[number])) setCategory(fromUrl);
@@ -371,10 +396,10 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
     <Page>
       <section className="page-hero compact">
         <Image src="/images/hero.png" alt="" fill priority />
-        <div className="hero-shade" /><div className="shell"><p>Главная / Каталог</p><h1>Каталог</h1><span>Натуральные материалы, ручная работа<br />и тепло вашего дома</span></div>
+        <div className="hero-shade" /><div className="shell"><p>Главная / Каталог{category !== "Все" ? ` / ${category}` : ""}</p><h1>{category === "Все" ? "Каталог" : category}</h1><span>Натуральные материалы, ручная работа<br />и тепло вашего дома</span></div>
       </section>
       <section className="shell catalog-section">
-        <div className="catalog-tabs">{catalogTabs.map(t => <button key={t} onClick={() => setCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
+        <div className="catalog-tabs">{catalogTabs.map(t => <button key={t} onClick={() => selectCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
         <div className="catalog-layout">
           <button
             type="button"
@@ -413,7 +438,7 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
                   <Leaf />
                   <h3>Позиции ещё в разработке</h3>
                   <p>Коллекция «{category}» скоро появится в каталоге. Пока можно выбрать ковры, салфетки и подставки под горячее.</p>
-                  <Button variant="outline" onClick={() => setCategory("Все")}>Смотреть доступные изделия</Button>
+                  <Button variant="outline" onClick={() => selectCategory("Все")}>Смотреть доступные изделия</Button>
                 </div>
                 {soonItem && (
                   <div className="soon-preview-grid">
@@ -432,7 +457,7 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
                 <div className="product-grid catalog-products">
                   {filteredProducts.map(p => <ProductCard key={p.id} product={p} />)}
                 </div>
-                {filteredProducts.length === 0 && <div className="catalog-empty"><Search /><h3>Ничего не найдено</h3><p>Измените категорию, цену, размер или поисковый запрос.</p><Button variant="outline" onClick={() => { setCategory("Все"); setMaxPrice(15000); setQuery(""); setSizeFilters([]); }}>Сбросить фильтры</Button></div>}
+                {filteredProducts.length === 0 && <div className="catalog-empty"><Search /><h3>Ничего не найдено</h3><p>Измените категорию, цену, размер или поисковый запрос.</p><Button variant="outline" onClick={() => { selectCategory("Все"); setMaxPrice(15000); setQuery(""); setSizeFilters([]); }}>Сбросить фильтры</Button></div>}
               </>
             )}
           </div>
