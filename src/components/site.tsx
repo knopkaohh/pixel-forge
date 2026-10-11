@@ -270,6 +270,7 @@ export function HomePage() {
           </picture>
         </div>
         <div className="hero-content">
+          <p className="hero-draft">Сайт в разработке</p>
           <p className="hero-kicker"><i /><span>Натуральные материалы<br />для уютного дома</span></p>
           <h1>Природный<br />уют в вашем<br />доме</h1>
           <span>Ковры, корзины, панно и декор ручной работы из натурального джута</span>
