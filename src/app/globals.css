@@ -1567,77 +1567,70 @@ body.is-loading { overflow:hidden; }
   .footer h4 { margin-bottom: 8px; }
 }
 
-/* Readable hero copy sits on a light card. The photo stays open above it. */
+/* Type sits on the photograph. A soft darkening at the bottom keeps it readable. */
 .hero-shade,
 .page-hero .hero-shade {
-  background: linear-gradient(180deg, rgba(22, 16, 12, 0) 42%, rgba(22, 16, 12, .28) 72%, rgba(22, 16, 12, .55) 100%);
+  background: linear-gradient(180deg, rgba(18, 14, 10, 0) 20%, rgba(18, 14, 10, .34) 48%, rgba(18, 14, 10, .72) 100%);
 }
 .hero-content {
   justify-content: flex-end;
   padding-bottom: 92px;
-}
-.hero-panel {
-  width: min(560px, 100%);
-  padding: 22px 26px 20px;
-  border-radius: 18px;
-  background: rgba(248, 244, 236, .94);
-  color: #302018;
-  box-shadow: 0 18px 40px rgba(24, 16, 10, .22);
-}
-.hero-panel .hero-draft {
-  margin-bottom: 12px;
-  background: #143f29;
   color: #fffdf8;
 }
-.hero-panel .hero-kicker {
+.hero-draft {
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #fffdf8;
+  box-shadow: none;
+}
+.hero-kicker {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 0 0 10px;
-  color: #5c5348;
+  margin: 0 0 12px;
+  color: #fffdf8;
   font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
-  text-shadow: none;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .45);
 }
-.hero-panel .hero-kicker:before {
+.hero-content > p.hero-draft:before { content: none; }
+.hero-content > p.hero-kicker:before {
   content: "";
   width: 28px;
   height: 1px;
-  background: #143f29;
+  background: rgba(255, 253, 248, .85);
 }
-.hero-panel h1,
-.hero .hero-panel h1 {
-  margin: 0 0 10px;
-  color: #24180f;
-  font-size: clamp(36px, 4.2vw, 58px);
+.hero .hero-content h1,
+.hero-content h1 {
+  margin: 0 0 12px;
+  max-width: 11ch;
+  color: #fffdf8;
+  font-size: clamp(40px, 4.8vw, 68px);
   line-height: 1.02;
   letter-spacing: -.03em;
-  text-shadow: none;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .45);
 }
-.hero-panel > span {
+.hero-content > span {
   display: block;
-  max-width: 38ch;
-  margin: 0 0 16px;
-  color: #4e453c;
+  max-width: 36ch;
+  margin: 0 0 18px;
+  color: #fffdf8;
   font-size: 15px;
   line-height: 1.5;
   opacity: 1;
-  text-shadow: none;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .5);
 }
-.hero-panel .light-button,
-.hero .hero-panel .light-button {
+.hero .light-button {
   height: 46px;
   padding: 0 22px;
-  background: #143f29;
-  color: #fffdf8;
+  background: #fffdf8;
+  color: #24180f;
   border: 0;
   box-shadow: none;
-}
-.hero-panel .light-button:hover,
-.hero .hero-panel .light-button:hover {
-  background: #9a7039;
-  color: #fff;
 }
 
 /* Burger stays a dark icon on the right. Close control is only a small cross. */
@@ -1677,12 +1670,32 @@ body.is-loading { overflow:hidden; }
   height: 18px;
 }
 
+.drawer-head {
+  height: auto;
+  padding: 28px 42px 36px;
+}
+
 @media (max-width: 900px) {
-  .site-header { overflow: visible; }
-  .header-inner { min-width: 0; gap: 8px; }
-  .brand { min-width: 0; flex: 1 1 auto; overflow: hidden; }
-  .brand-copy { min-width: 0; overflow: hidden; }
-  .brand-copy b { overflow: hidden; text-overflow: ellipsis; }
+  html { overflow-x: clip; }
+  body { overflow-x: visible; }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    width: 100%;
+    background: #fffdf8;
+    box-shadow: 0 1px 0 rgba(59, 47, 36, .14);
+  }
+  .site-header {
+    position: relative;
+    top: auto;
+    overflow: visible;
+    height: 58px;
+    background: transparent;
+    box-shadow: none;
+  }
+  .header-inner { height: 100%; min-width: 0; gap: 8px; align-items: center; }
+  .brand, .brand-copy, .brand-copy b { overflow: visible; text-overflow: unset; flex: 0 1 auto; min-width: 0; }
   .header-actions { margin-left: auto; gap: 2px; flex: 0 0 auto; }
   .header-actions .phone,
   .header-actions .search-button,
@@ -1697,9 +1710,15 @@ body.is-loading { overflow:hidden; }
     background: transparent;
     color: #302018;
   }
-  .hero-content { padding-bottom: 72px; }
-  .hero-panel { width: 100%; padding: 16px 16px 14px; border-radius: 16px; }
-  .hero .hero-panel h1 { font-size: clamp(28px, 8vw, 36px); }
-  .hero-panel > span { font-size: 13px; margin-bottom: 12px; }
-  .hero-panel .light-button { height: 42px; }
+  .drawer-head { padding: 32px 20px 40px; }
+  .hero-shade {
+    background: linear-gradient(180deg, rgba(18, 14, 10, 0) 0%, rgba(18, 14, 10, .22) 18%, rgba(18, 14, 10, .62) 46%, rgba(18, 14, 10, .86) 100%);
+  }
+  .hero .hero-content h1 {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .55), 0 10px 28px rgba(0, 0, 0, .45);
+  }
+  .hero-content { padding-bottom: 78px; }
+  .hero .hero-content h1 { font-size: clamp(32px, 9vw, 42px); max-width: 12ch; }
+  .hero-content > span { font-size: 14px; margin-bottom: 14px; }
+  .hero .light-button { height: 44px; }
 }

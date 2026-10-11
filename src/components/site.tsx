@@ -104,6 +104,7 @@ export function Header() {
 
   return (
     <>
+    <div className="topbar">
       <div className="announcement">Бесплатная доставка при заказе от 15 000 ₽ до 30 октября</div>
       <header className="site-header">
         <div className="shell header-inner">
@@ -123,6 +124,7 @@ export function Header() {
           </div>
         </div>
       </header>
+    </div>
       {open && (
         <div className="menu-overlay" onClick={() => setOpen(false)}>
           <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Меню сайта" onClick={event => event.stopPropagation()}>
@@ -284,13 +286,11 @@ export function HomePage() {
         </div>
         <div className="hero-shade" />
         <div className="shell hero-content">
-          <div className="hero-panel">
-            <p className="hero-draft">Сайт в разработке</p>
-            <p className="hero-kicker">{slides[slide].eyebrow}</p>
-            <h1>{slides[slide].title}</h1>
-            <span>{slides[slide].text}<br />от российского производителя</span>
-            <Button className="light-button" render={<Link href="/catalog" />}>Каталог <ArrowRight /></Button>
-          </div>
+          <p className="hero-draft">Сайт в разработке</p>
+          <p className="hero-kicker">{slides[slide].eyebrow}</p>
+          <h1>{slides[slide].title}</h1>
+          <span>{slides[slide].text}<br />от российского производителя</span>
+          <Button className="light-button" render={<Link href="/catalog" />}>Каталог <ArrowRight /></Button>
         </div>
         <div className="hero-controls shell">
           <div>{slides.map((_, i) => <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`} />)}</div>
