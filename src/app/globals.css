@@ -1567,16 +1567,15 @@ body.is-loading { overflow:hidden; }
   .footer h4 { margin-bottom: 8px; }
 }
 
-/* Homepage photo stays bright. Dark type with a pale halo stays readable on the light floor. Inner pages keep their shade. */
+/* Type sits on the photograph. A soft darkening at the bottom keeps it readable. */
+.hero-shade,
 .page-hero .hero-shade {
   background: linear-gradient(180deg, rgba(18, 14, 10, 0) 20%, rgba(18, 14, 10, .34) 48%, rgba(18, 14, 10, .72) 100%);
 }
-.hero > .hero-shade { background: none; }
-.hero { color: #24180f; }
 .hero-content {
   justify-content: flex-end;
   padding-bottom: 92px;
-  color: #24180f;
+  color: #fffdf8;
 }
 .hero-draft {
   margin: 0 0 14px;
@@ -1584,7 +1583,7 @@ body.is-loading { overflow:hidden; }
   border: 0;
   border-radius: 0;
   background: none;
-  color: #24180f;
+  color: #fffdf8;
   box-shadow: none;
 }
 .hero-kicker {
@@ -1592,60 +1591,47 @@ body.is-loading { overflow:hidden; }
   align-items: center;
   gap: 10px;
   margin: 0 0 12px;
-  color: #3a2a1c;
+  color: #fffdf8;
   font-size: 11px;
   letter-spacing: .12em;
   text-transform: uppercase;
-}
-.hero .hero-content > p,
-.hero .hero-content h1,
-.hero .hero-content > span {
-  text-shadow:
-    -1px 0 0 rgba(255, 253, 248, .9),
-    1px 0 0 rgba(255, 253, 248, .9),
-    0 -1px 0 rgba(255, 253, 248, .9),
-    0 1px 0 rgba(255, 253, 248, .9),
-    0 0 10px rgba(255, 253, 248, .95),
-    0 0 22px rgba(255, 253, 248, .92);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .45);
 }
 .hero-content > p.hero-draft:before { content: none; }
 .hero-content > p.hero-kicker:before {
   content: "";
   width: 28px;
   height: 1px;
-  background: #24180f;
+  background: rgba(255, 253, 248, .85);
 }
 .hero .hero-content h1,
 .hero-content h1 {
   margin: 0 0 12px;
   max-width: 11ch;
-  color: #1c140e;
+  color: #fffdf8;
   font-size: clamp(40px, 4.8vw, 68px);
   line-height: 1.02;
   letter-spacing: -.03em;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .45);
 }
 .hero-content > span {
   display: block;
   max-width: 36ch;
   margin: 0 0 18px;
-  color: #1c140e;
+  color: #fffdf8;
   font-size: 15px;
-  font-weight: 500;
   line-height: 1.5;
   opacity: 1;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .5);
 }
 .hero .light-button {
   height: 46px;
   padding: 0 22px;
-  background: #143f29;
-  color: #fffdf8;
+  background: #fffdf8;
+  color: #24180f;
   border: 0;
-  box-shadow: 0 8px 22px rgba(20, 63, 41, .18);
+  box-shadow: none;
 }
-.hero .hero-controls > div button { background: rgba(36, 24, 15, .28); }
-.hero .hero-controls > div button.active { background: #24180f; }
-.hero .hero-controls > span { color: #24180f; text-shadow: 0 0 10px rgba(255, 253, 248, .9); }
-.hero .hero-controls > span button { border-color: rgba(36, 24, 15, .45); color: #24180f; background: rgba(255, 253, 248, .35); }
 
 /* Burger stays a dark icon on the right. Close control is only a small cross. */
 .header-actions {
@@ -1725,7 +1711,12 @@ body.is-loading { overflow:hidden; }
     color: #302018;
   }
   .drawer-head { padding: 32px 20px 40px; }
-  .hero > .hero-shade { background: none; }
+  .hero-shade {
+    background: linear-gradient(180deg, rgba(18, 14, 10, 0) 0%, rgba(18, 14, 10, .22) 18%, rgba(18, 14, 10, .62) 46%, rgba(18, 14, 10, .86) 100%);
+  }
+  .hero .hero-content h1 {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .55), 0 10px 28px rgba(0, 0, 0, .45);
+  }
   .hero-content { padding-bottom: 78px; }
   .hero .hero-content h1 { font-size: clamp(32px, 9vw, 42px); max-width: 12ch; }
   .hero-content > span { font-size: 14px; margin-bottom: 14px; }
