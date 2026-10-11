@@ -273,26 +273,21 @@ export function HomePage() {
       <section className="hero">
         <div className="hero-slides" aria-live="polite">
           {slides.map((item, index) => (
-            <picture key={item.desktop} className={slide === index ? "active" : ""}>
+            <picture key={item.desktop} className={`${slide === index ? "active" : ""}${index === 0 ? " curtain" : ""}`}>
               <source media="(max-width: 900px)" srcSet={item.mobile} />
               <img src={item.desktop} alt="Светлый интерьер с джутовым ковром" />
             </picture>
           ))}
         </div>
-        <div className="hero-shade" />
-        <div className="shell hero-content">
+        <div className="hero-content">
+          <p className="hero-kicker"><i /><span>Натуральные материалы<br />для уютного дома</span></p>
           <h1>{slides[slide].title}</h1>
           <span>{slides[slide].text}</span>
-          <Button className="light-button" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
-        </div>
-        <div className="hero-points">
-          <span><Leaf /><b>Натуральный<br />материал</b></span>
-          <span><Heart /><b>Ручная<br />работа</b></span>
-          <span><Truck /><b>Доставка<br />по всей России</b></span>
+          <Button className="hero-cta" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
         </div>
         <div className="hero-index">
           {slides.map((_, i) => (
-            <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`}>0{i + 1}</button>
+            <button type="button" key={i} className={slide === i ? "active" : ""} onClick={() => setSlide(i)} aria-label={`Слайд ${i + 1}`}>{slide === i && <i />}0{i + 1}</button>
           ))}
         </div>
       </section>
