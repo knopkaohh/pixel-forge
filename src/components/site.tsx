@@ -35,15 +35,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useShop } from "@/components/shop-provider";
+import { useLiveCatalog } from "@/components/catalog-provider";
 import {
-  catalogTabs,
-  categories,
   categoryPath,
-  comingSoonCategories,
-  comingSoonItems,
-  familyProducts,
-  featuredProducts,
-  getProduct,
   minPrice,
   productSizeCm,
   products,
@@ -116,7 +110,6 @@ export function Header() {
           </nav>
           <div className="header-actions">
             <a className="phone" href={PHONE_HREF}>{PHONE_DISPLAY}</a>
-            <button className="search-button" aria-label="Поиск"><Search /></button>
             <Link className="header-icon fav" href="/favorites" aria-label="Избранное"><Heart />{favorites.length > 0 && <i>{favorites.length}</i>}</Link>
             <Link className="header-icon" href="/account" aria-label="Личный кабинет"><UserRound /></Link>
             <Link className="header-icon bag" href="/cart" aria-label="Корзина"><ShoppingBag />{cartCount > 0 && <i>{cartCount}</i>}</Link>
@@ -142,6 +135,7 @@ export function Header() {
 }
 
 export function Footer() {
+  const live = useLiveCatalog();
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [subscribeState, setSubscribeState] = useState<"idle" | "sending" | "done" | "error">("idle");
@@ -200,7 +194,7 @@ export function Footer() {
             <p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p>
           </div>
         </div>
-        <div><h4>Каталог</h4>{categories.map(cat => <Link key={cat.name} href={cat.href}>{cat.name}</Link>)}</div>
+        <div><h4>Каталог</h4>{live.categories.map(cat => <Link key={cat.name} href={cat.href}>{cat.name}</Link>)}</div>
         <div><h4>О компании</h4><Link href="/about">О нас</Link><Link href="/portfolio">Портфолио</Link><Link href="/contacts">Контакты</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link></div>
         <div><h4>Покупателям</h4><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link><Link href="/promotions">Акции</Link><Link href="/calculator">Свой размер</Link></div>
         <div><h4>Документы</h4><Link href="/privacy">Политика конфиденциальности</Link><Link href="/terms">Пользовательское соглашение</Link></div>
@@ -256,6 +250,7 @@ function Benefits() {
 }
 
 export function HomePage() {
+  const live = useLiveCatalog();
   const slides = [
     { desktop: "/images/hero/slide-1-desktop.jpg", mobile: "/images/hero/slide-1-mobile.jpg", eyebrow: "Интерьерные изделия из джута", title: <>Природный уют<br />в вашем доме</>, text: "Ковры, корзины, панно и декор ручной работы" },
     { desktop: "/images/hero/slide-2-desktop.jpg", mobile: "/images/hero/slide-2-mobile.jpg", eyebrow: "Коллекция «Тёплый дом»", title: <>Фактура природы<br />в каждой детали</>, text: "Уникальные изделия, созданные для вашего пространства" },
@@ -301,7 +296,7 @@ export function HomePage() {
       <Benefits />
       <section className="shell section">
         <SectionTitle link="/catalog">Популярные товары</SectionTitle>
-        <div className="product-grid">{featuredProducts.map((p) => <ProductCard key={p.id} product={p} />)}</div>
+        <div className="product-grid">{live.featured.map((p) => <ProductCard key={p.id} product={p} />)}</div>
       </section>
       <section className="shell collection-showcase">
         <div className="collection-main"><Image src="/images/hero-dining.png" alt="Коллекция джутовых ковров" fill /><div><span>Новая коллекция</span><h2>Дом, в котором<br />хочется остаться</h2><Link href="/catalog">Смотреть коллекцию <ArrowRight /></Link></div></div>
@@ -314,7 +309,7 @@ export function HomePage() {
       <section className="shell section">
         <SectionTitle link="/catalog">Категории</SectionTitle>
         <div className="category-grid">
-          {categories.map((cat) => <Link href={cat.href} className={`category-card${cat.soon ? " soon" : ""}`} key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="33vw" unoptimized loading="eager" /><i><ArrowRight /></i></div><span>{cat.name}<small>{cat.soon ? "Скоро в каталоге" : "Смотреть коллекцию"}</small></span></Link>)}
+          {live.categories.map((cat) => <Link href={cat.href} className={`category-card${cat.soon ? " soon" : ""}`} key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="33vw" unoptimized loading="eager" /><i><ArrowRight /></i></div><span>{cat.name}<small>{cat.soon ? "Скоро в каталоге" : "Смотреть коллекцию"}</small></span></Link>)}
         </div>
       </section>
       <section className="shell promo">
@@ -340,30 +335,34 @@ export function HomePage() {
   );
 }
 
-export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: string } = {}) {
+export function CatalogPage({ initialCategory = "Все", categorySlug = "" }: { initialCategory?: string; categorySlug?: string } = {}) {
   const router = useRouter();
-  const requested = catalogTabs.includes(initialCategory as typeof catalogTabs[number]) ? initialCategory : "Все";
-  const [category, setCategory] = useState(requested);
+  const live = useLiveCatalog();
+  const fromSlug = categorySlug ? live.nameForSlug(categorySlug) : "";
+  const requested = fromSlug || (initialCategory && live.tabs.includes(initialCategory) ? initialCategory : "Все");
+  const [category, setCategory] = useState(requested || "Все");
   function selectCategory(next: string) {
-    if (!catalogTabs.includes(next as typeof catalogTabs[number])) return;
+    if (!live.tabs.includes(next)) return;
     setCategory(next);
-    router.push(next === "Все" ? "/catalog" : categoryPath(next));
+    const slug = live.slugFor(next);
+    router.push(next === "Все" || !slug ? "/catalog" : `/catalog/${slug}`);
   }
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get("category") || requested;
-    if (catalogTabs.includes(fromUrl as typeof catalogTabs[number])) setCategory(fromUrl);
-  }, [requested]);
+    if (live.tabs.includes(fromUrl)) setCategory(fromUrl);
+  }, [requested, live.tabs]);
   const [maxPrice, setMaxPrice] = useState(15000);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("popular");
   const [sizeFilters, setSizeFilters] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const soon = comingSoonCategories.includes(category as typeof comingSoonCategories[number]);
+  const itemsInCategory = live.all.filter(item => item.category === category);
+  const soon = category !== "Все" && itemsInCategory.length > 0 && itemsInCategory.every(item => item.comingSoon);
   const activeFilterCount = sizeFilters.length + (maxPrice < 15000 ? 1 : 0) + (query.trim() ? 1 : 0);
-  const soonItem = comingSoonItems.find(item => item.category === category);
+  const soonItem = itemsInCategory.find(item => item.comingSoon);
   const filteredProducts = useMemo(() => {
     if (soon) return [];
-    const result = products.filter(product => {
+    const result = live.sale.filter(product => {
       const size = productSizeCm(product);
       const sizeOk = sizeFilters.length === 0 || SIZE_FILTERS.some(filter => sizeFilters.includes(filter.id) && filter.match(size));
       return (category === "Все" || product.category === category)
@@ -374,18 +373,22 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
     if (sort === "price-asc") return [...result].sort((a, b) => minPrice(a) - minPrice(b));
     if (sort === "price-desc") return [...result].sort((a, b) => minPrice(b) - minPrice(a));
     return result;
-  }, [category, maxPrice, query, sort, soon, sizeFilters]);
+  }, [category, live.sale, maxPrice, query, sort, soon, sizeFilters]);
 
   useEffect(() => {
-    if (catalogTabs.includes(requested as typeof catalogTabs[number])) setCategory(requested);
-  }, [requested]);
+    if (requested && live.tabs.includes(requested)) setCategory(requested);
+  }, [requested, live.tabs]);
 
   useEffect(() => {
-    products.forEach(item => {
+    live.sale.forEach(item => {
       const preload = new window.Image();
       preload.src = item.image;
     });
-  }, []);
+  }, [live.sale]);
+
+  if (categorySlug && live.ready && !fromSlug && !initialCategory) {
+    return <Page><div className="shell section"><h1>Категория не найдена</h1><p><Link href="/catalog">Вернуться в каталог</Link></p></div></Page>;
+  }
 
   return (
     <Page>
@@ -394,7 +397,7 @@ export function CatalogPage({ initialCategory = "Все" }: { initialCategory?: 
         <div className="hero-shade" /><div className="shell"><p>Главная / Каталог{category !== "Все" ? ` / ${category}` : ""}</p><h1>{category === "Все" ? "Каталог" : category}</h1><span>Натуральные материалы, ручная работа<br />и тепло вашего дома</span></div>
       </section>
       <section className="shell catalog-section">
-        <div className="catalog-tabs">{catalogTabs.map(t => <button key={t} onClick={() => selectCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
+        <div className="catalog-tabs">{live.tabs.map(t => <button key={t} onClick={() => selectCategory(t)} className={category === t ? "selected" : ""}>{t}</button>)}</div>
         <div className="catalog-layout">
           <button
             type="button"
@@ -525,31 +528,39 @@ export function CalculatorPage() {
 }
 
 export function ProductPage({ slug }: { slug: string }) {
-  const product = getProduct(slug) ?? products[0];
-  const comingSoon = Boolean(product.comingSoon);
+  const live = useLiveCatalog();
+  const product = live.productBySlug(slug);
   const router = useRouter();
   const { addToCart, toggleFavorite, isFavorite } = useShop();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики" | "Отзывы">("Описание");
-  const siblings = familyProducts(product);
-  const sourceImages = product.images.length ? product.images : [product.image];
-  const gallery = sourceImages.length <= 3
-    ? sourceImages
+  const comingSoon = Boolean(product?.comingSoon);
+  const siblings = product ? live.sale.filter(item => item.family === product.family) : [];
+  const sourceImages = product?.images.length ? product.images : [product?.image || ""];
+  const gallery = sourceImages.filter(Boolean).length <= 3
+    ? sourceImages.filter(Boolean)
     : [sourceImages[0], sourceImages[1], sourceImages[sourceImages.length - 1]];
   const [imageIndex, setImageIndex] = useState(0);
-  const image = gallery[imageIndex] ?? gallery[0] ?? product.image;
-  const related = products.filter(item => item.family !== product.family || item.id !== product.id).slice(0, 4);
+  const image = gallery[imageIndex] ?? gallery[0] ?? product?.image ?? "";
+  const related = product ? live.sale.filter(item => item.id !== product.id).slice(0, 4) : [];
   const tabs = ["Описание", "Характеристики", "Отзывы"] as const;
-  const reviews = product.reviews ?? [];
-  const wbUrl = product.wbUrl;
+  const reviews = product?.reviews ?? [];
+  const wbUrl = product?.wbUrl;
 
   useEffect(() => {
     setQty(1);
     setAdded(false);
     setActiveTab("Описание");
     setImageIndex(0);
-  }, [product.id]);
+  }, [product?.id]);
+
+  if (!product && !live.ready) {
+    return <Page><div className="shell section">Открываем товар…</div></Page>;
+  }
+  if (!product) {
+    return <Page><div className="shell section"><h1>Товар не найден</h1><p><Link href="/catalog">Вернуться в каталог</Link></p></div></Page>;
+  }
 
   return (
     <Page>

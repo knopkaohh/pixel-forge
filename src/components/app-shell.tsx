@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { CatalogProvider } from "@/components/catalog-provider";
 import { ShopProvider } from "@/components/shop-provider";
 import { SitePreloader } from "@/components/site-preloader";
 import { SiteTracker } from "@/components/site-tracker";
@@ -16,10 +17,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isAdmin) return <>{children}</>;
   return (
-    <ShopProvider>
-      <SitePreloader />
-      <SiteTracker />
-      {children}
-    </ShopProvider>
+    <CatalogProvider>
+      <ShopProvider>
+        <SitePreloader />
+        <SiteTracker />
+        {children}
+      </ShopProvider>
+    </CatalogProvider>
   );
 }

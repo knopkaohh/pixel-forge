@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { CatalogEditor } from "@/components/admin/catalog-editor";
 import { ADMIN_DISPLAY_NAME, ORDER_STATUSES, kindLabel, type InboxItem } from "@/lib/admin/types";
 import { PhoneInput } from "@/components/phone-input";
 
@@ -18,7 +19,6 @@ type Stats = {
   inboxTotal: number;
 };
 type Subscriber = { id: string; email: string; note: string; createdAt: string; unread: boolean };
-type CatalogRow = { id: string; name: string; category: string; price: number; comingSoon: boolean; payUrl: string };
 type VisitorReport = {
   from: string;
   to: string;
@@ -80,7 +80,6 @@ export function AdminApp() {
   const [recent, setRecent] = useState<InboxItem[]>([]);
   const [inbox, setInbox] = useState<InboxItem[]>([]);
   const [selected, setSelected] = useState<InboxItem | null>(null);
-  const [catalog, setCatalog] = useState<CatalogRow[]>([]);
   const [filter, setFilter] = useState("all");
   const [period, setPeriod] = useState<Period>("week");
   const [customFrom, setCustomFrom] = useState("");
@@ -121,7 +120,6 @@ export function AdminApp() {
 
   useEffect(() => {
     if (!authed) return;
-    if (view === "catalog") api("/api/admin/catalog").then(data => setCatalog(data.items)).catch(() => null);
     if (view === "mailings") {
       api("/api/admin/subscribers").then(async data => {
         setSubscribers(data.subscribers || []);
@@ -179,11 +177,6 @@ export function AdminApp() {
     await api(`/api/admin/inbox/${id}`, { method: "DELETE" });
     setSelected(null);
     await Promise.all([refreshInbox(), refreshOverview()]);
-  }
-
-  async function savePayUrl(id: string, payUrl: string) {
-    await api("/api/admin/catalog", { method: "PATCH", body: JSON.stringify({ id, payUrl }) });
-    setCatalog(current => current.map(item => item.id === id ? { ...item, payUrl } : item));
   }
 
   if (!ready) return <div className="admin-login"><p style={{ color: "#f5f0e6" }}>Открываем кабинет…</p></div>;
@@ -278,31 +271,12 @@ export function AdminApp() {
           <>
             <header>
               <div>
-                <h1>Каталог и Ozon</h1>
-                <p>Сюда вставляйте ссылки эквайринга. После сохранения они появятся под позициями на оплате заказа.</p>
+                <h1>Каталог</h1>
+                <p>Все карточки, которые сейчас на сайте. Можно поменять фото, название, цену, характеристики и описание, а также добавить товар или категорию.</p>
               </div>
             </header>
             <div className="admin-panel">
-              <table className="admin-table">
-                <thead><tr><th>Товар</th><th>Цена</th><th>Ссылка Ozon</th></tr></thead>
-                <tbody>
-                  {catalog.map(item => (
-                    <tr key={item.id}>
-                      <td><b>{item.name}</b><div style={{ color: "#7d7469", fontSize: 11 }}>{item.category}{item.comingSoon ? " · скоро" : ""}</div></td>
-                      <td>{item.price ? money(item.price) : "—"}</td>
-                      <td>
-                        <input
-                          defaultValue={item.payUrl}
-                          placeholder="https://…"
-                          onBlur={event => {
-                            if (event.target.value.trim() !== item.payUrl) savePayUrl(item.id, event.target.value.trim());
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <CatalogEditor />
             </div>
           </>
         )}

@@ -43,3 +43,5 @@ next-env.d.ts
 
 # admin runtime store
 /data/*.json
+/public/uploads/*
+!/public/uploads/.gitkeep

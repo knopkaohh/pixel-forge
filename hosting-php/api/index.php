@@ -49,6 +49,7 @@ function empty_store(): array
         "visitors" => [],
         "geoCache" => [],
         "subscribers" => [],
+        "catalog" => ["edits" => [], "created" => [], "categories" => []],
     ];
 }
 
@@ -78,6 +79,7 @@ function read_store(string $file): array
         "visitors" => is_array($parsed["visitors"] ?? null) ? $parsed["visitors"] : [],
         "geoCache" => is_array($parsed["geoCache"] ?? null) ? $parsed["geoCache"] : [],
         "subscribers" => is_array($parsed["subscribers"] ?? null) ? $parsed["subscribers"] : [],
+        "catalog" => catalog_from_parsed($parsed),
     ];
 }
 
@@ -87,13 +89,192 @@ function write_store(string $file, array $store): void
     if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
         send_json(["ok" => false, "error" => "Нет папки data"], 500);
     }
-    if ($store["payUrls"] === []) $store["payUrls"] = new stdClass();
-    if ($store["visitors"] === []) $store["visitors"] = new stdClass();
-    if ($store["geoCache"] === []) $store["geoCache"] = new stdClass();
+    if (($store["payUrls"] ?? []) === []) $store["payUrls"] = new stdClass();
+    if (($store["visitors"] ?? []) === []) $store["visitors"] = new stdClass();
+    if (($store["geoCache"] ?? []) === []) $store["geoCache"] = new stdClass();
+    if (!isset($store["catalog"]) || !is_array($store["catalog"])) $store["catalog"] = ["edits" => [], "created" => [], "categories" => []];
+    if (($store["catalog"]["edits"] ?? []) === []) $store["catalog"]["edits"] = new stdClass();
     $ok = file_put_contents($file, json_encode($store, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     if ($ok === false) {
         send_json(["ok" => false, "error" => "Папка data недоступна для записи"], 500);
     }
+}
+
+function clean_line(mixed $value, int $max): string
+{
+    $text = is_string($value) ? trim($value) : "";
+    return function_exists("mb_substr") ? mb_substr($text, 0, $max) : substr($text, 0, $max);
+}
+
+function clean_images(mixed $value): array
+{
+    if (!is_array($value)) return [];
+    $images = [];
+    foreach ($value as $item) {
+        if (!is_string($item)) continue;
+        $item = trim($item);
+        $ok = str_starts_with($item, "/uploads/") || str_starts_with($item, "/images/") || str_starts_with($item, "https://");
+        if (!$ok || str_contains($item, "..") || str_contains($item, "\\")) continue;
+        $images[] = $item;
+        if (count($images) >= 12) break;
+    }
+    return $images;
+}
+
+function clean_specs(mixed $value): array
+{
+    $source = is_array($value) ? $value : [];
+    return [
+        "material" => clean_line($source["material"] ?? "", 200),
+        "diameter" => clean_line($source["diameter"] ?? "", 200),
+        "thickness" => clean_line($source["thickness"] ?? "", 200),
+        "color" => clean_line($source["color"] ?? "", 200),
+        "production" => clean_line($source["production"] ?? "", 200),
+        "care" => clean_line($source["care"] ?? "", 200),
+    ];
+}
+
+function clean_patch(mixed $value): ?array
+{
+    if (!is_array($value)) return null;
+    $name = clean_line($value["name"] ?? "", 160);
+    if ($name === "") return null;
+    $price = is_numeric($value["price"] ?? null) ? (int) round((float) $value["price"]) : -1;
+    if ($price < 0 || $price > 10000000) return null;
+    $images = clean_images($value["images"] ?? []);
+    if ($images === []) return null;
+    $category = clean_line($value["category"] ?? "", 80);
+    if ($category === "") return null;
+    return [
+        "name" => $name,
+        "price" => $price,
+        "description" => clean_line($value["description"] ?? "", 8000),
+        "category" => $category,
+        "images" => $images,
+        "specs" => clean_specs($value["specs"] ?? []),
+        "sizeLabel" => clean_line($value["sizeLabel"] ?? "", 80),
+        "comingSoon" => ($value["comingSoon"] ?? false) === true,
+        "featured" => ($value["featured"] ?? false) === true,
+    ];
+}
+
+function catalog_from_parsed(array $parsed): array
+{
+    $raw = is_array($parsed["catalog"] ?? null) ? $parsed["catalog"] : [];
+    $edits = [];
+    $rawEdits = $raw["edits"] ?? [];
+    if (is_array($rawEdits) && !array_is_list($rawEdits)) {
+        foreach ($rawEdits as $id => $patch) {
+            $clean = clean_patch($patch);
+            if ($clean && is_string($id) && !str_contains($id, "..")) $edits[$id] = $clean;
+        }
+    }
+    $created = [];
+    foreach (($raw["created"] ?? []) as $item) {
+        if (!is_array($item)) continue;
+        $clean = clean_patch($item);
+        $id = clean_line($item["id"] ?? "", 80);
+        $slug = clean_line($item["slug"] ?? "", 80);
+        if (!$clean || $id === "" || $slug === "" || str_contains($id, "..") || str_contains($slug, "..")) continue;
+        $created[] = $clean + ["id" => $id, "slug" => $slug];
+    }
+    $categories = [];
+    foreach (($raw["categories"] ?? []) as $item) {
+        if (!is_array($item)) continue;
+        $name = clean_line($item["name"] ?? "", 80);
+        $slug = clean_line($item["slug"] ?? "", 80);
+        if ($name === "" || $slug === "" || str_contains($slug, "..")) continue;
+        $categories[] = ["name" => $name, "slug" => $slug];
+    }
+    return ["edits" => $edits, "created" => $created, "categories" => $categories];
+}
+
+function catalog_payload(array $catalog): array
+{
+    $edits = $catalog["edits"];
+    if ($edits === [] || array_is_list($edits)) $edits = new stdClass();
+    return [
+        "edits" => $edits,
+        "created" => array_values($catalog["created"]),
+        "categories" => array_values($catalog["categories"]),
+    ];
+}
+
+function slugify_ru(string $value): string
+{
+    $map = ["а" => "a", "б" => "b", "в" => "v", "г" => "g", "д" => "d", "е" => "e", "ё" => "e", "ж" => "zh", "з" => "z", "и" => "i", "й" => "y", "к" => "k", "л" => "l", "м" => "m", "н" => "n", "о" => "o", "п" => "p", "р" => "r", "с" => "s", "т" => "t", "у" => "u", "ф" => "f", "х" => "h", "ц" => "ts", "ч" => "ch", "ш" => "sh", "щ" => "sch", "ъ" => "", "ы" => "y", "ь" => "", "э" => "e", "ю" => "yu", "я" => "ya"];
+    $value = function_exists("mb_strtolower") ? mb_strtolower($value) : strtolower($value);
+    $out = "";
+    $length = function_exists("mb_strlen") ? mb_strlen($value) : strlen($value);
+    for ($index = 0; $index < $length; $index++) {
+        $char = function_exists("mb_substr") ? mb_substr($value, $index, 1) : substr($value, $index, 1);
+        if (isset($map[$char])) $out .= $map[$char];
+        elseif (preg_match("/[a-z0-9]/", $char)) $out .= $char;
+        else $out .= "-";
+    }
+    $out = trim((string) preg_replace("/-+/", "-", $out), "-");
+    $out = substr($out, 0, 60);
+    return $out !== "" ? $out : "tovar";
+}
+
+function base_product_ids(string $catalogFile): array
+{
+    $rows = json_decode((string) @file_get_contents($catalogFile), true) ?: [];
+    $ids = [];
+    foreach ($rows as $row) {
+        if (is_array($row) && !empty($row["id"])) $ids[] = (string) $row["id"];
+    }
+    return $ids;
+}
+
+function category_names(array $catalog): array
+{
+    $names = ["Ковры", "Салфетки сервировочные", "Подставка под горячее", "Корзины", "Кашпо", "Панно"];
+    foreach ($catalog["categories"] as $category) {
+        if (!in_array($category["name"], $names, true)) $names[] = $category["name"];
+    }
+    return $names;
+}
+
+function taken_slugs(array $catalog, string $catalogFile): array
+{
+    $taken = [];
+    $aliases = ["korzina" => "korzina-dzhutovaya", "kashpo" => "kashpo-dzhutovoe", "panno" => "panno-dzhutovoe"];
+    $rows = json_decode((string) @file_get_contents($catalogFile), true) ?: [];
+    foreach ($rows as $row) {
+        if (!is_array($row) || empty($row["id"])) continue;
+        $id = (string) $row["id"];
+        $taken[$id] = true;
+        $taken[$aliases[$id] ?? $id] = true;
+    }
+    foreach (["kovry", "salfetki", "podstavki", "korziny", "kashpo", "panno"] as $slug) $taken[$slug] = true;
+    foreach ($catalog["created"] as $product) {
+        $taken[$product["id"]] = true;
+        $taken[$product["slug"]] = true;
+    }
+    foreach ($catalog["categories"] as $category) $taken[$category["slug"]] = true;
+    return $taken;
+}
+
+function unique_slug(string $base, array $taken): string
+{
+    $root = $base !== "" ? $base : "tovar";
+    $slug = $root;
+    $index = 2;
+    while (isset($taken[$slug])) {
+        $slug = $root . "-" . $index;
+        $index++;
+    }
+    return $slug;
+}
+
+function image_extension(string $path): string
+{
+    $bytes = (string) file_get_contents($path, false, null, 0, 16);
+    if (str_starts_with($bytes, "\xFF\xD8\xFF")) return "jpg";
+    if (str_starts_with($bytes, "\x89PNG\r\n\x1a\n")) return "png";
+    if (str_starts_with($bytes, "RIFF") && substr($bytes, 8, 4) === "WEBP") return "webp";
+    return "";
 }
 
 function with_store(string $file, callable $work): mixed
@@ -653,34 +834,127 @@ if (preg_match("#^/api/admin/inbox/([^/]+)$#", $path, $match)) {
     }
 }
 
+if ($path === "/api/catalog" && $method === "GET") {
+    $store = read_store($storeFile);
+    send_json(["ok" => true] + catalog_payload($store["catalog"]));
+}
+
 if ($path === "/api/admin/catalog" && $method === "GET") {
     require_admin($config);
     $store = read_store($storeFile);
-    $catalog = json_decode((string) file_get_contents($catalogFile), true) ?: [];
-    $items = array_map(function ($product) use ($store) {
-        return [
-            "id" => $product["id"],
-            "name" => $product["name"],
-            "category" => $product["category"],
-            "price" => $product["price"],
-            "comingSoon" => (bool) ($product["comingSoon"] ?? false),
-            "payUrl" => $store["payUrls"][$product["id"]] ?? "",
-        ];
-    }, $catalog);
-    send_json(["ok" => true, "items" => $items]);
+    send_json(["ok" => true] + catalog_payload($store["catalog"]));
 }
 
 if ($path === "/api/admin/catalog" && $method === "PATCH") {
     require_admin($config);
     $body = json_body();
-    $id = text($body["id"] ?? "");
-    $payUrl = text($body["payUrl"] ?? "");
-    if ($id === "") send_json(["ok" => false, "error" => "Нет товара"], 400);
-    with_store($storeFile, function (&$store) use ($id, $payUrl) {
-        if ($payUrl) $store["payUrls"][$id] = $payUrl;
-        else unset($store["payUrls"][$id]);
+    $id = clean_line($body["id"] ?? "", 80);
+    $patch = clean_patch($body);
+    if ($id === "" || str_contains($id, "..")) send_json(["ok" => false, "error" => "Нет товара"], 400);
+    if (!$patch) send_json(["ok" => false, "error" => "Проверьте название, цену, категорию и фото"], 400);
+    $error = "";
+    $saved = with_store($storeFile, function (&$store) use ($id, $patch, $catalogFile, &$error) {
+        $records = $store["catalog"];
+        if (!in_array($patch["category"], category_names($records), true)) {
+            $error = "Сначала добавьте категорию";
+            return catalog_payload($records);
+        }
+        $builtIn = in_array($id, base_product_ids($catalogFile), true);
+        $createdIndex = null;
+        foreach ($records["created"] as $index => $product) {
+            if ($product["id"] === $id) $createdIndex = $index;
+        }
+        if ($builtIn) $records["edits"][$id] = $patch;
+        elseif ($createdIndex !== null) $records["created"][$createdIndex] = $patch + ["id" => $records["created"][$createdIndex]["id"], "slug" => $records["created"][$createdIndex]["slug"]];
+        else $error = "Товар не найден";
+        $store["catalog"] = $records;
+        return catalog_payload($records);
     });
-    send_json(["ok" => true, "id" => $id, "payUrl" => $payUrl]);
+    if ($error !== "") send_json(["ok" => false, "error" => $error], 400);
+    send_json(["ok" => true] + $saved);
+}
+
+if ($path === "/api/admin/catalog" && $method === "POST") {
+    require_admin($config);
+    $body = json_body();
+    $action = text($body["action"] ?? "product");
+    if ($action === "category") {
+        $name = clean_line($body["name"] ?? "", 80);
+        if (function_exists("mb_strlen") ? mb_strlen($name) < 2 : strlen($name) < 2) send_json(["ok" => false, "error" => "Укажите название категории"], 400);
+        $error = "";
+        $saved = with_store($storeFile, function (&$store) use ($name, $catalogFile, &$error) {
+            $records = $store["catalog"];
+            foreach (category_names($records) as $existing) {
+                if (function_exists("mb_strtolower") ? mb_strtolower($existing) === mb_strtolower($name) : strtolower($existing) === strtolower($name)) {
+                    $error = "Такая категория уже есть";
+                    return catalog_payload($records);
+                }
+            }
+            $slug = unique_slug(slugify_ru($name), taken_slugs($records, $catalogFile));
+            $records["categories"][] = ["name" => $name, "slug" => $slug];
+            $store["catalog"] = $records;
+            return catalog_payload($records);
+        });
+        if ($error !== "") send_json(["ok" => false, "error" => $error], 400);
+        send_json(["ok" => true] + $saved);
+    }
+    if ($action === "delete-category") {
+        $slug = clean_line($body["slug"] ?? "", 80);
+        $error = "";
+        $saved = with_store($storeFile, function (&$store) use ($slug, &$error) {
+            $records = $store["catalog"];
+            $category = null;
+            foreach ($records["categories"] as $item) {
+                if ($item["slug"] === $slug) $category = $item;
+            }
+            if (!$category) {
+                $error = "Эту категорию нельзя удалить";
+                return catalog_payload($records);
+            }
+            foreach ($records["created"] as $product) {
+                if ($product["category"] === $category["name"]) $error = "В категории есть товары";
+            }
+            foreach ($records["edits"] as $product) {
+                if ($product["category"] === $category["name"]) $error = "В категории есть товары";
+            }
+            if ($error !== "") return catalog_payload($records);
+            $records["categories"] = array_values(array_filter($records["categories"], fn($item) => $item["slug"] !== $slug));
+            $store["catalog"] = $records;
+            return catalog_payload($records);
+        });
+        if ($error !== "") send_json(["ok" => false, "error" => $error], 400);
+        send_json(["ok" => true] + $saved);
+    }
+    $patch = clean_patch($body);
+    if (!$patch) send_json(["ok" => false, "error" => "Проверьте название, цену, категорию и фото"], 400);
+    $error = "";
+    $saved = with_store($storeFile, function (&$store) use ($patch, $catalogFile, &$error) {
+        $records = $store["catalog"];
+        if (!in_array($patch["category"], category_names($records), true)) {
+            $error = "Сначала добавьте категорию";
+            return catalog_payload($records);
+        }
+        $slug = unique_slug(slugify_ru($patch["name"]), taken_slugs($records, $catalogFile));
+        $records["created"][] = $patch + ["id" => $slug, "slug" => $slug];
+        $store["catalog"] = $records;
+        return catalog_payload($records);
+    });
+    if ($error !== "") send_json(["ok" => false, "error" => $error], 400);
+    send_json(["ok" => true] + $saved);
+}
+
+if ($path === "/api/admin/upload" && $method === "POST") {
+    require_admin($config);
+    $file = $_FILES["file"] ?? null;
+    if (!is_array($file) || !is_uploaded_file($file["tmp_name"] ?? "")) send_json(["ok" => false, "error" => "Нет файла"], 400);
+    if (($file["size"] ?? 0) <= 0 || $file["size"] > 8 * 1024 * 1024) send_json(["ok" => false, "error" => "Фото должно быть меньше 8 МБ"], 400);
+    $ext = image_extension($file["tmp_name"]);
+    if ($ext === "") send_json(["ok" => false, "error" => "Нужна фотография JPG, PNG или WebP"], 400);
+    $directory = $root . "/uploads";
+    if (!is_dir($directory) && !mkdir($directory, 0775, true) && !is_dir($directory)) send_json(["ok" => false, "error" => "Нет папки uploads"], 500);
+    $filename = "photo-" . bin2hex(random_bytes(8)) . "." . $ext;
+    if (!move_uploaded_file($file["tmp_name"], $directory . "/" . $filename)) send_json(["ok" => false, "error" => "Не удалось сохранить фото"], 500);
+    send_json(["ok" => true, "url" => "/uploads/" . $filename]);
 }
 
 if ($path === "/api/admin/subscribers" && $method === "GET") {

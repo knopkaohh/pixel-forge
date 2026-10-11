@@ -13,6 +13,6 @@ export default async function CatalogCategory({
 }) {
   const { category } = await params;
   const name = categoryFromSlug(category);
-  if (!name) notFound();
-  return <CatalogPage initialCategory={name} />;
+  if (!name && process.env.NEXT_OUTPUT === "export") notFound();
+  return <CatalogPage initialCategory={name} categorySlug={category} />;
 }

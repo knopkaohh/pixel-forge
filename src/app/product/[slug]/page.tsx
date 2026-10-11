@@ -19,6 +19,6 @@ export default async function Product({
 }) {
   const { slug } = await params;
   const resolved = resolveProductSlug(slug);
-  if (!getProduct(resolved)) notFound();
+  if (!getProduct(resolved) && process.env.NEXT_OUTPUT === "export") notFound();
   return <ProductPage slug={resolved} />;
 }

@@ -56,6 +56,43 @@ export type Subscriber = {
   unread: boolean;
 };
 
+export type CatalogSpecs = {
+  material: string;
+  diameter: string;
+  thickness: string;
+  color: string;
+  production: string;
+  care: string;
+};
+
+export type CatalogPatch = {
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+  images: string[];
+  specs: CatalogSpecs;
+  sizeLabel: string;
+  comingSoon: boolean;
+  featured: boolean;
+};
+
+export type CreatedProductRecord = CatalogPatch & {
+  id: string;
+  slug: string;
+};
+
+export type ExtraCategory = {
+  name: string;
+  slug: string;
+};
+
+export type CatalogRecords = {
+  edits: Record<string, CatalogPatch>;
+  created: CreatedProductRecord[];
+  categories: ExtraCategory[];
+};
+
 export type AdminStore = {
   inbox: InboxItem[];
   payUrls: Record<string, string>;
@@ -63,6 +100,7 @@ export type AdminStore = {
   visitors: Record<string, string[]>;
   geoCache?: Record<string, { country: string; city: string }>;
   subscribers: Subscriber[];
+  catalog: CatalogRecords;
 };
 
 export const ADMIN_DISPLAY_NAME = "Елена Варакина";
