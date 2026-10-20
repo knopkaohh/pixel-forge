@@ -6,6 +6,8 @@ export type ShopProduct = {
   name: string;
   price: number;
   image: string;
+  sku?: string;
+  option?: string;
   payUrl?: string;
 };
 
