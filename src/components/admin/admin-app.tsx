@@ -429,7 +429,7 @@ function ItemEditor({ item, onChange, onSave, onDelete }: {
   onDelete: (id: string) => Promise<void>;
 }) {
   const statuses = ORDER_STATUSES;
-  const items = Array.isArray(item.payload.items) ? item.payload.items as { name?: string; quantity?: number; price?: number }[] : [];
+  const items = Array.isArray(item.payload.items) ? item.payload.items as { name?: string; quantity?: number; price?: number; sku?: string; option?: string }[] : [];
   const calculation = item.payload.calculation && typeof item.payload.calculation === "object" ? item.payload.calculation as Record<string, unknown> : null;
   return (
     <div className="admin-drawer">
@@ -458,7 +458,7 @@ function ItemEditor({ item, onChange, onSave, onDelete }: {
         <h3>Подробности</h3>
         {item.kind === "order" && (
           <ul className="admin-list">
-            {items.map((row, index) => <li key={index}>{row.name} × {row.quantity} — {money(row.price)}</li>)}
+            {items.map((row, index) => <li key={index}>{row.sku ? `Артикул ${row.sku} — ` : ""}{row.name}{row.option ? `, ${row.option}` : ""} × {row.quantity} — {money(row.price)}</li>)}
             <li>Доставка: {String((item.payload.customer as { delivery?: string } | undefined)?.delivery || "—")}</li>
             <li>Пункт: {String((item.payload.customer as { pickupPoint?: string } | undefined)?.pickupPoint || "—")}</li>
             <li>Итого: {money(item.total)}</li>

@@ -197,6 +197,7 @@ export function CatalogEditor() {
           <button type="button" key={item.id} className={draft?.id === item.id && !creating ? "active" : ""} onClick={() => openProduct(item)}>
             <img src={item.images[0]} alt="" />
             <b>{item.name}</b>
+            <span>Артикул {item.slug}</span>
             <span>{item.category}{item.comingSoon ? " · скоро" : ""}</span>
             <strong>{item.price ? `${item.price.toLocaleString("ru-RU")} ₽` : "—"}</strong>
           </button>
@@ -205,6 +206,7 @@ export function CatalogEditor() {
       {draft && (
         <form className="admin-editor" onSubmit={event => { event.preventDefault(); saveProduct(); }}>
           <h3>{creating ? "Новый товар" : draft.name}</h3>
+          {!creating && draft.slug && <p className="admin-note">Артикул {draft.slug}. Клиент его не видит, в заказе он сохраняется.</p>}
           <div className="admin-photos">
             {draft.images.map((src, index) => (
               <figure key={`${src}-${index}`}>

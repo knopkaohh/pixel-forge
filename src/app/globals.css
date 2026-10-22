@@ -161,12 +161,10 @@ h1, h2, h3, .brand { font-family: "Playfair Display", Georgia, serif; font-weigh
 .catalog-cta h2 { font-size:29px; }
 .catalog-cta button { border-radius:20px; }
 .calculator { padding-block:34px 60px; }
-.steps { display:flex; align-items:center; justify-content:center; margin-bottom:38px; color:#8c857a; font-size:11px; }
-.steps span { display:flex; align-items:center; gap:8px; }
-.steps span:not(.active) { width:25px; overflow:hidden; white-space:nowrap; }
+.steps { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; row-gap:10px; margin-bottom:38px; color:#8c857a; font-size:13px; }
+.steps span { display:flex; align-items:center; gap:8px; white-space:nowrap; }
 .steps span.active { color:var(--green); }
-.steps span:first-letter { border-radius:50%; }
-.steps i { width:90px; height:1px; background:var(--line); margin:0 14px; }
+.steps i { width:56px; flex:0 0 56px; height:1px; background:var(--line); margin:0 16px; }
 .calculator-grid { display:grid; grid-template-columns:1fr 390px; border:1px solid var(--line); }
 .calc-form { padding:38px 50px; }
 .calc-form h3 { font:14px Arial; margin:0 0 15px; }

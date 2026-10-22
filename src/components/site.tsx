@@ -185,7 +185,6 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
       <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite({ id: product.id, name: product.name, price, image: product.image })} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
       <div className="product-copy">
         <Link href={href}><h3>{product.name}</h3></Link>
-        {product.sku && <small className="product-sku">Артикул {product.sku}</small>}
         <p>{soon ? "Коллекция готовится к публикации" : "Натуральный джут · в наличии"}</p>
         <div className="product-bottom">
           {soon ? <strong>Скоро в каталоге</strong> : <strong>{formatPrice(price)}</strong>}
@@ -253,19 +252,10 @@ export function HomePage() {
           {live.categories.map((cat) => <Link href={cat.href} className={`category-card${cat.soon ? " soon" : ""}`} key={cat.name}><div className="category-image"><Image src={cat.image} alt={cat.name} fill sizes="33vw" unoptimized loading="eager" /><i><ArrowRight /></i></div><span>{cat.name}<small>{cat.soon ? "Скоро в каталоге" : "Смотреть коллекцию"}</small></span></Link>)}
         </div>
       </section>
-      <section className="shell production">
-        <div className="production-photo"><Image src="/images/process.png" alt="Пошив изделий из джутового каната" fill sizes="(max-width: 900px) 100vw, 46vw" /></div>
-        <div className="production-copy">
-          <small>За кулисами производства</small>
-          <h2>Мэри Джут — уют, созданный с душой</h2>
-          <p>Мы шьём ковры и аксессуары для дома из джутового каната. В работе используем специальные швейные машины и технику зигзаг, с помощью которой канат соединяется в цельное полотно. Такая техника позволяет создавать красивые ковры с характерной фактурой джута и прочным, аккуратным пошивом.</p>
-          <p>Для нас важно качество в каждой детали: ровная строчка, аккуратное соединение каната и красивая форма готового изделия. Мы внимательно следим за процессом пошива, чтобы каждый ковёр получился именно таким, каким мы задумали его изначально.</p>
-          <p>В «Мэри Джут» мы всё делаем сами: придумываем модели, подбираем размеры, шьём, проверяем готовые изделия, упаковываем и отправляем заказы. Нам важно лично участвовать в каждом этапе и знать, что к вам приедет изделие, за которое нам действительно приятно отвечать.</p>
-          <p>Мы небольшое производство, где за каждой вещью стоят реальные люди, любовь к своему делу и внимание к тому, что мы создаём. Нам хочется, чтобы наши изделия не просто украшали дом, а становились той самой деталью, которая добавляет ему тепла и уюта.</p>
-          <p>Мэри Джут — натуральные материалы, собственное производство и немного нашей души в каждом изделии.</p>
-          <p>Выбирайте свой ковёр, а мы с любовью создадим его для вашего дома.</p>
-          <Button render={<Link href="/catalog" />}>Выбрать ковёр <ArrowRight /></Button>
-        </div>
+      <section className="shell promo">
+        <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
+        <div><small>За кулисами производства</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
+        <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
       <section className="shell section interiors">
         <SectionTitle>Фото в интерьере</SectionTitle>
@@ -459,7 +449,7 @@ export function CalculatorPage() {
             <h3>Форма</h3>
             <div className="shape-row">{["Круг", "Овал"].map(v => <button onClick={() => setShape(v)} className={shape === v ? "selected" : ""} key={v}><span className={v === "Круг" ? "round" : "oval"} />{v}</button>)}</div>
             <h3>Размеры (см)</h3>
-            <div className="field-grid"><label>Ширина / диаметр<Input type="number" value={size} onChange={e => setSize(Math.min(300, Math.max(40, Number(e.target.value))))} min={40} max={300} /><small>от 40 до 300 см</small></label>{shape === "Овал" && <label>Длина<Input type="number" value={length} onChange={e => setLength(Math.min(400, Math.max(60, Number(e.target.value))))} min={60} max={400} /><small>от 60 до 400 см</small></label>}<label>Толщина<Input value="8 мм" disabled /><small>фиксированная</small></label></div>
+            <div className="field-grid"><label>Ширина / диаметр<Input type="number" value={size} onChange={e => setSize(Math.min(300, Math.max(40, Number(e.target.value))))} min={40} max={300} /><small>от 40 до 300 см</small></label>{shape === "Овал" && <label>Длина<Input type="number" value={length} onChange={e => setLength(Math.min(400, Math.max(60, Number(e.target.value))))} min={60} max={400} /><small>от 60 до 400 см</small></label>}</div>
             <h3>Материал</h3>
             <div className="choice-row option-choices"><button className="selected" type="button">Натуральный джут</button></div>
             <h3>Рисунок</h3>
@@ -479,7 +469,7 @@ export function CalculatorPage() {
           </aside>
         </div>
       </section>
-      <section className="shell how"><h2>Как это работает?</h2><div>{["Выберите форму ковра", "Укажите желаемые размеры", "Получите расчёт и оставьте заявку"].map((t, i) => <article key={t}><b>0{i + 1}</b><span>{t}</span></article>)}</div><p>Толщина изделия — 8 мм. Для овала расчёт ведётся по усреднённому диаметру.</p></section>
+      <section className="shell how"><h2>Как это работает?</h2><div>{["Выберите форму ковра", "Укажите желаемые размеры", "Получите расчёт и оставьте заявку"].map((t, i) => <article key={t}><b>0{i + 1}</b><span>{t}</span></article>)}</div><p>Для овала расчёт ведётся по усреднённому диаметру.</p></section>
     </Page>
   );
 }
@@ -547,7 +537,6 @@ export function ProductPage({ slug }: { slug: string }) {
         </div>
         <div className="product-info">
           <h1>{product.name}</h1>
-          {product.sku && <p className="product-sku">Артикул {product.sku}</p>}
           {comingSoon ? <strong className="detail-price">Скоро в каталоге</strong> : <strong className="detail-price">{formatPrice(unitPrice)}</strong>}
           {siblings.length > 1 && (
             <div className="option">

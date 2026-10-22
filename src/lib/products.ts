@@ -107,8 +107,8 @@ function rug(opts: {
 }
 
 export const products: CatalogProduct[] = [
-  rug({ sku: "w002", name: "Ковёр круглый 100 см, один ряд узора", sizeLabel: "100 см, 1 ряд узора", price: 3479, count: 6, featured: true }),
-  rug({ sku: "w003", name: "Ковёр круглый 100 см, два ряда узора", sizeLabel: "100 см, 2 ряда узора", price: 3479, count: 8, featured: true }),
+  rug({ sku: "w002", name: "Ковёр круглый 100 см", sizeLabel: "100 см", price: 3479, count: 6, featured: true }),
+  rug({ sku: "w003", name: "Ковёр круглый 100 см", sizeLabel: "100 см", price: 3479, count: 8, featured: true }),
   rug({ sku: "w005", name: "Ковёр овальный 60×100 см", sizeLabel: "60×100 см", price: 2448, count: 6 }),
   rug({ sku: "w006", name: "Ковёр круглый 90 см", sizeLabel: "90 см", price: 2892, count: 4 }),
   rug({ sku: "w007", name: "Ковёр круглый 120 см", sizeLabel: "120 см", price: 4766, count: 6 }),
