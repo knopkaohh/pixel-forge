@@ -1532,10 +1532,10 @@ body.is-loading { overflow:hidden; }
 .footer-markets { display: flex; align-items: center; justify-content: space-between; gap: 18px 28px; margin-top: 34px; padding-top: 22px; border-top: 1px solid #ffffff18; }
 .footer-markets > span { color: #c8c0b2; font: 11px/1.3 "Montserrat", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
 .footer-markets > div { display: flex; flex-wrap: wrap; gap: 10px; }
-.footer-markets a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 16px 6px 6px; border-radius: 999px; background: #fffdf8; color: #241910; font-size: 13px; text-decoration: none; transition: transform .2s ease; }
-.footer-markets a:hover { transform: translateY(-2px); }
-.footer-markets svg { width: 32px; height: 32px; display: block; flex: none; }
-.footer-markets b { font: 500 13px/1 "Montserrat", sans-serif; }
+.footer-markets a { display: inline-flex; align-items: center; gap: 8px; color: #c8c5ba; font: 12px/1 "Montserrat", sans-serif; text-decoration: none; }
+.footer-markets a i { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid #ffffff2a; border-radius: 50%; font: 600 8px/1 "Montserrat", sans-serif; letter-spacing: .04em; font-style: normal; color: #e6dfd2; }
+.footer-markets a:hover { color: #fff; }
+.footer-markets a:hover i { border-color: #ffffff66; }
 .footer-markets + .footer-bottom { margin-top: 18px; }
 
 @media (max-width: 1100px) {
@@ -1572,8 +1572,7 @@ body.is-loading { overflow:hidden; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 22px 16px; }
   .footer-brand { grid-column: 1 / -1; }
   .footer h4 { margin-bottom: 8px; }
-  .footer-markets { flex-direction: column; align-items: flex-start; }
-  .footer-markets a { width: 100%; }
+  .footer-markets { flex-direction: column; align-items: flex-start; gap: 14px; }
 }
 
 /* Homepage hero matches the curtain photo: dark green type on the bright sheers, no wash. */
