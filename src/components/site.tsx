@@ -140,6 +140,44 @@ export function Header() {
   );
 }
 
+function MarketIcon({ children }: { children: React.ReactNode }) {
+  return <svg viewBox="0 0 32 32" aria-hidden="true">{children}</svg>;
+}
+
+const marketplaces = [
+  {
+    name: "Wildberries",
+    href: "https://www.wildberries.ru/seller/4489192",
+    icon: (
+      <MarketIcon>
+        <circle cx="16" cy="16" r="16" fill="#CB11AB" />
+        <text x="16" y="20.2" textAnchor="middle" fill="#fff" fontFamily="Arial, sans-serif" fontSize="11" fontWeight="700">WB</text>
+      </MarketIcon>
+    ),
+  },
+  {
+    name: "Ozon",
+    href: "https://www.ozon.ru/seller/meri-dzhut/products/?__rr=1",
+    icon: (
+      <MarketIcon>
+        <rect width="32" height="32" rx="8" fill="#005BFF" />
+        <text x="16" y="20.4" textAnchor="middle" fill="#fff" fontFamily="Arial, sans-serif" fontSize="9" fontWeight="700">ozon</text>
+      </MarketIcon>
+    ),
+  },
+  {
+    name: "Яндекс Маркет",
+    href: "https://market.yandex.ru/business--meri-dzhut/197693890?clid=703&generalContext=t%3DshopInShop%3Bi%3D1%3Bbi%3D197693890%3B&searchContext=sins_ctx",
+    icon: (
+      <MarketIcon>
+        <rect width="32" height="32" rx="8" fill="#FFCC00" />
+        <path d="M9.2 14.2h13.6l-1.45 11.1H10.65L9.2 14.2z" fill="none" stroke="#1A1A1A" strokeWidth="1.7" strokeLinejoin="round" />
+        <path d="M12.2 14.2v-2.1a1.7 1.7 0 0 1 3.4 0v2.1M16.4 14.2v-2.1a1.7 1.7 0 0 1 3.4 0v2.1" fill="none" stroke="#1A1A1A" strokeWidth="1.6" strokeLinecap="round" />
+      </MarketIcon>
+    ),
+  },
+];
+
 export function Footer() {
   const live = useLiveCatalog();
 
@@ -160,6 +198,17 @@ export function Footer() {
         <div><h4>О компании</h4><Link href="/about">О нас</Link><Link href="/portfolio">Портфолио</Link><Link href="/contacts">Контакты</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link></div>
         <div><h4>Покупателям</h4><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link><Link href="/promotions">Акции</Link><Link href="/calculator">Свой размер</Link></div>
         <div><h4>Документы</h4><Link href="/privacy">Политика конфиденциальности</Link><Link href="/terms">Пользовательское соглашение</Link></div>
+      </div>
+      <div className="shell footer-markets">
+        <span>Также на маркетплейсах</span>
+        <div>
+          {marketplaces.map(item => (
+            <a key={item.name} href={item.href} target="_blank" rel="noopener noreferrer">
+              {item.icon}
+              <b>{item.name}</b>
+            </a>
+          ))}
+        </div>
       </div>
       <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span><Link href="/privacy">Политика конфиденциальности</Link> · <Link href="/terms">Пользовательское соглашение</Link></span></div>
     </footer>
