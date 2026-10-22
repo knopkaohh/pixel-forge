@@ -18,6 +18,9 @@ import {
   Menu,
   MessageCircle,
   Phone,
+  Ban,
+  BrushCleaning,
+  Bubbles,
   Minus,
   MapPin,
   PackageCheck,
@@ -28,6 +31,7 @@ import {
   Sparkles,
   Truck,
   UserRound,
+  Wind,
   WalletCards,
   X,
 } from "lucide-react";
@@ -53,6 +57,7 @@ import { portfolioPhotos, socialLinks } from "@/lib/portfolio";
 import { PhoneInput } from "@/components/phone-input";
 
 const JUTE_PRICE_PER_METER = 65;
+const PATTERN_EXTRA = 360;
 const formatPrice = (price: number) => `${price.toLocaleString("ru-RU")} ₽`;
 
 
@@ -419,8 +424,7 @@ export function CalculatorPage() {
   const [shape, setShape] = useState("Круг");
   const [size, setSize] = useState(100);
   const [length, setLength] = useState(140);
-  const [rows, setRows] = useState(2);
-  const [pattern, setPattern] = useState("С узором");
+  const [pattern, setPattern] = useState("С узорами");
   const [backing, setBacking] = useState(false);
   const [leadName, setLeadName] = useState("");
   const [leadPhone, setLeadPhone] = useState("");
@@ -431,11 +435,11 @@ export function CalculatorPage() {
     const b = thicknessMm / (2 * Math.PI);
     const theta = Math.PI * diameterMm / thicknessMm;
     const lengthMeters = (b / 2 * (theta * Math.sqrt(theta * theta + 1) + Math.asinh(theta))) / 1000;
-    const patternCost = pattern === "С узором" ? rows * 180 : 0;
+    const patternCost = pattern === "С узорами" ? PATTERN_EXTRA : 0;
     const extras = (backing ? 200 : 0) + patternCost;
     const total = Math.max(2900, Math.round((lengthMeters * JUTE_PRICE_PER_METER + extras) / 100) * 100);
     return { total, lengthMeters };
-  }, [shape, size, length, rows, pattern, backing]);
+  }, [shape, size, length, pattern, backing]);
 
   return (
     <Page>
@@ -453,19 +457,15 @@ export function CalculatorPage() {
             <h3>Материал</h3>
             <div className="choice-row option-choices"><button className="selected" type="button">Натуральный джут</button></div>
             <h3>Рисунок</h3>
-            <div className="choice-row option-choices">{["С узором", "Без узора"].map(v => <button type="button" onClick={() => setPattern(v)} className={pattern === v ? "selected" : ""} key={v}>{v}</button>)}</div>
+            <div className="choice-row option-choices">{["С узорами", "Без узора"].map(v => <button type="button" onClick={() => setPattern(v)} className={pattern === v ? "selected" : ""} key={v}>{v}</button>)}</div>
             <h3>Оттенок</h3>
             <div className="calc-colors"><button className="selected" type="button"><i style={{ background: "#d5bd91" }} />Натуральный</button></div>
-            {pattern === "С узором" && <>
-              <h3>Количество рядов с узором</h3>
-              <div className="counter"><button type="button" onClick={() => setRows(Math.max(1, rows - 1))}><Minus /></button><span>{rows}</span><button type="button" onClick={() => setRows(Math.min(8, rows + 1))}><Plus /></button></div>
-            </>}
             <h3>Дополнительные опции</h3>
             <div className="extra-options"><button type="button" className={backing ? "selected" : ""} onClick={() => setBacking(!backing)}><i>{backing && <Check />}</i><span>Антискользящее покрытие<small>натуральный латекс, ручное нанесение · + 200 ₽</small></span></button></div>
             <label className="calc-check"><Checkbox defaultChecked />Я согласен с отклонением готового изделия ± 2 см</label>
           </div>
           <aside className="estimate-card">
-            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>Ковёр</span><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>Натуральный джут</span><span>{pattern}</span>{pattern === "С узором" && <span>{rows} {rows === 1 ? "ряд" : "ряда"} узора</span>}{backing && <span>Антискользящее покрытие</span>}</div><div className="estimate-lead"><Input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="Ваше имя" /><PhoneInput value={leadPhone} onValueChange={setLeadPhone} /></div><Button disabled={!leadName || !isCompleteRuPhone(leadPhone) || requestSent} onClick={async () => { const response = await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "calculator", contact: { name: leadName, phone: leadPhone }, calculation: { shape, size, length, material: "Натуральный джут", pattern, color: "Натуральный", rows: pattern === "С узором" ? rows : 0, backing, ...calculation } }) }); setRequestSent(response.ok); }}>{requestSent ? "Заявка отправлена" : "Отправить заявку"} <ArrowRight /></Button><Image src="/images/products/w014/1.jpg" alt="Круглый джутовый ковёр" width={420} height={420} />
+            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>Ковёр</span><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>Натуральный джут</span><span>{pattern}</span>{backing && <span>Антискользящее покрытие</span>}</div><div className="estimate-lead"><Input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="Ваше имя" /><PhoneInput value={leadPhone} onValueChange={setLeadPhone} /></div><Button disabled={!leadName || !isCompleteRuPhone(leadPhone) || requestSent} onClick={async () => { const response = await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "calculator", contact: { name: leadName, phone: leadPhone }, calculation: { shape, size, length, material: "Натуральный джут", pattern, color: "Натуральный", backing, ...calculation } }) }); setRequestSent(response.ok); }}>{requestSent ? "Заявка отправлена" : "Отправить заявку"} <ArrowRight /></Button><Image src="/images/products/w014/1.jpg" alt="Круглый джутовый ковёр" width={420} height={420} />
           </aside>
         </div>
       </section>
@@ -576,6 +576,17 @@ export function ProductPage({ slug }: { slug: string }) {
           {activeTab === "Описание" && (
             <div className="tab-panel">
               {product.description.split("\n\n").map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+              {product.category === "Ковры" && (
+                <div className="care-block">
+                  <h3>Уход</h3>
+                  <ul>
+                    <li><i><Bubbles /></i>Влажная чистка намыленной губкой</li>
+                    <li><i><BrushCleaning /></i>Сухая чистка</li>
+                    <li><i><Wind /></i>Можно пылесосить</li>
+                    <li className="forbidden"><i><Ban /></i>Стирать запрещено</li>
+                  </ul>
+                </div>
+              )}
             </div>
           )}
           {activeTab === "Характеристики" && (
