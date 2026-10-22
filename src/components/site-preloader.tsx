@@ -37,7 +37,6 @@ export function SitePreloader() {
         <div className="preloader-progress"><i /></div>
         <p>Создаём тепло вручную</p>
       </div>
-      <span className="preloader-number">01 / 03</span>
     </div>
   );
 }

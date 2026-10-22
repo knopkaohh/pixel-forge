@@ -12,13 +12,15 @@ import {
   ChevronDown,
   Clock3,
   CreditCard,
-  ExternalLink,
   Heart,
   Leaf,
   Mail,
   Menu,
   MessageCircle,
   Phone,
+  Ban,
+  BrushCleaning,
+  Bubbles,
   Minus,
   MapPin,
   PackageCheck,
@@ -29,6 +31,7 @@ import {
   Sparkles,
   Truck,
   UserRound,
+  Wind,
   WalletCards,
   X,
 } from "lucide-react";
@@ -38,7 +41,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useShop } from "@/components/shop-provider";
 import { useLiveCatalog } from "@/components/catalog-provider";
 import {
-  categoryPath,
+  BACKING_PRICE,
   minPrice,
   productSizeCm,
   products,
@@ -54,6 +57,7 @@ import { portfolioPhotos, socialLinks } from "@/lib/portfolio";
 import { PhoneInput } from "@/components/phone-input";
 
 const JUTE_PRICE_PER_METER = 65;
+const PATTERN_EXTRA = 360;
 const formatPrice = (price: number) => `${price.toLocaleString("ru-RU")} ₽`;
 
 
@@ -136,55 +140,17 @@ export function Header() {
   );
 }
 
+const marketplaces = [
+  { mark: "WB", name: "Wildberries", href: "https://www.wildberries.ru/seller/4489192" },
+  { mark: "OZ", name: "Ozon", href: "https://www.ozon.ru/seller/meri-dzhut/products/?__rr=1" },
+  { mark: "ЯМ", name: "Яндекс Маркет", href: "https://market.yandex.ru/business--meri-dzhut/197693890?clid=703&generalContext=t%3DshopInShop%3Bi%3D1%3Bbi%3D197693890%3B&searchContext=sins_ctx" },
+];
+
 export function Footer() {
   const live = useLiveCatalog();
-  const [email, setEmail] = useState("");
-  const [note, setNote] = useState("");
-  const [subscribeState, setSubscribeState] = useState<"idle" | "sending" | "done" | "error">("idle");
-  const [subscribeError, setSubscribeError] = useState("");
-
-  async function submitSubscribe(event: React.FormEvent) {
-    event.preventDefault();
-    setSubscribeError("");
-    setSubscribeState("sending");
-    try {
-      const response = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, note }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setSubscribeError(data.error || "Не удалось подписаться");
-        setSubscribeState("error");
-        return;
-      }
-      setSubscribeState("done");
-      setEmail("");
-      setNote("");
-    } catch {
-      setSubscribeError("Не удалось подписаться");
-      setSubscribeState("error");
-    }
-  }
 
   return (
     <footer className="footer" id="contacts">
-      <div className="newsletter">
-        <div className="shell newsletter-inner">
-          <div><span>Письма о натуральном уюте</span><h3>Будьте в курсе новинок и акций</h3></div>
-          {subscribeState === "done" ? (
-            <p className="subscribe-done">Записали. Новинки придут на почту.</p>
-          ) : (
-            <form className="subscribe" onSubmit={submitSubscribe}>
-              <Input type="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="Ваш e-mail" />
-              <Input value={note} onChange={event => setNote(event.target.value)} placeholder="Имя или пожелание" />
-              <Button type="submit" disabled={subscribeState === "sending"}>{subscribeState === "sending" ? "Отправляем" : "Подписаться"} <ArrowRight /></Button>
-              {subscribeError && <span className="subscribe-error">{subscribeError}</span>}
-            </form>
-          )}
-        </div>
-      </div>
       <div className="shell footer-grid">
         <div className="footer-brand">
           <Logo />
@@ -193,13 +159,24 @@ export function Footer() {
           <div className="footer-contact">
             <a href={PHONE_HREF}>{PHONE_DISPLAY}</a>
             <a href={CONTACT_MAILTO}>{CONTACT_EMAIL}</a>
-            <p>Ежедневно с 9:00 до 20:00<br />Ульяновская область</p>
+            <p>пн–пт, 10:00–19:00 (МСК)<br />Россия, г. Ульяновск, ул. Карла Либкнехта, д. 5</p>
           </div>
         </div>
         <div><h4>Каталог</h4>{live.categories.map(cat => <Link key={cat.name} href={cat.href}>{cat.name}</Link>)}</div>
         <div><h4>О компании</h4><Link href="/about">О нас</Link><Link href="/portfolio">Портфолио</Link><Link href="/contacts">Контакты</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link></div>
         <div><h4>Покупателям</h4><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link><Link href="/promotions">Акции</Link><Link href="/calculator">Свой размер</Link></div>
         <div><h4>Документы</h4><Link href="/privacy">Политика конфиденциальности</Link><Link href="/terms">Пользовательское соглашение</Link></div>
+      </div>
+      <div className="shell footer-markets">
+        <span>Также на маркетплейсах</span>
+        <div>
+          {marketplaces.map(item => (
+            <a key={item.name} href={item.href} target="_blank" rel="noopener noreferrer">
+              <i>{item.mark}</i>
+              {item.name}
+            </a>
+          ))}
+        </div>
       </div>
       <div className="shell footer-bottom"><span>© 2026 Мэри Джут</span><span><Link href="/privacy">Политика конфиденциальности</Link> · <Link href="/terms">Пользовательское соглашение</Link></span></div>
     </footer>
@@ -225,7 +202,7 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
     <article className={`product-card${soon ? " soon" : ""}`}>
       <Link href={href} className="product-image">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" unoptimized />
-        <span className="product-badge">{soon ? "Скоро" : "Ручная работа"}</span>
+        {soon && <span className="product-badge">Скоро</span>}
       </Link>
       <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite({ id: product.id, name: product.name, price, image: product.image })} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
       <div className="product-copy">
@@ -287,13 +264,9 @@ export function HomePage() {
         <SectionTitle link="/catalog">Популярные товары</SectionTitle>
         <div className="product-grid">{live.featured.map((p) => <ProductCard key={p.id} product={p} />)}</div>
       </section>
-      <section className="shell collection-showcase">
-        <div className="collection-main"><Image src="/images/hero-dining.png" alt="Коллекция джутовых ковров" fill /><div><span>Новая коллекция</span><h2>Дом, в котором<br />хочется остаться</h2><Link href="/catalog">Смотреть коллекцию <ArrowRight /></Link></div></div>
-        <Link href={categoryPath("Салфетки сервировочные")} className="collection-small"><Image src="/images/categories/salfetki.jpg" alt="Сервировочные салфетки из джута" fill /><span>Салфетки и сервировка<small>Наборы 2 и 5 шт</small></span></Link>
-      </section>
       <section className="shell story-banner">
         <Image src="/images/hero.png" alt="" fill sizes="100vw" />
-        <div className="story-copy"><em>Индивидуальное изготовление</em><p>Эксклюзивные изделия для вашего пространства</p><span>Подберём форму, размер и оттенок. Каждое изделие создаём вручную — от первого витка до последнего стежка.</span><Button render={<Link href="/calculator" />}>Рассчитать стоимость <ArrowRight /></Button></div>
+        <div className="story-copy"><em>Ковры</em><p>Индивидуальное изготовление</p><span>Если вы не нашли подходящий ковёр, вы можете сделать заказ по вашим размерам.</span><Button render={<Link href="/calculator" />}>Рассчитать стоимость <ArrowRight /></Button></div>
       </section>
       <section className="shell section">
         <SectionTitle link="/catalog">Категории</SectionTitle>
@@ -306,16 +279,24 @@ export function HomePage() {
         <div><small>За кулисами производства</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
         <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
-      <section className="shell section reviews">
-        <SectionTitle>Отзывы</SectionTitle>
-        <div className="review-grid">
+      <section className="shell section interiors">
+        <SectionTitle>Фото в интерьере</SectionTitle>
+        <div className="interior-grid">
           {[
-            ["Елена П.", "Ковёр великолепный — плотный, аккуратный и очень уютный. Видно, что сделан руками."],
-            ["Ольга К.", "Корзина идеально вписалась в интерьер. Упаковка бережная, доставка быстрая."],
-            ["Наталья С.", "Заказывала нестандартный размер. Всё подробно согласовали, результат превзошёл ожидания."],
-          ].map(([name, text], i) => <article key={name}><div className="review-top"><Image src={i === 1 ? "/images/craftswoman.png" : "/images/hero.png"} alt="" width={52} height={52} /><span><b>{name}</b><small>Покупатель</small></span><i>“</i></div><div className="stars">★★★★★</div><p>{text}</p></article>)}
+            ["/images/interiors/01-kover-150.jpg", "Круглый ковёр 150 см у камина", "/product/w014"],
+            ["/images/interiors/02-kover-200.jpg", "Круглый ковёр 200 см в гостиной", "/product/w018"],
+            ["/images/interiors/03-oval-150.jpg", "Овальный ковёр 80×150 см в гостиной", "/product/w017"],
+            ["/images/interiors/04-oval-120.jpg", "Овальный ковёр 80×120 см у дивана", "/product/w008"],
+            ["/images/interiors/05-oval-100.jpg", "Овальный ковёр 60×100 см у окна", "/product/w005"],
+            ["/images/interiors/06-bedroom.jpg", "Круглый ковёр в спальне", "/product/w003"],
+            ["/images/interiors/07-living.jpg", "Круглый ковёр в гостиной", "/product/w002"],
+            ["/images/interiors/08-table.jpg", "Сервировка стола джутовыми салфетками", "/product/w010"],
+          ].map(([src, alt, href]) => (
+            <Link href={href} key={src}>
+              <Image src={src} alt={alt} fill sizes="(max-width: 700px) 50vw, 25vw" />
+            </Link>
+          ))}
         </div>
-        <div className="review-summary"><strong>4,9</strong><span><b>★★★★★</b>На основе 186 отзывов</span><div>{["Яндекс", "Ozon", "Wildberries"].map((v) => <i key={v}><Check />{v}</i>)}</div></div>
       </section>
       <section className="shell home-bottom-grid">
         <div className="faq-preview"><span>Помогаем с выбором</span><h2>Частые вопросы</h2>{homeFaqs.map(([question, answer], i) => <div className={`home-faq-item ${homeFaqOpen === i ? "open" : ""}`} key={question}><button type="button" onClick={() => setHomeFaqOpen(homeFaqOpen === i ? null : i)} aria-expanded={homeFaqOpen === i}><b>0{i + 1}</b><span>{question}</span><Plus /></button>{homeFaqOpen === i && <p>{answer}</p>}</div>)}<Link href="/faq">Все вопросы <ArrowRight /></Link></div>
@@ -346,7 +327,8 @@ export function CatalogPage({ initialCategory = "Все", categorySlug = "" }: {
   const [sizeFilters, setSizeFilters] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const itemsInCategory = live.all.filter(item => item.category === category);
-  const soon = category !== "Все" && itemsInCategory.length > 0 && itemsInCategory.every(item => item.comingSoon);
+  const liveCategory = live.categories.find(item => item.name === category);
+  const soon = category !== "Все" && (Boolean(liveCategory?.soon) || (itemsInCategory.length > 0 && itemsInCategory.every(item => item.comingSoon)));
   const activeFilterCount = sizeFilters.length + (maxPrice < 15000 ? 1 : 0) + (query.trim() ? 1 : 0);
   const soonItem = itemsInCategory.find(item => item.comingSoon);
   const filteredProducts = useMemo(() => {
@@ -424,7 +406,7 @@ export function CatalogPage({ initialCategory = "Все", categorySlug = "" }: {
                 <div className="catalog-soon">
                   <Leaf />
                   <h3>Позиции ещё в разработке</h3>
-                  <p>Коллекция «{category}» скоро появится в каталоге. Пока можно выбрать ковры, салфетки и подставки под горячее.</p>
+                  <p>Коллекция «{category}» скоро появится в каталоге. Пока можно выбрать ковры и сервировку стола.</p>
                   <Button variant="outline" onClick={() => selectCategory("Все")}>Смотреть доступные изделия</Button>
                 </div>
                 {soonItem && (
@@ -459,11 +441,7 @@ export function CalculatorPage() {
   const [shape, setShape] = useState("Круг");
   const [size, setSize] = useState(100);
   const [length, setLength] = useState(140);
-  const [rows, setRows] = useState(2);
-  const [material, setMaterial] = useState("Натуральный джут");
-  const [pattern, setPattern] = useState("Классический");
-  const [color, setColor] = useState("Натуральный");
-  const [edge, setEdge] = useState(true);
+  const [pattern, setPattern] = useState("С узорами");
   const [backing, setBacking] = useState(false);
   const [leadName, setLeadName] = useState("");
   const [leadPhone, setLeadPhone] = useState("");
@@ -474,44 +452,41 @@ export function CalculatorPage() {
     const b = thicknessMm / (2 * Math.PI);
     const theta = Math.PI * diameterMm / thicknessMm;
     const lengthMeters = (b / 2 * (theta * Math.sqrt(theta * theta + 1) + Math.asinh(theta))) / 1000;
-    const materialRate = material === "Джут + хлопок" ? 1.18 : 1;
-    const patternCost = pattern === "Ажурный" ? 900 : pattern === "Классический" ? rows * 180 : 0;
-    const extras = (edge ? 600 : 0) + (backing ? 1200 : 0) + patternCost;
-    const total = Math.max(2900, Math.round((lengthMeters * JUTE_PRICE_PER_METER * materialRate + extras) / 100) * 100);
+    const patternCost = pattern === "С узорами" ? PATTERN_EXTRA : 0;
+    const extras = (backing ? 200 : 0) + patternCost;
+    const total = Math.max(2900, Math.round((lengthMeters * JUTE_PRICE_PER_METER + extras) / 100) * 100);
     return { total, lengthMeters };
-  }, [shape, size, length, rows, material, pattern, edge, backing]);
+  }, [shape, size, length, pattern, backing]);
 
   return (
     <Page>
-      <section className="page-hero calc-hero"><Image src="/images/hero.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / Калькулятор</p><h1>Калькулятор стоимости</h1><span>Рассчитайте стоимость изделия ручной работы<br />по индивидуальным размерам</span></div></section>
+      <section className="page-hero calc-hero"><Image src="/images/hero.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / Калькулятор</p><h1>Калькулятор стоимости</h1><span>Рассчитайте стоимость ковра<br />по вашим размерам</span></div></section>
       <section className="shell calculator">
         <div className="steps"><span className="active">1 <b>Параметры</b></span><i /><span>2 <b>Расчёт</b></span><i /><span>3 <b>Заявка</b></span></div>
         <div className="calculator-grid">
           <div className="calc-form">
             <h3>Тип изделия</h3>
-            <div className="choice-row">{["Ковёр", "Корзина", "Панно", "Декор"].map((v, i) => <button className={i === 0 ? "selected" : ""} key={v}>{v}</button>)}</div>
+            <div className="choice-row"><button className="selected" type="button">Ковёр</button></div>
             <h3>Форма</h3>
             <div className="shape-row">{["Круг", "Овал"].map(v => <button onClick={() => setShape(v)} className={shape === v ? "selected" : ""} key={v}><span className={v === "Круг" ? "round" : "oval"} />{v}</button>)}</div>
             <h3>Размеры (см)</h3>
-            <div className="field-grid"><label>Ширина / диаметр<Input type="number" value={size} onChange={e => setSize(Math.min(300, Math.max(40, Number(e.target.value))))} min={40} max={300} /><small>от 40 до 300 см</small></label>{shape === "Овал" && <label>Длина<Input type="number" value={length} onChange={e => setLength(Math.min(400, Math.max(60, Number(e.target.value))))} min={60} max={400} /><small>от 60 до 400 см</small></label>}<label>Толщина<Input value="8 мм" disabled /><small>фиксированная</small></label></div>
+            <div className="field-grid"><label>Ширина / диаметр<Input type="number" value={size} onChange={e => setSize(Math.min(300, Math.max(40, Number(e.target.value))))} min={40} max={300} /><small>от 40 до 300 см</small></label>{shape === "Овал" && <label>Длина<Input type="number" value={length} onChange={e => setLength(Math.min(400, Math.max(60, Number(e.target.value))))} min={60} max={400} /><small>от 60 до 400 см</small></label>}</div>
             <h3>Материал</h3>
-            <div className="choice-row option-choices">{["Натуральный джут", "Джут + хлопок"].map(v => <button onClick={() => setMaterial(v)} className={material === v ? "selected" : ""} key={v}>{v}</button>)}</div>
-            <h3>Рисунок плетения</h3>
-            <div className="choice-row option-choices">{["Классический", "Ажурный", "Без узора"].map(v => <button onClick={() => setPattern(v)} className={pattern === v ? "selected" : ""} key={v}>{v}</button>)}</div>
+            <div className="choice-row option-choices"><button className="selected" type="button">Натуральный джут</button></div>
+            <h3>Рисунок</h3>
+            <div className="choice-row option-choices">{["С узорами", "Без узора"].map(v => <button type="button" onClick={() => setPattern(v)} className={pattern === v ? "selected" : ""} key={v}>{v}</button>)}</div>
             <h3>Оттенок</h3>
-            <div className="calc-colors">{[["Натуральный", "#d5bd91"], ["Карамель", "#a8753d"], ["Тёмный", "#62513d"]].map(([name, value]) => <button onClick={() => setColor(name)} className={color === name ? "selected" : ""} key={name}><i style={{background:value}} />{name}</button>)}</div>
-            <h3>Количество рядов с узором</h3>
-            <div className="counter"><button onClick={() => setRows(Math.max(0, rows - 1))}><Minus /></button><span>{rows}</span><button onClick={() => setRows(Math.min(8, rows + 1))}><Plus /></button></div>
+            <div className="calc-colors"><button className="selected" type="button"><i style={{ background: "#d5bd91" }} />Натуральный</button></div>
             <h3>Дополнительные опции</h3>
-            <div className="extra-options"><button className={edge ? "selected" : ""} onClick={() => setEdge(!edge)}><i>{edge && <Check />}</i><span>Обработка края<small>+ 600 ₽</small></span></button><button className={backing ? "selected" : ""} onClick={() => setBacking(!backing)}><i>{backing && <Check />}</i><span>Антискользящая основа<small>+ 1 200 ₽</small></span></button></div>
+            <div className="extra-options"><button type="button" className={backing ? "selected" : ""} onClick={() => setBacking(!backing)}><i>{backing && <Check />}</i><span>Антискользящее покрытие<small>натуральный латекс, ручное нанесение · + 200 ₽</small></span></button></div>
             <label className="calc-check"><Checkbox defaultChecked />Я согласен с отклонением готового изделия ± 2 см</label>
           </div>
           <aside className="estimate-card">
-            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>{calculation.lengthMeters.toFixed(1)} м джута</span><span>{material}</span><span>{pattern}</span><span>{color}</span></div><span>Расчёт по спирали, толщина 8 мм<br />и тариф {JUTE_PRICE_PER_METER} ₽/м. Итог подтвердит мастер.</span><div className="estimate-lead"><Input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="Ваше имя" /><PhoneInput value={leadPhone} onValueChange={setLeadPhone} /></div><Button disabled={!leadName || !isCompleteRuPhone(leadPhone) || requestSent} onClick={async () => { const response = await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "calculator", contact: { name: leadName, phone: leadPhone }, calculation: { shape, size, length, material, pattern, color, rows, edge, backing, ...calculation } }) }); setRequestSent(response.ok); }}>{requestSent ? "Заявка отправлена" : "Отправить заявку"} <ArrowRight /></Button><Image src="/images/basket.png" alt="Джутовая корзина" width={420} height={420} />
+            <p>Примерная стоимость</p><strong>{calculation.total.toLocaleString("ru-RU")} ₽</strong><div className="estimate-spec"><span>Ковёр</span><span>{shape}</span><span>{shape === "Овал" ? `${size} × ${length} см` : `Ø ${size} см`}</span><span>Натуральный джут</span><span>{pattern}</span>{backing && <span>Антискользящее покрытие</span>}</div><div className="estimate-lead"><Input value={leadName} onChange={e => setLeadName(e.target.value)} placeholder="Ваше имя" /><PhoneInput value={leadPhone} onValueChange={setLeadPhone} /></div><Button disabled={!leadName || !isCompleteRuPhone(leadPhone) || requestSent} onClick={async () => { const response = await fetch("/api/requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "calculator", contact: { name: leadName, phone: leadPhone }, calculation: { shape, size, length, material: "Натуральный джут", pattern, color: "Натуральный", backing, ...calculation } }) }); setRequestSent(response.ok); }}>{requestSent ? "Заявка отправлена" : "Отправить заявку"} <ArrowRight /></Button><Image src="/images/products/w014/1.jpg" alt="Круглый джутовый ковёр" width={420} height={420} />
           </aside>
         </div>
       </section>
-      <section className="shell how"><h2>Как это работает?</h2><div>{["Выберите тип и форму изделия", "Укажите желаемые размеры", "Получите расчёт и оставьте заявку"].map((t, i) => <article key={t}><b>0{i + 1}</b><span>{t}</span></article>)}</div><p>Толщина изделия — 8 мм. Для овала расчёт ведётся по усреднённому диаметру.</p></section>
+      <section className="shell how"><h2>Как это работает?</h2><div>{["Выберите форму ковра", "Укажите желаемые размеры", "Получите расчёт и оставьте заявку"].map((t, i) => <article key={t}><b>0{i + 1}</b><span>{t}</span></article>)}</div><p>Для овала расчёт ведётся по усреднённому диаметру.</p></section>
     </Page>
   );
 }
@@ -523,23 +498,22 @@ export function ProductPage({ slug }: { slug: string }) {
   const { addToCart, toggleFavorite, isFavorite } = useShop();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики" | "Отзывы">("Описание");
+  const [backing, setBacking] = useState(false);
+  const [activeTab, setActiveTab] = useState<"Описание" | "Характеристики">("Описание");
   const comingSoon = Boolean(product?.comingSoon);
   const siblings = product ? live.sale.filter(item => item.family === product.family) : [];
-  const sourceImages = product?.images.length ? product.images : [product?.image || ""];
-  const gallery = sourceImages.filter(Boolean).length <= 3
-    ? sourceImages.filter(Boolean)
-    : [sourceImages[0], sourceImages[1], sourceImages[sourceImages.length - 1]];
+  const gallery = (product?.images.length ? product.images : [product?.image || ""]).filter(Boolean);
   const [imageIndex, setImageIndex] = useState(0);
   const image = gallery[imageIndex] ?? gallery[0] ?? product?.image ?? "";
   const related = product ? live.sale.filter(item => item.id !== product.id).slice(0, 4) : [];
-  const tabs = ["Описание", "Характеристики", "Отзывы"] as const;
-  const reviews = product?.reviews ?? [];
-  const wbUrl = product?.wbUrl;
+  const tabs = ["Описание", "Характеристики"] as const;
+  const rugBacking = product?.category === "Ковры";
+  const unitPrice = (product?.price ?? 0) + (rugBacking && backing ? BACKING_PRICE : 0);
 
   useEffect(() => {
     setQty(1);
     setAdded(false);
+    setBacking(false);
     setActiveTab("Описание");
     setImageIndex(0);
   }, [product?.id]);
@@ -580,14 +554,19 @@ export function ProductPage({ slug }: { slug: string }) {
         </div>
         <div className="product-info">
           <h1>{product.name}</h1>
-          {comingSoon ? <strong className="detail-price">Скоро в каталоге</strong> : <strong className="detail-price">{formatPrice(product.price)}</strong>}
-          {wbUrl && (
-            <p className="rating">★★★★★ <a href={wbUrl} target="_blank" rel="noopener noreferrer">Отзывы на Wildberries</a></p>
-          )}
+          {comingSoon ? <strong className="detail-price">Скоро в каталоге</strong> : <strong className="detail-price">{formatPrice(unitPrice)}</strong>}
           {siblings.length > 1 && (
             <div className="option">
               <label>{product.variantKind === "set" ? "Комплектация" : "Размер"}</label>
               <div>{siblings.map(item => <button type="button" className={item.id === product.id ? "selected" : ""} onClick={() => router.push(`/product/${item.slug}`)} key={item.id}>{item.sizeLabel}</button>)}</div>
+            </div>
+          )}
+          {rugBacking && !comingSoon && (
+            <div className="extra-options product-backing">
+              <button type="button" className={backing ? "selected" : ""} onClick={() => { setBacking(!backing); setAdded(false); }}>
+                <i>{backing && <Check />}</i>
+                <span>Антискользящее покрытие<small>натуральный латекс, ручное нанесение · + {BACKING_PRICE} ₽</small></span>
+              </button>
             </div>
           )}
           {comingSoon ? (
@@ -602,54 +581,38 @@ export function ProductPage({ slug }: { slug: string }) {
                 <span>{qty}</span>
                 <button onClick={() => setQty(qty + 1)}><Plus /></button>
               </div>
-              <Button onClick={() => { addToCart(toCartItem(product), qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button>
+              <Button onClick={() => { addToCart(toCartItem(product, undefined, rugBacking && backing), qty); setAdded(true); }}>{added ? "Товар в корзине" : "В корзину"} <ShoppingBag /></Button>
             </div>
           )}
-          <div className="mini-benefits"><span><PackageCheck />Быстрая доставка</span><span><Sparkles />Ручная работа</span><span><Truck />Возможен возврат</span></div>
+          <div className="mini-benefits"><span><PackageCheck />Быстрая доставка</span><span><Sparkles />Натуральный джут</span><span><Truck />Возможен возврат</span></div>
         </div>
       </section>
-      <section className={`shell product-description${activeTab === "Отзывы" ? " reviews-open" : ""}`}>
+      <section className="shell product-description">
         <div className="description-copy">
           <div className="description-tabs">{tabs.map(tab => <button className={activeTab === tab ? "active" : ""} onClick={() => setActiveTab(tab)} key={tab}>{tab}</button>)}</div>
           {activeTab === "Описание" && (
             <div className="tab-panel">
               {product.description.split("\n\n").map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+              {product.category === "Ковры" && (
+                <div className="care-block">
+                  <h3>Уход</h3>
+                  <ul>
+                    <li><i><Bubbles /></i>Влажная чистка намыленной губкой</li>
+                    <li><i><BrushCleaning /></i>Сухая чистка</li>
+                    <li><i><Wind /></i>Можно пылесосить</li>
+                    <li className="forbidden"><i><Ban /></i>Стирать запрещено</li>
+                  </ul>
+                </div>
+              )}
             </div>
           )}
           {activeTab === "Характеристики" && (
             <div className="spec-table">{specRows(product).map(([key, value]) => <div key={key}><span>{key}</span><b>{value}</b></div>)}</div>
           )}
-          {activeTab === "Отзывы" && (
-            <div className="product-reviews">
-              {reviews.length > 0 ? (
-                <>
-                  {reviews.map(review => (
-                    <article key={`${review.author}-${review.date}`}>
-                      <div>
-                        <b>{review.author}</b>
-                        <span>{"★".repeat(review.rating)}</span>
-                      </div>
-                      <p>{review.text}</p>
-                      <small>{review.date} · Wildberries</small>
-                    </article>
-                  ))}
-                  {wbUrl && (
-                    <a className="wb-reviews-link" href={wbUrl} target="_blank" rel="noopener noreferrer">
-                      Все отзывы на Wildberries <ExternalLink />
-                    </a>
-                  )}
-                </>
-              ) : (
-                <p>Отзывы появятся вместе с коллекцией.</p>
-              )}
-            </div>
-          )}
         </div>
-        {activeTab !== "Отзывы" && (
-          <figure className="description-photo">
-            <Image src={gallery[1] ?? gallery[0] ?? product.image} alt={product.name} fill sizes="(max-width: 700px) 100vw, 420px" unoptimized />
-          </figure>
-        )}
+        <figure className="description-photo">
+          <Image src={gallery[1] ?? gallery[0] ?? product.image} alt={product.name} fill sizes="(max-width: 700px) 100vw, 420px" unoptimized />
+        </figure>
       </section>
       {related.length > 0 && <section className="shell section"><SectionTitle>Похожие товары</SectionTitle><div className="product-grid">{related.map(item => <ProductCard key={item.id} product={item} />)}</div></section>}
     </Page>
@@ -660,34 +623,73 @@ export function AboutPage() {
   const preview = portfolioPhotos.slice(0, 6);
   return (
     <Page>
-      <section className="page-hero about-hero"><Image src="/images/hero.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>Производство интерьерных изделий из джута</span></div></section>
-      <section className="shell about-intro">
-        <div>
-          <p className="eyebrow">Мэри Джут — это</p>
-          <h2>Производство интерьерных изделий из джута — фабрика с душой</h2>
-          <div className="about-copy">
-            <p>Мы делаем вещи для дома из натурального джута: ковры, салфетки, подставки и декор. Это своё производство в России — с ритмом фабрики и теплом ручной работы.</p>
-            <p>Специализируемся на уникальных предметах интерьера из экологичных материалов. Каждое изделие помогает собрать в доме уют и спокойную гармонию: живая фактура каната, спокойный цвет, форма, которую хочется оставлять на виду.</p>
-            <p>Плетём сами — от первого витка до готовой вещи. Поэтому джут остаётся натуральным, а серия не теряет характера: свои формы, свой материал, своя сборка.</p>
-          </div>
-          <div className="about-points"><span><Leaf />Ручная работа</span><span><Sparkles />Собственное производство</span><span><PackageCheck />Натуральный джут</span><span><Heart />С душой к детали</span></div>
+      <section className="page-hero about-hero"><Image src="/images/hero.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
+      <article className="shell about-story">
+        <p className="eyebrow">Алёна и Стася</p>
+        <h2>Мэри Джут — история, которая началась со школьного проекта</h2>
+        <div className="about-copy">
+          <p>Создаём уют для вашего дома из натурального джута. С душой, вниманием к деталям и любовью к своему делу.</p>
+          <p>Привет! Мы — Алёна и Стася, основательницы «Мэри Джут». Когда-то мы просто хотели придумать интересный проект для школьного конкурса. Сегодня у нас собственное производство интерьерных изделий из джута, любимое дело и большая мечта — помогать людям создавать дома, в которые хочется возвращаться.</p>
+          <p>Расскажем, как всё начиналось.</p>
         </div>
-        <Image src="/images/about/craft.jpg" alt="Джутовый ковёр ручной работы" width={480} height={720} unoptimized />
-      </section>
-      <section className="shell founder">
-        <Image src="/images/about/home.jpg" alt="Овальный ковёр из джута в интерьере" width={460} height={620} unoptimized />
-        <div>
-          <p className="eyebrow">Как мы работаем</p>
-          <h2>Полный цикл — у нас, характер изделия — в вашем доме</h2>
-          <div className="about-copy">
-            <p>Производство в Ульяновской области. Берём джутовый канат, собираем форму и доводим край так, чтобы вещь можно было сразу поставить на пол, на стол или в нишу.</p>
-            <p>В каталоге уже ковры разных размеров, сервировочные салфетки и подставки под горячее. Корзины, кашпо и панно готовим следующей коллекцией. Если нужен нестандарт — считаем индивидуально.</p>
-          </div>
-          <div className="about-actions">
-            <Button render={<Link href="/portfolio" />}>Портфолио <ArrowRight /></Button>
-          </div>
+        <h3>От школьной идеи до собственного производства</h3>
+        <div className="about-copy">
+          <p>Всё началось в 2024 году. Мы участвовали в школьном конкурсе по предпринимательству, где нужно было придумать бизнес-идею и представить её жюри. Мы долго искали то, что было бы не только интересно нам самим, но и могло бы приносить пользу людям.</p>
+          <p>Так появилась идея создавать корзины и плейсматы из натуральных материалов. Мы решили попробовать сделать их своими руками. Тогда это казалось небольшим экспериментом, который должен был закончиться вместе с конкурсом.</p>
+          <p>Но всё получилось совсем иначе.</p>
+          <p>Наш проект получил хорошие отзывы, а мы выиграли грант на развитие бизнеса. На эти деньги приобрели первые производственные машинки и начали воплощать задуманное в жизнь. Сначала изделия заказывали знакомые, затем о нас стали узнавать люди, которые никогда нас не видели. И каждый новый заказ убеждал нас: то, что мы делаем, действительно кому-то нужно.</p>
+          <p>Постепенно маленький проект вырос в настоящее производство. Мы расширили ассортимент, начали создавать ковры для дома и задумались о том, каким хотим видеть наш бренд в будущем.</p>
+          <p>Так появилась «Мэри Джут» — дело, в которое мы вкладываем не только время и силы, но и частичку себя.</p>
         </div>
-      </section>
+        <h3>Почему именно джут?</h3>
+        <div className="about-copy">
+          <p>Нам всегда нравились натуральные материалы, спокойные оттенки и вещи, которые не перегружают интерьер, а делают его гармоничнее. Так мы и остановились на джуте.</p>
+          <p>Джут — натуральное растительное волокно с характерной фактурой и красивым тёплым оттенком. Он привлекает нас своей выразительностью, прочностью и тем, как естественно вписывается в самые разные интерьеры.</p>
+          <p>Нам хотелось создавать изделия, которые не просто выполняют свою функцию, а меняют ощущение пространства. Ковёр, который объединяет мебель в единую композицию. Салфетка, которая делает обычный завтрак немного уютнее. Подставка, благодаря которой даже небольшая деталь на столе выглядит продуманно.</p>
+          <p>Мы верим, что уют складывается именно из таких мелочей. Необязательно полностью менять интерьер, чтобы сделать дом красивее. Иногда достаточно одной детали, выбранной с любовью.</p>
+          <p>Поэтому в основе «Мэри Джут» — натуральная фактура, сдержанные цвета, лаконичные формы и внимание к качеству.</p>
+        </div>
+        <h3>Создаём сами — от идеи до готового изделия</h3>
+        <div className="about-copy">
+          <p>За каждым изделием «Мэри Джут» стоит наша работа. Мы самостоятельно развиваем производство, продумываем ассортимент, подбираем материалы и следим за тем, чтобы готовые изделия соответствовали нашим представлениям о качестве.</p>
+          <p>Для нас важно не просто выпустить очередную модель, а создать вещь, которую захочется оставить в доме надолго.</p>
+          <p>Мы используем производственное оборудование, чтобы добиваться аккуратных швов, ровных краёв и стабильного качества. При этом сохраняем главное — внимание к деталям, благодаря которому изделие выглядит завершённым и гармоничным.</p>
+          <p>Сегодня мы создаём ковры, сервировочные салфетки и подставки из джута. Постепенно расширяем ассортимент и работаем над новыми изделиями для дома.</p>
+          <p>Наше производство находится в Ульяновской области. Здесь мы продолжаем развивать дело, которое когда-то начиналось с небольшой школьной идеи.</p>
+        </div>
+        <h3>Наш стиль — уют без лишнего</h3>
+        <div className="about-copy">
+          <p>Мы хотим, чтобы изделия «Мэри Джут» легко становились частью вашего дома. Не спорили с интерьером, а дополняли его. Не привязывали к одному стилю, а давали возможность создавать собственные сочетания.</p>
+          <p>Именно поэтому мы уделяем особое внимание форме.</p>
+          <p>В нашем ассортименте вы найдёте круглые и овальные ковры разных размеров. Мы выбрали эти формы не случайно: мягкие линии помогают визуально смягчить пространство и красиво сочетаются с мебелью, текстилем и натуральными материалами.</p>
+          <p>Наши изделия подходят для разных зон дома: спальни, гостиной, кухни или прихожей. А небольшие джутовые аксессуары помогают объединить детали интерьера и сделать сервировку стола более выразительной.</p>
+          <p>Мы стараемся создавать вещи, которые не теряют актуальности с очередным изменением трендов. Ведь настоящий уют — это не про моду на один сезон, а про ощущение, которое остаётся с вами каждый день.</p>
+        </div>
+        <h3>Для нас каждый заказ — это доверие</h3>
+        <div className="about-copy">
+          <p>Когда мы только начинали, каждый покупатель был для нас особенным событием. Мы радовались каждому сообщению, каждому отзыву и каждому вопросу о наших изделиях.</p>
+          <p>С ростом производства это отношение не изменилось.</p>
+          <p>Нам важно, чтобы вам было легко выбрать подходящий размер, понять особенности изделия и разобраться в уходе за ним. Поэтому мы готовы помочь с выбором и ответить на вопросы до и после покупки.</p>
+          <p>Мы понимаем, что вы выбираете не просто ковёр или аксессуар. Вы выбираете вещь, которой предстоит стать частью вашего пространства, ваших привычек и повседневных моментов.</p>
+          <p>И нам хочется, чтобы покупка «Мэри Джут» приносила радость не только в день получения заказа, но и спустя долгое время.</p>
+        </div>
+        <h3>Сегодня мы только начинаем</h3>
+        <div className="about-copy">
+          <p>Иногда мы вспоминаем тот самый школьный конкурс и с удивлением думаем о том, как далеко нас привела одна идея.</p>
+          <p>Впереди ещё много планов: новые формы, новые изделия, развитие производства и новые возможности для тех, кто выбирает наш бренд. Мы хотим расти, сохраняя то, с чего всё началось: искренний интерес к своему делу, любовь к натуральным материалам и желание создавать красивые вещи для дома.</p>
+          <p>Для нас «Мэри Джут» — это больше, чем производство. Это история о том, как идея двух девушек превратилась в дело жизни. И нам очень приятно, что теперь частью этой истории становитесь вы.</p>
+          <p>Спасибо, что выбираете нас и впускаете наши изделия в свой дом.</p>
+          <p>С теплом,<br />Алёна и Стася — основательницы «Мэри Джут»</p>
+        </div>
+        <h3>Найдите свою деталь уюта</h3>
+        <div className="about-copy">
+          <p>Выбирайте джутовые ковры, салфетки и аксессуары, которые помогут сделать ваш дом ещё уютнее.</p>
+          <p>Посмотрите каталог «Мэри Джут» и найдите изделие, которое станет частью вашей истории дома.</p>
+        </div>
+        <div className="about-actions">
+          <Button render={<Link href="/catalog" />}>Смотреть каталог <ArrowRight /></Button>
+        </div>
+      </article>
       <section className="shell about-preview">
         <SectionTitle link="/portfolio">Из портфолио</SectionTitle>
         <div className="about-preview-grid">
@@ -698,7 +700,6 @@ export function AboutPage() {
           ))}
         </div>
       </section>
-      <section className="stats"><div className="shell"><span><b>Своё</b>производство в России</span><span><b>100%</b>натуральный джут</span><span><b>Вручную</b>каждая вещь</span></div></section>
     </Page>
   );
 }
@@ -806,7 +807,7 @@ export function ContactsPage() {
     <Page>
       <InfoHero title="Контакты" subtitle="Всегда готовы помочь с выбором и заказом" />
       <section className="shell contacts-layout">
-        <div className="contact-details"><p className="eyebrow">Связаться с нами</p><h2>Давайте обсудим ваш будущий уют</h2><p>Расскажем об изделиях, поможем подобрать размер и рассчитаем индивидуальный заказ.</p><div><a href={PHONE_HREF}><span><MessageCircle /></span><b>{PHONE_DISPLAY}<small>Ежедневно с 9:00 до 20:00</small></b></a><a href={CONTACT_MAILTO}><span><Mail /></span><b>{CONTACT_EMAIL}<small>Ответим в течение рабочего дня</small></b></a><p><span><MapPin /></span><b>Ульяновская область<small>Мастерская работает без шоурума</small></b></p></div><div className="contact-socials">{socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.name}</a>)}</div></div>
+        <div className="contact-details"><p className="eyebrow">Связаться с нами</p><h2>Давайте обсудим ваш будущий уют</h2><p>Расскажем об изделиях, поможем подобрать размер и рассчитаем индивидуальный заказ.</p><div><a href={PHONE_HREF}><span><MessageCircle /></span><b>{PHONE_DISPLAY}<small>пн–пт, 10:00–19:00 (МСК)</small></b></a><a href={CONTACT_MAILTO}><span><Mail /></span><b>{CONTACT_EMAIL}<small>Ответим в течение рабочего дня</small></b></a><p><span><MapPin /></span><b>г. Ульяновск, ул. Карла Либкнехта, д. 5<small>Россия</small></b></p></div><div className="contact-socials">{socialLinks.map(item => <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">{item.name}</a>)}</div></div>
         <form className="contact-form" onSubmit={submitContact}><span>Напишите нам</span><h3>Ответим на ваш вопрос</h3><label>Ваше имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<PhoneInput name="phone" required /></label><label>E-mail<Input name="email" type="email" placeholder="mail@example.ru" /></label><label>Сообщение<textarea name="message" required placeholder="Расскажите, чем мы можем помочь" /></label><label className="calc-check"><Checkbox defaultChecked />Согласен с политикой конфиденциальности</label><Button type="submit" disabled={sending || sent}>{sent ? "Сообщение отправлено" : sending ? "Отправляем..." : "Отправить сообщение"} <ArrowRight /></Button></form>
       </section>
     </Page>

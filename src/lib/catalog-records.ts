@@ -191,6 +191,7 @@ function fromCreated(item: CreatedProductRecord): CatalogProduct {
   return {
     id: item.id,
     slug: item.slug,
+    sku: item.slug,
     family: item.id,
     name: item.name,
     sizeLabel: item.sizeLabel,

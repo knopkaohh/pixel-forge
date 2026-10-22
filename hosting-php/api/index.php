@@ -229,7 +229,7 @@ function base_product_ids(string $catalogFile): array
 
 function category_names(array $catalog): array
 {
-    $names = ["Ковры", "Салфетки сервировочные", "Подставка под горячее", "Корзины", "Кашпо", "Панно"];
+    $names = ["Ковры", "Сервировка стола", "Кашпо и корзины", "Освещение", "Панно"];
     foreach ($catalog["categories"] as $category) {
         if (!in_array($category["name"], $names, true)) $names[] = $category["name"];
     }
@@ -247,7 +247,7 @@ function taken_slugs(array $catalog, string $catalogFile): array
         $taken[$id] = true;
         $taken[$aliases[$id] ?? $id] = true;
     }
-    foreach (["kovry", "salfetki", "podstavki", "korziny", "kashpo", "panno"] as $slug) $taken[$slug] = true;
+    foreach (["kovry", "servirovka", "kashpo-i-korziny", "osveshchenie", "panno"] as $slug) $taken[$slug] = true;
     foreach ($catalog["created"] as $product) {
         $taken[$product["id"]] = true;
         $taken[$product["slug"]] = true;
