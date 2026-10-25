@@ -49,6 +49,7 @@ h1, h2, h3, .brand { font-family: "Playfair Display", Georgia, serif; font-weigh
 .site-header { height: 70px; background: rgba(255,253,248,.97); border-bottom: 1px solid var(--line); position: relative; z-index: 30; }
 .header-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; }
 .brand { display: inline-flex; align-items: center; gap: 8px; font-size: 20px; white-space: nowrap; }
+.brand-logo { height: 46px; width: auto; display: block; }
 .brand-mark { color: var(--jute); font-size: 13px; }
 .desktop-nav { display: flex; align-items: center; gap: 31px; font-size: 13px; }
 .desktop-nav a:hover { color: var(--green-light); }
@@ -480,6 +481,7 @@ body { background:#f7f3eb; }
 .footer .brand-leaf { stroke:#e6dfd2; }
 .footer .brand-leaf path:first-child { fill:#8e866c55; stroke:#e6dfd2; }
 .footer .brand-copy small { color:#a8a397; }
+.footer .brand-logo { height: 52px; }
 .socials { display:flex; gap:8px; margin-top:8px; }
 .socials a { width:30px; height:30px; display:grid; place-items:center; border:1px solid #ffffff2a; border-radius:50%; font-size:8px!important; }
 .footer-contact > a { font-size:13px!important; color:#fff!important; }
@@ -1605,6 +1607,12 @@ body.is-loading { overflow:hidden; }
 .hero > .hero-shade { background: none; }
 .hero-slides picture img { object-position: center center; transform: none; }
 .hero-slides picture.curtain img { object-position: left center; }
+.hero-slides picture.detail img { object-position: 78% center; }
+.about-hero .hero-shade {
+  background:
+    linear-gradient(90deg, rgba(12, 16, 12, .78) 0%, rgba(12, 16, 12, .42) 32%, rgba(12, 16, 12, 0) 62%),
+    linear-gradient(180deg, rgba(12, 16, 12, .12), rgba(12, 16, 12, 0) 28%, rgba(12, 16, 12, .2));
+}
 .hero-content {
   width: auto;
   max-width: none;
@@ -1677,7 +1685,7 @@ body.is-loading { overflow:hidden; }
   align-items: center;
   gap: 0;
 }
-.hero-index span {
+.hero-index button {
   display: inline-flex;
   align-items: center;
   border: 0;
@@ -1688,14 +1696,15 @@ body.is-loading { overflow:hidden; }
   font-size: 13px;
   font-weight: 500;
   letter-spacing: .04em;
+  cursor: pointer;
 }
-.hero-index span i {
+.hero-index button i {
   width: 28px;
   height: 2px;
   margin-right: 10px;
   background: #272b1d;
 }
-.hero-index span + span:before {
+.hero-index button + button:before {
   content: "";
   display: inline-block;
   width: 14px;
@@ -1704,7 +1713,7 @@ body.is-loading { overflow:hidden; }
   background: #b7b1a6;
   vertical-align: middle;
 }
-.hero-index span.active { color: #272b1d; }
+.hero-index button.active { color: #272b1d; }
 .phone-link { display: none; }
 .hero::after {
   content: "";
@@ -1712,6 +1721,7 @@ body.is-loading { overflow:hidden; }
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  background: linear-gradient(90deg, rgba(248, 244, 236, .97) 0%, rgba(248, 244, 236, .9) 22%, rgba(248, 244, 236, .42) 38%, rgba(248, 244, 236, 0) 54%);
 }
 
 /* Burger stays a dark icon on the right. Close control is only a small cross. */
@@ -1777,6 +1787,7 @@ body.is-loading { overflow:hidden; }
   }
   .header-inner { height: 100%; min-width: 0; gap: 8px; align-items: center; }
   .brand, .brand-copy, .brand-copy b { overflow: visible; text-overflow: unset; flex: 0 1 auto; min-width: 0; }
+  .brand-logo { height: 34px; }
   .header-actions { margin-left: auto; gap: 2px; flex: 0 0 auto; }
   .header-actions .phone,
   .header-actions .search-button,
@@ -1810,7 +1821,8 @@ body.is-loading { overflow:hidden; }
     background: linear-gradient(180deg, rgba(16, 12, 8, 0) 38%, rgba(16, 12, 8, .28) 58%, rgba(10, 8, 6, .72) 100%);
   }
   .hero-slides picture img,
-  .hero-slides picture.curtain img { object-position: center center; }
+  .hero-slides picture.curtain img,
+  .hero-slides picture.detail img { object-position: center center; }
   .hero-content {
     justify-content: flex-end;
     padding: 0 8% 15cqh 7%;
@@ -1834,10 +1846,10 @@ body.is-loading { overflow:hidden; }
     bottom: 4.2%;
     transform: translateX(-50%);
   }
-  .hero-index span { color: rgba(255, 253, 248, .62); }
-  .hero-index span.active { color: #fffdf8; }
-  .hero-index span.active i { display: none; }
-  .hero-index span + span:before { background: rgba(255, 253, 248, .45); }
+  .hero-index button { color: rgba(255, 253, 248, .62); }
+  .hero-index button.active { color: #fffdf8; }
+  .hero-index button.active i { display: none; }
+  .hero-index button + button:before { background: rgba(255, 253, 248, .45); }
 }
 
 .category-image { aspect-ratio: 1 / 1; }

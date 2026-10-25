@@ -64,11 +64,7 @@ const formatPrice = (price: number) => `${price.toLocaleString("ru-RU")} ₽`;
 function Logo() {
   return (
     <Link href="/" className="brand" aria-label="Мэри Джут — главная">
-      <svg className="brand-leaf" viewBox="0 0 42 42" aria-hidden="true">
-        <path d="M35.5 6.5C20 7 9.2 14 8.1 27.8c7.7 1.7 15.5-.5 20.2-6.9 3.6-4.8 4.8-10 7.2-14.4Z" />
-        <path d="M7 35c3.7-10.2 10.8-17.6 22.8-23.3M17.2 22.1c-.2-3.2.4-6 1.7-8.7M18.6 21.1c3.2.4 6.4-.1 9.5-1.5" />
-      </svg>
-      <span className="brand-copy"><b>Мэри Джут</b><small>изделия из джута</small></span>
+      <img src="/images/logo.svg" alt="" className="brand-logo" />
     </Link>
   );
 }
@@ -228,23 +224,39 @@ function Benefits() {
   );
 }
 
+const heroSlides = [
+  { alt: "Круглый джутовый ковёр у кресла" },
+  { alt: "Круглый джутовый ковёр в спальне" },
+  { alt: "Крупный план круглого джутового ковра" },
+];
+
 export function HomePage() {
   const live = useLiveCatalog();
   const [homeFaqOpen, setHomeFaqOpen] = useState<number | null>(null);
+  const [heroSlide, setHeroSlide] = useState(0);
   const homeFaqs = [
     ["Как ухаживать за изделиями?", "Используйте сухую чистку мягкой щёткой или пылесосом на небольшой мощности. Не замачивайте изделие полностью."],
     ["Можно ли заказать свой размер?", "Да. Укажите форму и размеры в калькуляторе, а мастер уточнит детали и подтвердит итоговую стоимость."],
     ["Почему новое изделие имеет запах?", "Это естественный аромат натурального джута. После проветривания он становится значительно слабее в течение нескольких дней."],
   ];
 
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const timer = window.setInterval(() => setHeroSlide((current) => (current + 1) % heroSlides.length), 7000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   return (
     <Page>
       <section className="hero">
         <div className="hero-slides">
-          <picture className="active curtain">
-            <source media="(max-width: 900px)" srcSet="/images/hero/slide-1-mobile.jpg" />
-            <img src="/images/hero/slide-1-desktop.jpg" alt="Светлый интерьер с джутовым ковром" />
-          </picture>
+          {heroSlides.map((slide, index) => (
+            <picture className={`${heroSlide === index ? "active" : ""}${index === 2 ? " detail" : ""}`} key={slide.alt}>
+              <source media="(max-width: 900px)" srcSet={`/images/hero/slide-${index + 1}-mobile.jpg`} />
+              <img src={`/images/hero/slide-${index + 1}-desktop.jpg`} alt={slide.alt} />
+            </picture>
+          ))}
         </div>
         <div className="hero-content">
           <p className="hero-draft">Сайт в разработке</p>
@@ -253,10 +265,12 @@ export function HomePage() {
           <span>Ковры, корзины, панно и декор ручной работы из натурального джута</span>
           <Button className="hero-cta" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
         </div>
-        <div className="hero-index" aria-hidden="true">
-          <span className="active"><i />01</span>
-          <span>02</span>
-          <span>03</span>
+        <div className="hero-index">
+          {heroSlides.map((slide, index) => (
+            <button type="button" className={heroSlide === index ? "active" : ""} key={slide.alt} onClick={() => setHeroSlide(index)} aria-label={`Фото ${index + 1}`}>
+              {index === 0 && <i />}0{index + 1}
+            </button>
+          ))}
         </div>
       </section>
       <Benefits />
@@ -275,7 +289,7 @@ export function HomePage() {
         </div>
       </section>
       <section className="shell promo">
-        <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
+        <Image src="/images/workshop.jpg" alt="Пошив ковра из джутового каната" fill sizes="100vw" />
         <div><small>За кулисами производства</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
         <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
@@ -623,7 +637,7 @@ export function AboutPage() {
   const preview = portfolioPhotos.slice(0, 6);
   return (
     <Page>
-      <section className="page-hero about-hero"><Image src="/images/hero.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
+      <section className="page-hero about-hero"><Image src="/images/workshop.jpg" alt="Пошив ковра из джутового каната" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
       <article className="shell about-story">
         <p className="eyebrow">Алёна и Стася</p>
         <h2>Мэри Джут — история, которая началась со школьного проекта</h2>

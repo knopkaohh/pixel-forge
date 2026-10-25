@@ -240,7 +240,7 @@ export function mergeCatalog(records: CatalogRecords) {
     const soon = items.length ? items.every(product => product.comingSoon) : Boolean(builtIn?.soon);
     return {
       name,
-      image: items[0]?.image || builtIn?.image || "/images/categories/kovry.jpg",
+      image: builtIn?.image || items[0]?.image || "/images/categories/kovry.jpg",
       href: `/catalog/${slug}`,
       soon,
     };
