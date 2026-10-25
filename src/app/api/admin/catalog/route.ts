@@ -80,6 +80,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, ...saved });
   }
 
+  if (action === "delete-product") {
+    const id = typeof body?.id === "string" ? body.id.trim() : "";
+    if (!id || id.includes("..")) return NextResponse.json({ ok: false, error: "Нет товара" }, { status: 400 });
+    let error = "";
+    const saved = await withStore(store => {
+      const records = catalogOf(store);
+      const createdIndex = records.created.findIndex(product => product.id === id);
+      if (createdIndex >= 0) records.created.splice(createdIndex, 1);
+      else if (baseProducts().some(product => product.id === id)) {
+        if (!records.deleted.includes(id)) records.deleted.push(id);
+      } else {
+        error = "Товар не найден";
+        return records;
+      }
+      delete records.edits[id];
+      store.catalog = records;
+      return records;
+    });
+    if (error) return NextResponse.json({ ok: false, error }, { status: 400 });
+    return NextResponse.json({ ok: true, ...saved });
+  }
+
   if (action === "delete-category") {
     const slug = typeof body?.slug === "string" ? body.slug.trim() : "";
     let error = "";

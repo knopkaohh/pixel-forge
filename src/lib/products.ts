@@ -41,6 +41,7 @@ export type CatalogProduct = {
   wbUrl?: string;
   featured?: boolean;
   comingSoon?: boolean;
+  onOrder?: boolean;
 };
 
 export type CartProduct = {

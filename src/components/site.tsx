@@ -199,12 +199,12 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
     <article className={`product-card${soon ? " soon" : ""}`}>
       <Link href={href} className="product-image">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" unoptimized />
-        {soon && <span className="product-badge">Скоро</span>}
+        {soon ? <span className="product-badge">Скоро</span> : product.onOrder ? <span className="product-badge order">Под заказ</span> : null}
       </Link>
       <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite({ id: product.id, name: product.name, price, image: product.image })} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
       <div className="product-copy">
         <Link href={href}><h3>{product.name}</h3></Link>
-        <p>{soon ? "Коллекция готовится к публикации" : "Натуральный джут · в наличии"}</p>
+        <p>{soon ? "Коллекция готовится к публикации" : product.onOrder ? "Натуральный джут · под заказ" : "Натуральный джут · в наличии"}</p>
         <div className="product-bottom">
           {soon ? <strong>Скоро в каталоге</strong> : <strong>{formatPrice(price)}</strong>}
           {!soon && <button onClick={() => { addToCart(toCartItem(product)); setAdded(true); }}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button>}
@@ -290,10 +290,7 @@ export function HomePage() {
         </div>
       </section>
       <section className="shell promo">
-        <picture className="cover-photo">
-          <source media="(max-width: 900px)" srcSet="/images/workshop.jpg" />
-          <img src="/images/workshop-desktop.jpg" alt="Пошив ковра из джутового каната" />
-        </picture>
+        <Image src="/images/workshop.png" alt="Пошив ковра из джутового каната" fill sizes="100vw" unoptimized />
         <div><small>За кулисами производства</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
         <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
@@ -550,6 +547,7 @@ export function ProductPage({ slug }: { slug: string }) {
         <div className="gallery">
           <div className="main-image">
             <Image src={image} alt={product.name} fill priority sizes="(max-width: 700px) 100vw, 520px" unoptimized />
+            {!comingSoon && product.onOrder && <span className="product-badge order">Под заказ</span>}
             {gallery.length > 1 && (
               <>
                 <button type="button" className="gallery-nav prev" onClick={() => setImageIndex((gallery.length + imageIndex - 1) % gallery.length)} aria-label="Предыдущее фото"><ArrowLeft /></button>
@@ -641,7 +639,7 @@ export function AboutPage() {
   const preview = portfolioPhotos.slice(0, 6);
   return (
     <Page>
-      <section className="page-hero about-hero"><picture className="cover-photo"><source media="(max-width: 900px)" srcSet="/images/workshop.jpg" /><img src="/images/workshop-desktop.jpg" alt="Пошив ковра из джутового каната" /></picture><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
+      <section className="page-hero about-hero"><Image src="/images/workshop.png" alt="Пошив ковра из джутового каната" fill priority unoptimized /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
       <article className="shell about-story">
         <p className="eyebrow">Алёна и Стася</p>
         <h2>Мэри Джут — история, которая началась со школьного проекта</h2>
