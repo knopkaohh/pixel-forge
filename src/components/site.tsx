@@ -290,7 +290,7 @@ export function HomePage() {
         </div>
       </section>
       <section className="shell promo">
-        <Image src="/images/workshop.png" alt="Пошив ковра из джутового каната" fill sizes="100vw" unoptimized />
+        <Image src="/images/workshop.jpg" alt="Пошив ковра из джутового каната" fill sizes="100vw" unoptimized />
         <div><small>За кулисами производства</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
         <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
@@ -639,7 +639,7 @@ export function AboutPage() {
   const preview = portfolioPhotos.slice(0, 6);
   return (
     <Page>
-      <section className="page-hero about-hero"><Image src="/images/workshop.png" alt="Пошив ковра из джутового каната" fill priority unoptimized /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
+      <section className="page-hero about-hero"><Image src="/images/workshop.jpg" alt="Пошив ковра из джутового каната" fill priority unoptimized /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
       <article className="shell about-story">
         <p className="eyebrow">Алёна и Стася</p>
         <h2>Мэри Джут — история, которая началась со школьного проекта</h2>
