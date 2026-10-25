@@ -99,6 +99,7 @@ body:has(.admin-app), body:has(.admin-login) { overflow:auto; }
 .admin-upload input { display:none; }
 .admin-spec-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .admin-check { flex-direction:row !important; align-items:center; gap:8px; font-size:13px !important; }
+.admin-stock { display:flex; gap:18px; flex-wrap:wrap; }
 @keyframes admin-pulse { 50% { transform:scale(1.08); box-shadow:0 0 0 6px #d24b3a33; } }
 @media (max-width:980px) {
   .admin-app { grid-template-columns:1fr; }

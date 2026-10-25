@@ -32,6 +32,7 @@ function blankProduct(category: string): EditableProduct {
     sizeLabel: "",
     comingSoon: false,
     featured: false,
+    onOrder: false,
     builtIn: false,
   };
 }
@@ -123,6 +124,7 @@ export function CatalogEditor() {
         sizeLabel: draft.sizeLabel,
         comingSoon: draft.comingSoon,
         featured: draft.featured,
+        onOrder: draft.onOrder,
       };
       const data = creating
         ? await api("/api/admin/catalog", { method: "POST", body: JSON.stringify({ action: "product", ...payload }) })
@@ -172,6 +174,24 @@ export function CatalogEditor() {
     }
   }
 
+  async function deleteProduct() {
+    if (!draft || creating) return;
+    if (!window.confirm(`Удалить «${draft.name}»? Товар пропадёт с сайта.`)) return;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const data = await api("/api/admin/catalog", { method: "POST", body: JSON.stringify({ action: "delete-product", id: draft.id }) });
+      applyRecords(data);
+      setDraft(null);
+      setMessage("Товар удалён.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось удалить товар");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!ready) return <p className="admin-empty">Открываем карточки…</p>;
 
   return (
@@ -198,7 +218,7 @@ export function CatalogEditor() {
             <img src={item.images[0]} alt="" />
             <b>{item.name}</b>
             <span>Артикул {item.slug}</span>
-            <span>{item.category}{item.comingSoon ? " · скоро" : ""}</span>
+            <span>{item.category}{item.comingSoon ? " · скоро" : ""}{item.onOrder ? " · под заказ" : ""}</span>
             <strong>{item.price ? `${item.price.toLocaleString("ru-RU")} ₽` : "—"}</strong>
           </button>
         ))}
@@ -237,8 +257,13 @@ export function CatalogEditor() {
           <label>Описание<textarea value={draft.description} onChange={event => setDraft({ ...draft, description: event.target.value })} /></label>
           <label className="admin-check"><input type="checkbox" checked={draft.featured} onChange={event => setDraft({ ...draft, featured: event.target.checked })} />Показывать в «Популярных товарах»</label>
           <label className="admin-check"><input type="checkbox" checked={draft.comingSoon} onChange={event => setDraft({ ...draft, comingSoon: event.target.checked })} />Пока не продаётся</label>
+          <div className="admin-stock">
+            <label className="admin-check"><input type="radio" name="stock" checked={!draft.onOrder} onChange={() => setDraft({ ...draft, onOrder: false })} />В наличии</label>
+            <label className="admin-check"><input type="radio" name="stock" checked={draft.onOrder} onChange={() => setDraft({ ...draft, onOrder: true })} />Под заказ</label>
+          </div>
           <div className="admin-actions">
             <button type="submit" disabled={busy}>{creating ? "Добавить товар" : "Сохранить"}</button>
+            {!creating && <button type="button" className="danger" disabled={busy} onClick={deleteProduct}>Удалить товар</button>}
             <button type="button" className="ghost" onClick={() => { setDraft(null); setCreating(false); }}>Закрыть</button>
           </div>
         </form>

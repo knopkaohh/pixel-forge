@@ -41,6 +41,7 @@ export type CatalogProduct = {
   wbUrl?: string;
   featured?: boolean;
   comingSoon?: boolean;
+  onOrder?: boolean;
 };
 
 export type CartProduct = {
@@ -190,7 +191,7 @@ export const categories = [
   { name: "Сервировка стола", image: "/images/categories/salfetki.jpg", href: categoryPath("Сервировка стола"), soon: false },
   { name: "Кашпо и корзины", image: "/images/categories/korziny.jpg", href: categoryPath("Кашпо и корзины"), soon: true },
   { name: "Освещение", image: "/images/categories/osveshchenie.jpg", href: categoryPath("Освещение"), soon: true },
-  { name: "Панно", image: "/images/wall-art.png", href: categoryPath("Панно"), soon: true },
+  { name: "Панно", image: "/images/categories/panno.jpg", href: categoryPath("Панно"), soon: true },
 ];
 
 const SLUG_ALIASES: Record<string, string> = {

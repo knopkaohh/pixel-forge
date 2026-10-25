@@ -19,6 +19,7 @@ export type CatalogPatch = {
   sizeLabel: string;
   comingSoon: boolean;
   featured: boolean;
+  onOrder: boolean;
 };
 
 export type CreatedProductRecord = CatalogPatch & {
@@ -35,6 +36,7 @@ export type CatalogRecords = {
   edits: Record<string, CatalogPatch>;
   created: CreatedProductRecord[];
   categories: ExtraCategory[];
+  deleted: string[];
 };
 
 export type EditableProduct = CreatedProductRecord & {
@@ -57,7 +59,7 @@ const LETTERS: Record<string, string> = {
 };
 
 export function emptyCatalog(): CatalogRecords {
-  return { edits: {}, created: [], categories: [] };
+  return { edits: {}, created: [], categories: [], deleted: [] };
 }
 
 export function slugify(value: string) {
@@ -131,6 +133,7 @@ export function parsePatch(body: unknown): { ok: true; value: CatalogPatch } | {
       sizeLabel: cleanText(source.sizeLabel, 80),
       comingSoon: source.comingSoon === true,
       featured: source.featured === true,
+      onOrder: source.onOrder === true,
     },
   };
 }
@@ -167,7 +170,14 @@ export function normalizeCatalog(value: unknown): CatalogRecords {
       categories.push({ name, slug });
     }
   }
-  return { edits, created, categories };
+  const deleted: string[] = [];
+  if (Array.isArray(source.deleted)) {
+    for (const item of source.deleted) {
+      const id = cleanText(item, 80);
+      if (id && !id.includes("..") && !deleted.includes(id)) deleted.push(id);
+    }
+  }
+  return { edits, created, categories, deleted };
 }
 
 function applyPatch(product: CatalogProduct, patch?: CatalogPatch): CatalogProduct {
@@ -181,6 +191,7 @@ function applyPatch(product: CatalogProduct, patch?: CatalogPatch): CatalogProdu
     sizeLabel: patch.sizeLabel,
     comingSoon: patch.comingSoon,
     featured: patch.featured,
+    onOrder: patch.onOrder,
     specs: { ...product.specs, ...patch.specs },
     images: patch.images,
     image: patch.images[0] || product.image,
@@ -206,6 +217,7 @@ function fromCreated(item: CreatedProductRecord): CatalogProduct {
     reviews: [],
     featured: item.featured,
     comingSoon: item.comingSoon,
+    onOrder: item.onOrder,
   };
 }
 
@@ -215,10 +227,11 @@ export function baseProducts() {
 
 export function mergeCatalog(records: CatalogRecords) {
   const catalog = normalizeCatalog(records);
+  const removed = new Set(catalog.deleted);
   const all = [
     ...baseProducts().map(product => applyPatch(product, catalog.edits[product.id])),
     ...catalog.created.map(fromCreated),
-  ];
+  ].filter(product => !removed.has(product.id));
   const sale = all.filter(product => !product.comingSoon);
   const featured = sale.filter(product => product.featured);
   const slugByName = new Map<string, string>(Object.entries(categorySlugs));
@@ -240,7 +253,7 @@ export function mergeCatalog(records: CatalogRecords) {
     const soon = items.length ? items.every(product => product.comingSoon) : Boolean(builtIn?.soon);
     return {
       name,
-      image: items[0]?.image || builtIn?.image || "/images/categories/kovry.jpg",
+      image: builtIn?.image || items[0]?.image || "/images/categories/kovry.jpg",
       href: `/catalog/${slug}`,
       soon,
     };
@@ -257,6 +270,7 @@ export function mergeCatalog(records: CatalogRecords) {
     sizeLabel: product.sizeLabel,
     comingSoon: Boolean(product.comingSoon),
     featured: Boolean(product.featured),
+    onOrder: Boolean(product.onOrder),
     builtIn: baseProducts().some(item => item.id === product.id),
   }));
   return {

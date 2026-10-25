@@ -49,7 +49,7 @@ function empty_store(): array
         "visitors" => [],
         "geoCache" => [],
         "subscribers" => [],
-        "catalog" => ["edits" => [], "created" => [], "categories" => []],
+        "catalog" => ["edits" => [], "created" => [], "categories" => [], "deleted" => []],
     ];
 }
 
@@ -92,7 +92,7 @@ function write_store(string $file, array $store): void
     if (($store["payUrls"] ?? []) === []) $store["payUrls"] = new stdClass();
     if (($store["visitors"] ?? []) === []) $store["visitors"] = new stdClass();
     if (($store["geoCache"] ?? []) === []) $store["geoCache"] = new stdClass();
-    if (!isset($store["catalog"]) || !is_array($store["catalog"])) $store["catalog"] = ["edits" => [], "created" => [], "categories" => []];
+    if (!isset($store["catalog"]) || !is_array($store["catalog"])) $store["catalog"] = ["edits" => [], "created" => [], "categories" => [], "deleted" => []];
     if (($store["catalog"]["edits"] ?? []) === []) $store["catalog"]["edits"] = new stdClass();
     $ok = file_put_contents($file, json_encode($store, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     if ($ok === false) {
@@ -155,6 +155,7 @@ function clean_patch(mixed $value): ?array
         "sizeLabel" => clean_line($value["sizeLabel"] ?? "", 80),
         "comingSoon" => ($value["comingSoon"] ?? false) === true,
         "featured" => ($value["featured"] ?? false) === true,
+        "onOrder" => ($value["onOrder"] ?? false) === true,
     ];
 }
 
@@ -186,7 +187,12 @@ function catalog_from_parsed(array $parsed): array
         if ($name === "" || $slug === "" || str_contains($slug, "..")) continue;
         $categories[] = ["name" => $name, "slug" => $slug];
     }
-    return ["edits" => $edits, "created" => $created, "categories" => $categories];
+    $deleted = [];
+    foreach (($raw["deleted"] ?? []) as $item) {
+        $id = clean_line($item, 80);
+        if ($id !== "" && !str_contains($id, "..") && !in_array($id, $deleted, true)) $deleted[] = $id;
+    }
+    return ["edits" => $edits, "created" => $created, "categories" => $categories, "deleted" => $deleted];
 }
 
 function catalog_payload(array $catalog): array
@@ -197,6 +203,7 @@ function catalog_payload(array $catalog): array
         "edits" => $edits,
         "created" => array_values($catalog["created"]),
         "categories" => array_values($catalog["categories"]),
+        "deleted" => array_values($catalog["deleted"] ?? []),
     ];
 }
 
@@ -892,6 +899,32 @@ if ($path === "/api/admin/catalog" && $method === "POST") {
             }
             $slug = unique_slug(slugify_ru($name), taken_slugs($records, $catalogFile));
             $records["categories"][] = ["name" => $name, "slug" => $slug];
+            $store["catalog"] = $records;
+            return catalog_payload($records);
+        });
+        if ($error !== "") send_json(["ok" => false, "error" => $error], 400);
+        send_json(["ok" => true] + $saved);
+    }
+    if ($action === "delete-product") {
+        $id = clean_line($body["id"] ?? "", 80);
+        if ($id === "" || str_contains($id, "..")) send_json(["ok" => false, "error" => "Нет товара"], 400);
+        $error = "";
+        $saved = with_store($storeFile, function (&$store) use ($id, $catalogFile, &$error) {
+            $records = $store["catalog"];
+            if (!isset($records["deleted"]) || !is_array($records["deleted"])) $records["deleted"] = [];
+            $createdIndex = null;
+            foreach ($records["created"] as $index => $product) {
+                if ($product["id"] === $id) $createdIndex = $index;
+            }
+            if ($createdIndex !== null) {
+                array_splice($records["created"], $createdIndex, 1);
+            } elseif (in_array($id, base_product_ids($catalogFile), true)) {
+                if (!in_array($id, $records["deleted"], true)) $records["deleted"][] = $id;
+            } else {
+                $error = "Товар не найден";
+                return catalog_payload($records);
+            }
+            unset($records["edits"][$id]);
             $store["catalog"] = $records;
             return catalog_payload($records);
         });

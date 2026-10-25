@@ -75,6 +75,7 @@ export type CatalogPatch = {
   sizeLabel: string;
   comingSoon: boolean;
   featured: boolean;
+  onOrder: boolean;
 };
 
 export type CreatedProductRecord = CatalogPatch & {
@@ -91,6 +92,7 @@ export type CatalogRecords = {
   edits: Record<string, CatalogPatch>;
   created: CreatedProductRecord[];
   categories: ExtraCategory[];
+  deleted: string[];
 };
 
 export type AdminStore = {

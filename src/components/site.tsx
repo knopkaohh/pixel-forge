@@ -64,11 +64,8 @@ const formatPrice = (price: number) => `${price.toLocaleString("ru-RU")} ₽`;
 function Logo() {
   return (
     <Link href="/" className="brand" aria-label="Мэри Джут — главная">
-      <svg className="brand-leaf" viewBox="0 0 42 42" aria-hidden="true">
-        <path d="M35.5 6.5C20 7 9.2 14 8.1 27.8c7.7 1.7 15.5-.5 20.2-6.9 3.6-4.8 4.8-10 7.2-14.4Z" />
-        <path d="M7 35c3.7-10.2 10.8-17.6 22.8-23.3M17.2 22.1c-.2-3.2.4-6 1.7-8.7M18.6 21.1c3.2.4 6.4-.1 9.5-1.5" />
-      </svg>
-      <span className="brand-copy"><b>Мэри Джут</b><small>изделия из джута</small></span>
+      <img src="/images/logo.svg" alt="" className="brand-logo" />
+      <img src="/images/logo-footer.svg" alt="" className="brand-logo brand-logo-on-dark" />
     </Link>
   );
 }
@@ -79,6 +76,14 @@ export function Header() {
   const nav = [
     ["Каталог", "/catalog"],
     ["О нас", "/about"],
+    ["Доставка", "/delivery"],
+    ["Оплата", "/payment"],
+    ["Контакты", "/contacts"],
+  ];
+  const primaryNav = [
+    ["Каталог", "/catalog"],
+    ["О нас", "/about"],
+    ["Индивидуальное изготовление", "/custom"],
     ["Доставка", "/delivery"],
     ["Оплата", "/payment"],
     ["Контакты", "/contacts"],
@@ -104,7 +109,7 @@ export function Header() {
   return (
     <>
     <div className="topbar">
-      <div className="announcement">Бесплатная доставка при заказе от 15 000 ₽ до 30 октября</div>
+      <div className="announcement">Скидка 10% на заказ от 15 000 ₽ и 5% за самовывоз</div>
       <header className="site-header">
         <div className="shell header-inner">
           <Logo />
@@ -129,8 +134,8 @@ export function Header() {
           <div className="mobile-drawer" role="dialog" aria-modal="true" aria-label="Меню сайта" onClick={event => event.stopPropagation()}>
             <div className="drawer-head"><Logo /><button onClick={() => setOpen(false)} aria-label="Закрыть меню"><X /></button></div>
             <div className="drawer-columns">
-              <nav><span>Основное</span>{nav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}<ArrowRight /></Link>)}<Link href="/favorites" onClick={() => setOpen(false)}>Избранное<ArrowRight /></Link><Link href="/cart" onClick={() => setOpen(false)}>Корзина<ArrowRight /></Link></nav>
-              <nav><span>Покупателям</span>{moreNav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}>{label}<ArrowRight /></Link>)}</nav>
+              <nav><span>Основное</span>{primaryNav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}><span>{label}</span><ArrowRight /></Link>)}<Link href="/favorites" onClick={() => setOpen(false)}><span>Избранное</span><ArrowRight /></Link><Link href="/cart" onClick={() => setOpen(false)}><span>Корзина</span><ArrowRight /></Link></nav>
+              <nav><span>Покупателям</span>{moreNav.map(([label, href]) => <Link key={label} href={href} onClick={() => setOpen(false)}><span>{label}</span><ArrowRight /></Link>)}</nav>
             </div>
             <div className="drawer-contact"><span>Нужна помощь с выбором?</span><a href={PHONE_HREF}>{PHONE_DISPLAY}</a><Link href="/contacts" onClick={() => setOpen(false)}>Написать нам</Link></div>
           </div>
@@ -164,7 +169,7 @@ export function Footer() {
         </div>
         <div><h4>Каталог</h4>{live.categories.map(cat => <Link key={cat.name} href={cat.href}>{cat.name}</Link>)}</div>
         <div><h4>О компании</h4><Link href="/about">О нас</Link><Link href="/portfolio">Портфолио</Link><Link href="/contacts">Контакты</Link><Link href="/faq">Вопросы и ответы</Link><Link href="/certificates">Сертификаты</Link></div>
-        <div><h4>Покупателям</h4><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link><Link href="/promotions">Акции</Link><Link href="/calculator">Свой размер</Link></div>
+        <div><h4>Покупателям</h4><Link href="/custom">Индивидуальное изготовление</Link><Link href="/delivery">Доставка</Link><Link href="/payment">Оплата</Link><Link href="/returns">Возврат</Link><Link href="/warranty">Гарантия</Link><Link href="/care">Уход за изделиями</Link><Link href="/promotions">Акции</Link><Link href="/calculator">Свой размер</Link></div>
         <div><h4>Документы</h4><Link href="/privacy">Политика конфиденциальности</Link><Link href="/terms">Пользовательское соглашение</Link></div>
       </div>
       <div className="shell footer-markets">
@@ -202,12 +207,12 @@ function ProductCard({ product = products[0] }: { product?: CatalogProduct }) {
     <article className={`product-card${soon ? " soon" : ""}`}>
       <Link href={href} className="product-image">
         <Image src={product.image} alt={product.name} fill sizes="(max-width: 700px) 50vw, 25vw" unoptimized />
-        {soon && <span className="product-badge">Скоро</span>}
+        {soon ? <span className="product-badge">Скоро</span> : product.onOrder ? <span className="product-badge order">Под заказ</span> : null}
       </Link>
       <button className={`heart ${liked ? "active" : ""}`} onClick={() => toggleFavorite({ id: product.id, name: product.name, price, image: product.image })} aria-label="Добавить в избранное" aria-pressed={liked}><Heart /></button>
       <div className="product-copy">
         <Link href={href}><h3>{product.name}</h3></Link>
-        <p>{soon ? "Коллекция готовится к публикации" : "Натуральный джут · в наличии"}</p>
+        <p>{soon ? "Коллекция готовится к публикации" : product.onOrder ? "Натуральный джут · под заказ" : "Натуральный джут · в наличии"}</p>
         <div className="product-bottom">
           {soon ? <strong>Скоро в каталоге</strong> : <strong>{formatPrice(price)}</strong>}
           {!soon && <button onClick={() => { addToCart(toCartItem(product)); setAdded(true); }}><span>{added ? "Добавлено" : "В корзину"}</span><ShoppingBag /></button>}
@@ -228,23 +233,39 @@ function Benefits() {
   );
 }
 
+const heroSlides = [
+  { alt: "Круглый джутовый ковёр у кресла" },
+  { alt: "Круглый джутовый ковёр в спальне" },
+  { alt: "Крупный план круглого джутового ковра" },
+];
+
 export function HomePage() {
   const live = useLiveCatalog();
   const [homeFaqOpen, setHomeFaqOpen] = useState<number | null>(null);
+  const [heroSlide, setHeroSlide] = useState(0);
   const homeFaqs = [
     ["Как ухаживать за изделиями?", "Используйте сухую чистку мягкой щёткой или пылесосом на небольшой мощности. Не замачивайте изделие полностью."],
-    ["Можно ли заказать свой размер?", "Да. Укажите форму и размеры в калькуляторе, а мастер уточнит детали и подтвердит итоговую стоимость."],
+    ["Можно ли заказать свой размер?", "Да. На странице индивидуального изготовления — сроки и условия, в калькуляторе можно прикинуть стоимость. Мастер подтвердит итог до начала работы."],
     ["Почему новое изделие имеет запах?", "Это естественный аромат натурального джута. После проветривания он становится значительно слабее в течение нескольких дней."],
   ];
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const timer = window.setInterval(() => setHeroSlide((current) => (current + 1) % heroSlides.length), 7000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <Page>
       <section className="hero">
         <div className="hero-slides">
-          <picture className="active curtain">
-            <source media="(max-width: 900px)" srcSet="/images/hero/slide-1-mobile.jpg" />
-            <img src="/images/hero/slide-1-desktop.jpg" alt="Светлый интерьер с джутовым ковром" />
-          </picture>
+          {heroSlides.map((slide, index) => (
+            <picture className={`${heroSlide === index ? "active" : ""}${index === 2 ? " detail" : ""}`} key={slide.alt}>
+              <source media="(max-width: 900px)" srcSet={`/images/hero/slide-${index + 1}-mobile.jpg`} />
+              <img src={`/images/hero/slide-${index + 1}-desktop.jpg`} alt={slide.alt} />
+            </picture>
+          ))}
         </div>
         <div className="hero-content">
           <p className="hero-draft">Сайт в разработке</p>
@@ -253,10 +274,12 @@ export function HomePage() {
           <span>Ковры, корзины, панно и декор ручной работы из натурального джута</span>
           <Button className="hero-cta" render={<Link href="/catalog" />}>Перейти в каталог <ArrowRight /></Button>
         </div>
-        <div className="hero-index" aria-hidden="true">
-          <span className="active"><i />01</span>
-          <span>02</span>
-          <span>03</span>
+        <div className="hero-index">
+          {heroSlides.map((slide, index) => (
+            <button type="button" className={heroSlide === index ? "active" : ""} key={slide.alt} onClick={() => setHeroSlide(index)} aria-label={`Фото ${index + 1}`}>
+              {index === 0 && <i />}0{index + 1}
+            </button>
+          ))}
         </div>
       </section>
       <Benefits />
@@ -264,9 +287,26 @@ export function HomePage() {
         <SectionTitle link="/catalog">Популярные товары</SectionTitle>
         <div className="product-grid">{live.featured.map((p) => <ProductCard key={p.id} product={p} />)}</div>
       </section>
-      <section className="shell story-banner">
-        <Image src="/images/hero.png" alt="" fill sizes="100vw" />
-        <div className="story-copy"><em>Ковры</em><p>Индивидуальное изготовление</p><span>Если вы не нашли подходящий ковёр, вы можете сделать заказ по вашим размерам.</span><Button render={<Link href="/calculator" />}>Рассчитать стоимость <ArrowRight /></Button></div>
+      <section className="shell bespoke">
+        <img src="/images/logo-footer.svg" alt="Мэри Джут" className="bespoke-logo" />
+        <div className="bespoke-top">
+          <div>
+            <p className="eyebrow">На заказ</p>
+            <h2>Нужен другой диаметр?</h2>
+            <p className="bespoke-lead">Сплетём форму, размер и оттенок для комнаты, подарка или одного места, которое хочется закрыть джутом. Сначала называем сумму — к станку садимся после вашего подтверждения.</p>
+          </div>
+          <div className="bespoke-actions">
+            <Button render={<Link href="/calculator" />}>Рассчитать стоимость <ArrowRight /></Button>
+            <span>Сумму называем до того, как сядем плести.</span>
+          </div>
+        </div>
+        <ul className="bespoke-facts">
+          <li><b>от 5 000 ₽</b><span>с этой суммы берём работу в мастерской</span></li>
+          <li><b>10–14 дней</b><span>обычно уходит на плетение после согласования</span></li>
+          <li><b>Оплата целиком</b><span>если плетение не начато, предоплату отдаём обратно</span></li>
+          <li><b>Кадр перед дорогой</b><span>в путь — только когда подтвердите, что вид вас устраивает</span></li>
+        </ul>
+        <p className="bespoke-legal">Ковёр по вашим меркам, сделанный без брака, обратно не принимаем: его нельзя продать другому. <Link href="/custom">Как устроен заказ</Link>, подробности — на страницах <Link href="/delivery">«Доставка»</Link> и <Link href="/returns">«Возврат и обмен»</Link>.</p>
       </section>
       <section className="shell section">
         <SectionTitle link="/catalog">Категории</SectionTitle>
@@ -275,7 +315,7 @@ export function HomePage() {
         </div>
       </section>
       <section className="shell promo">
-        <Image src="/images/process.png" alt="Процесс создания изделий из джута" fill sizes="100vw" />
+        <Image src="/images/workshop.jpg" alt="Пошив ковра из джутового каната" fill sizes="100vw" unoptimized />
         <div><small>За кулисами производства</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
         <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
@@ -532,6 +572,7 @@ export function ProductPage({ slug }: { slug: string }) {
         <div className="gallery">
           <div className="main-image">
             <Image src={image} alt={product.name} fill priority sizes="(max-width: 700px) 100vw, 520px" unoptimized />
+            {!comingSoon && product.onOrder && <span className="product-badge order">Под заказ</span>}
             {gallery.length > 1 && (
               <>
                 <button type="button" className="gallery-nav prev" onClick={() => setImageIndex((gallery.length + imageIndex - 1) % gallery.length)} aria-label="Предыдущее фото"><ArrowLeft /></button>
@@ -623,7 +664,7 @@ export function AboutPage() {
   const preview = portfolioPhotos.slice(0, 6);
   return (
     <Page>
-      <section className="page-hero about-hero"><Image src="/images/hero.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
+      <section className="page-hero about-hero"><Image src="/images/workshop.jpg" alt="Пошив ковра из джутового каната" fill priority unoptimized /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
       <article className="shell about-story">
         <p className="eyebrow">Алёна и Стася</p>
         <h2>Мэри Джут — история, которая началась со школьного проекта</h2>
@@ -750,16 +791,105 @@ function InfoHero({ title, subtitle }: { title: string; subtitle: string }) {
 export function DeliveryPage() {
   return (
     <Page>
-      <InfoHero title="Доставка" subtitle="Бережно доставляем изделия по всей России" />
-      <section className="shell info-layout">
-        <div className="info-main"><p className="eyebrow">Сразу по делу</p><h2>Доставка и оплата</h2><p>Ozon — от 350 ₽ до пункта выдачи. СДЭК — от 490 ₽. Отправка готового изделия — 1–3 рабочих дня. От 15 000 ₽ доставка до пункта бесплатная. Заказ из нескольких товаров оплачивается одной суммой, одной ссылкой.</p><div className="info-card-grid">
-          <article><Truck /><span><b>СДЭК</b><small>До пункта выдачи или курьером</small></span><strong>от 490 ₽</strong></article>
-          <article><PackageCheck /><span><b>Ozon Доставка</b><small>До выбранного пункта выдачи</small></span><strong>от 350 ₽</strong></article>
-          <article><MapPin /><span><b>Самовывоз</b><small>По согласованию из мастерской</small></span><strong>Бесплатно</strong></article>
-        </div><div className="info-copy"><h3>Как проходит доставка</h3><ol><li><b>Оформите заказ</b><span>Выберите изделие и укажите удобный способ получения.</span></li><li><b>Мы бережно упакуем</b><span>Защитим изделие от влаги и повреждений.</span></li><li><b>Получите уведомление</b><span>Отправим трек-номер на e-mail или в мессенджер.</span></li></ol></div></div>
-        <aside className="info-aside"><Clock3 /><h3>Сроки доставки</h3><p>Срок изготовления и отправки готовых изделий — 1–3 рабочих дня. Индивидуальные заказы согласовываются отдельно.</p><div><span>Центральный регион</span><b>2–5 дней</b></div><div><span>Южные регионы</span><b>3–7 дней</b></div><div><span>Другие регионы</span><b>4–10 дней</b></div><Button render={<Link href="/contacts" />}>Уточнить срок</Button></aside>
+      <InfoHero title="Доставка" subtitle="По Ульяновску привозим бесплатно, по России — до пункта выдачи или курьером" />
+      <section className="shell info-layout delivery-page">
+        <div className="info-main">
+          <p className="eyebrow">Сразу по делу</p>
+          <h2>Как довезём заказ</h2>
+          <p>Готовую вещь отдаём в доставку за 1–3 рабочих дня. Ковёр по вашим меркам плетём 10–14 дней и только потом сдаём перевозчику. В пути по стране обычно от двух дней до недели: точнее скажем, когда появится трек.</p>
+          <p>По городу Ульяновск привозим сами и бесплатно. Дальше — до пункта выдачи: Ozon от 350 ₽, СДЭК от 490 ₽. Курьера до двери считаем отдельно, когда подтверждаем заказ: вес и город разные, одну цифру на всех не ставим. Забрать из мастерской можно самим — доставка тогда не нужна, и на заказ действует скидка 5%.</p>
+          <p>На заказ от 15 000 ₽ даём скидку 10%. Несколько изделий в одной корзине оплачиваются одной суммой. <Link href="/payment">Как проходит оплата</Link>.</p>
+          <div className="info-card-grid quad">
+            <article><MapPin /><span><b>Ульяновск</b><small>По городу привозим сами</small></span><strong>Бесплатно</strong></article>
+            <article><PackageCheck /><span><b>Ozon</b><small>До выбранного пункта выдачи</small></span><strong>от 350 ₽</strong></article>
+            <article><Truck /><span><b>СДЭК</b><small>Пункт выдачи или курьер до двери</small></span><strong>от 490 ₽</strong></article>
+            <article><Leaf /><span><b>Самовывоз</b><small>Из мастерской, плюс скидка 5%</small></span><strong>Бесплатно</strong></article>
+          </div>
+          <div className="info-copy">
+            <h3>Как проходит отправка</h3>
+            <ol>
+              <li><b>Выбираете получение</b><span>Город, пункт выдачи, курьер или самовывоз — отмечаете при заказе.</span></li>
+              <li><b>Пакуем по отдельности</b><span>Каждую вещь закрываем сами и только потом укладываем в коробку, чтобы канат не поехал и не набрал влаги.</span></li>
+              <li><b>Присылаем трек</b><span>Когда отдадим перевозчику, номер уйдёт на почту или в сообщение.</span></li>
+            </ol>
+          </div>
+        </div>
+        <aside className="info-aside">
+          <Clock3 />
+          <h3>Сроки</h3>
+          <p>Готовое изделие уходит за 1–3 рабочих дня. Индивидуальный заказ — 10–14 дней на плетение, дорога считается сверху.</p>
+          <div><span>Центральный регион</span><b>2–5 дней</b></div>
+          <div><span>Южные регионы</span><b>3–7 дней</b></div>
+          <div><span>Остальная Россия</span><b>4–10 дней</b></div>
+          <div><span>Дальние регионы</span><b>до оплаты</b></div>
+          <Button render={<Link href="/contacts" />}>Уточнить срок</Button>
+        </aside>
       </section>
-      <section className="shell delivery-note"><Leaf /><div><h3>Бесплатная доставка</h3><p>Для заказов от 15 000 ₽ доставка до пункта выдачи — за наш счёт.</p></div></section>
+      <section className="shell policy-prose">
+        <article>
+          <h2>Дальние адреса</h2>
+          <p>Дальний Восток, Калининград и Крайний Север считаем отдельно. Сумму и ориентир по дням называем до оплаты, а не после того, как заказ уже собран.</p>
+        </article>
+        <article>
+          <h2>Что внутри коробки</h2>
+          <p>Сначала своя упаковка на каждое изделие, затем общая коробка. Так ковёр не трётся о корзину, а канат не набирает влагу в дороге.</p>
+        </article>
+        <article>
+          <h2>Если плетём под вас</h2>
+          <p>Срок 10–14 дней — это мастерская, не перевозчик. Отсчёт дороги начинается, когда вы посмотрите фото и напишете, что можно отправлять. <Link href="/custom">Условия индивидуального заказа</Link>.</p>
+        </article>
+      </section>
+      <section className="shell delivery-note">
+        <Leaf />
+        <div>
+          <h3>Скидки на заказ</h3>
+          <p>10%, если сумма от 15 000 ₽. Ещё 5%, если забираете самовывозом. По Ульяновску доставка бесплатная в любом случае.</p>
+        </div>
+      </section>
+    </Page>
+  );
+}
+
+export function CustomPage() {
+  return (
+    <Page>
+      <InfoHero title="Индивидуальное изготовление" subtitle="Форма, диаметр и оттенок — под вашу комнату, а не под чужой каталог" />
+      <section className="shell custom-intro">
+        <div>
+          <p className="eyebrow">Свой размер</p>
+          <h2>Сплетём то, чего нет в каталоге</h2>
+          <p>Если нужен другой диаметр, форма или оттенок джута — делаем отдельно. Сначала прикидываете стоимость в калькуляторе, потом мы подтверждаем, что такой размер получится на станке, и называем итог. К работе садимся только после вашего согласия.</p>
+          <p>Заказ от 15 000 ₽ — скидка 10%. Самовывоз из мастерской — ещё 5%.</p>
+        </div>
+        <ul className="custom-facts">
+          <li><b>от 5 000 ₽</b><span>Минимальная сумма, с которой берём заказ. Итог может быть выше похожей вещи из каталога: размер и рисунок другие, об этом говорим до старта.</span></li>
+          <li><b>10–14 дней</b><span>Обычный срок плетения после согласования и оплаты. Дорога до вас в эти дни не входит.</span></li>
+          <li><b>Предоплата целиком</b><span>Цену фиксируем заранее. Если ещё не начали плести — сумму возвращаем.</span></li>
+          <li><b>Фото до отправки</b><span>Присылаем кадр с производства. В дорогу изделие уходит, когда вы напишете, что всё так.</span></li>
+        </ul>
+      </section>
+      <section className="shell warranty-steps custom-steps">
+        <div>
+          <p className="eyebrow">Порядок</p>
+          <h2>От калькулятора до коробки</h2>
+        </div>
+        <ol>
+          <li><b>Считаете размер</b><span>Форма и диаметр — в калькуляторе. Это ориентир, не счёт.</span></li>
+          <li><b>Согласуем итог</b><span>Проверяем, что такой ковёр можем сплести, и называем сумму. Если размер не наш — оплату не берём.</span></li>
+          <li><b>Плетём и показываем</b><span>После предоплаты делаем изделие и присылаем фото. Отправляем только когда вы подтвердите.</span></li>
+        </ol>
+      </section>
+      <section className="shell returns-callout">
+        <h2>Обратно такую вещь не принимаем</h2>
+        <p>Изделие по вашим меркам, если в нём нет брака, нельзя вернуть или обменять: второго такого же в каталоге нет. Недостаток с производства — это уже гарантия, не отказ «не подошло». Условия доставки и возврата — на страницах <Link href="/delivery">«Доставка»</Link> и <Link href="/returns">«Возврат и обмен»</Link>.</p>
+      </section>
+      <section className="shell editorial-cta warranty-cta custom-cta">
+        <h3>Посчитать свой размер</h3>
+        <div className="about-actions">
+          <Button render={<Link href="/calculator" />}>Рассчитать стоимость <ArrowRight /></Button>
+          <Button variant="outline" render={<Link href="/contacts" />}>Написать нам</Button>
+        </div>
+      </section>
     </Page>
   );
 }
@@ -777,7 +907,7 @@ export function PaymentPage() {
         <div className="payment-grid">
           <article><CreditCard /><h3>Одна сумма</h3><p>Стоимость всех изделий складывается в один итог. Платить пять раз за пять товаров не нужно.</p><span>Весь заказ</span></article>
           <article><WalletCards /><h3>Ссылка от менеджера</h3><p>После заявки менеджер присылает одну ссылку на оплату. Карту мы на сайте не храним.</p><span>На телефон и почту</span></article>
-          <article><Banknote /><h3>Доставка отдельно</h3><p>Ozon от 350 ₽, СДЭК от 490 ₽. От 15 000 ₽ доставка до пункта выдачи бесплатная.</p><span>Считается в заказе</span></article>
+          <article><Banknote /><h3>Доставка и скидки</h3><p>По Ульяновску — бесплатно. По России Ozon от 350 ₽, СДЭК от 490 ₽. На заказ от 15 000 ₽ скидка 10%, за самовывоз ещё 5%.</p><span>Считается в заказе</span></article>
         </div>
       </section>
       <section className="shell payment-steps">
