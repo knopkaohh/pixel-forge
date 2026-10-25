@@ -288,25 +288,25 @@ export function HomePage() {
         <div className="product-grid">{live.featured.map((p) => <ProductCard key={p.id} product={p} />)}</div>
       </section>
       <section className="shell bespoke">
-        <div className="bespoke-photo">
-          <Image src="/images/hero.png" alt="Круглый джутовый ковёр в гостиной" fill sizes="(max-width: 900px) 100vw, 320px" />
-        </div>
-        <div className="bespoke-copy">
-          <p className="eyebrow">На заказ</p>
-          <h2>Нужен другой диаметр?</h2>
-          <p className="bespoke-lead">Сплетём форму, размер и оттенок для комнаты, подарка или одного места, которое хочется закрыть джутом. Сначала называем сумму — к станку садимся после вашего подтверждения.</p>
-          <ul className="bespoke-facts">
-            <li><b>от 5 000 ₽</b><span>с этой суммы берём работу в мастерской</span></li>
-            <li><b>10–14 дней</b><span>обычно уходит на плетение после согласования</span></li>
-            <li><b>Оплата целиком</b><span>если плетение не начато, предоплату отдаём обратно</span></li>
-            <li><b>Кадр перед дорогой</b><span>в путь — только когда подтвердите, что вид вас устраивает</span></li>
-          </ul>
+        <img src="/images/logo-footer.svg" alt="Мэри Джут" className="bespoke-logo" />
+        <div className="bespoke-top">
+          <div>
+            <p className="eyebrow">На заказ</p>
+            <h2>Нужен другой диаметр?</h2>
+            <p className="bespoke-lead">Сплетём форму, размер и оттенок для комнаты, подарка или одного места, которое хочется закрыть джутом. Сначала называем сумму — к станку садимся после вашего подтверждения.</p>
+          </div>
           <div className="bespoke-actions">
             <Button render={<Link href="/calculator" />}>Рассчитать стоимость <ArrowRight /></Button>
             <span>Сумму называем до того, как сядем плести.</span>
           </div>
-          <p className="bespoke-legal">Ковёр по вашим меркам, сделанный без брака, обратно не принимаем: его нельзя продать другому. <Link href="/custom">Как устроен заказ</Link>, подробности — на страницах <Link href="/delivery">«Доставка»</Link> и <Link href="/returns">«Возврат и обмен»</Link>.</p>
         </div>
+        <ul className="bespoke-facts">
+          <li><b>от 5 000 ₽</b><span>с этой суммы берём работу в мастерской</span></li>
+          <li><b>10–14 дней</b><span>обычно уходит на плетение после согласования</span></li>
+          <li><b>Оплата целиком</b><span>если плетение не начато, предоплату отдаём обратно</span></li>
+          <li><b>Кадр перед дорогой</b><span>в путь — только когда подтвердите, что вид вас устраивает</span></li>
+        </ul>
+        <p className="bespoke-legal">Ковёр по вашим меркам, сделанный без брака, обратно не принимаем: его нельзя продать другому. <Link href="/custom">Как устроен заказ</Link>, подробности — на страницах <Link href="/delivery">«Доставка»</Link> и <Link href="/returns">«Возврат и обмен»</Link>.</p>
       </section>
       <section className="shell section">
         <SectionTitle link="/catalog">Категории</SectionTitle>
