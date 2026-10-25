@@ -13,6 +13,7 @@ const pages = [
   "/payment",
   "/contacts",
   "/calculator",
+  "/custom",
   "/promotions",
   "/returns",
   "/warranty",
