@@ -65,6 +65,7 @@ function Logo() {
   return (
     <Link href="/" className="brand" aria-label="Мэри Джут — главная">
       <img src="/images/logo.svg" alt="" className="brand-logo" />
+      <img src="/images/logo-footer.svg" alt="" className="brand-logo brand-logo-on-dark" />
     </Link>
   );
 }
@@ -289,7 +290,10 @@ export function HomePage() {
         </div>
       </section>
       <section className="shell promo">
-        <Image src="/images/workshop.jpg" alt="Пошив ковра из джутового каната" fill sizes="100vw" />
+        <picture className="cover-photo">
+          <source media="(max-width: 900px)" srcSet="/images/workshop.jpg" />
+          <img src="/images/workshop-desktop.jpg" alt="Пошив ковра из джутового каната" />
+        </picture>
         <div><small>За кулисами производства</small><p>Наши изделия рождаются<br />с любовью к деталям</p><span>Посмотрите, как создаётся натуральный уют</span><Button variant="secondary" render={<Link href="/about" />}>Смотреть историю <ArrowRight /></Button></div>
         <Link className="play-button" href="/about" aria-label="Смотреть историю компании">▶</Link>
       </section>
@@ -637,7 +641,7 @@ export function AboutPage() {
   const preview = portfolioPhotos.slice(0, 6);
   return (
     <Page>
-      <section className="page-hero about-hero"><Image src="/images/workshop.jpg" alt="Пошив ковра из джутового каната" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
+      <section className="page-hero about-hero"><picture className="cover-photo"><source media="(max-width: 900px)" srcSet="/images/workshop.jpg" /><img src="/images/workshop-desktop.jpg" alt="Пошив ковра из джутового каната" /></picture><div className="hero-shade" /><div className="shell"><p>Главная / О нас</p><h1>О нас</h1><span>История, которая началась со школьного проекта</span></div></section>
       <article className="shell about-story">
         <p className="eyebrow">Алёна и Стася</p>
         <h2>Мэри Джут — история, которая началась со школьного проекта</h2>
