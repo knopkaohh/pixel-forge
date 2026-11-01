@@ -1544,6 +1544,7 @@ body.is-loading { overflow:hidden; }
 
 @media (max-width: 1100px) {
   .delivery-facts { grid-template-columns: 1fr 1fr; }
+  .info-card-grid.quad { grid-template-columns: 1fr 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
 }
@@ -1609,9 +1610,9 @@ body.is-loading { overflow:hidden; }
 }
 .hero .hero-content > .hero-draft:before { content: none; display: none; }
 .hero > .hero-shade { background: none; }
-.hero-slides picture img { object-position: center center; transform: none; }
-.hero-slides picture.curtain img { object-position: left center; }
-.hero-slides picture.detail img { object-position: 78% center; }
+.hero-slides picture img { object-position: center 72%; transform: none; }
+.hero-slides picture.curtain img { object-position: center 72%; }
+.hero-slides picture.detail img { object-position: center center; }
 .about-hero .hero-shade {
   background:
     linear-gradient(90deg, rgba(12, 16, 12, .78) 0%, rgba(12, 16, 12, .42) 32%, rgba(12, 16, 12, 0) 62%),
@@ -1725,7 +1726,7 @@ body.is-loading { overflow:hidden; }
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(248, 244, 236, .97) 0%, rgba(248, 244, 236, .9) 22%, rgba(248, 244, 236, .42) 38%, rgba(248, 244, 236, 0) 54%);
+  background: linear-gradient(90deg, rgba(248, 244, 236, .94) 0%, rgba(248, 244, 236, .72) 12%, rgba(248, 244, 236, .18) 22%, rgba(248, 244, 236, 0) 32%);
 }
 
 /* Burger stays a dark icon on the right. Close control is only a small cross. */
@@ -1857,6 +1858,12 @@ body.is-loading { overflow:hidden; }
 }
 
 .category-image { aspect-ratio: 1 / 1; }
+.care-guide { display: grid; gap: 16px; padding: 48px 0 72px; }
+.care-guide article { padding: 28px 32px; border-radius: 16px; background: #fff; }
+.care-guide b { color: var(--jute); font: 18px "Playfair Display", Georgia, serif; }
+.care-guide h2 { margin: 8px 0 10px; font-size: 28px; }
+.care-guide p { margin: 0; max-width: 72ch; color: var(--muted); font-size: 15px; line-height: 1.7; }
+.care-guide .editorial-cta { margin-top: 8px; }
 .care-block { margin-top: 28px; }
 .care-block h3 { margin: 0 0 14px; font: 500 22px/1.2 "Playfair Display", Georgia, serif; color: var(--ink); }
 .care-block ul { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin: 0; padding: 0; columns: auto; list-style: none; }
@@ -1924,7 +1931,7 @@ body.is-loading { overflow:hidden; }
 .bespoke [data-slot="button"]:hover { background: #9a7039 !important; border-color: #9a7039 !important; color: #fff !important; }
 .bespoke-facts {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px 24px;
   margin: 22px 0 0;
   padding: 18px 0 0;
@@ -1943,7 +1950,7 @@ body.is-loading { overflow:hidden; }
 .returns-callout a,
 .custom-intro a { text-decoration: underline; text-underline-offset: 3px; }
 .delivery-page .info-card-grid { margin-top: 18px; }
-.info-card-grid.quad { grid-template-columns: 1fr 1fr; }
+.info-card-grid.quad { grid-template-columns: repeat(3, 1fr); }
 .delivery-page .info-card-grid article b { font-size: 16px; }
 .delivery-page .info-card-grid article small,
 .delivery-page .info-copy li span,
@@ -1952,7 +1959,7 @@ body.is-loading { overflow:hidden; }
 .delivery-page .info-copy li b { font-size: 15px; }
 .delivery-page .info-aside > div span { max-width: 18ch; }
 .delivery-note p { font-size: 15px; line-height: 1.6; }
-.policy-prose { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 0 auto 22px; }
+.policy-prose { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin: 0 auto 22px; }
 .policy-prose article { padding: 26px 24px; border-radius: 16px; background: #fff; }
 .policy-prose h2 { margin: 0 0 10px; font-size: 22px; }
 .policy-prose p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }

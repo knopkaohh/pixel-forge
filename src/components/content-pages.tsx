@@ -7,13 +7,14 @@ import { ArrowRight, ChevronDown, Heart, Leaf, PackageCheck, ShieldCheck, Sparkl
 import { Header, Footer } from "@/components/site";
 import { Button } from "@/components/ui/button";
 import { privacyPolicy, userAgreement, type LegalBlock } from "@/lib/legal";
+import { MAX_HREF, TELEGRAM_HREF } from "@/lib/contacts";
 
 function Page({ children }: { children: React.ReactNode }) {
   return <><Header /><main>{children}</main><Footer /></>;
 }
 
-function Hero({ title, text }: { title: string; text: string }) {
-  return <section className="page-hero content-hero"><Image src="/images/hero-dining.png" alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / {title}</p><h1>{title}</h1><span>{text}</span></div></section>;
+function Hero({ title, text, image = "/images/hero-dining.png" }: { title: string; text: string; image?: string }) {
+  return <section className="page-hero content-hero"><Image src={image} alt="" fill priority /><div className="hero-shade" /><div className="shell"><p>Главная / {title}</p><h1>{title}</h1><span>{text}</span></div></section>;
 }
 
 const faqs = [
@@ -33,34 +34,60 @@ export function FaqPage() {
 const infoPages = {
   care: {
     title: "Уход за изделиями",
-    text: "Простые рекомендации, которые сохранят красоту натурального джута",
-    icon: <Sparkles />,
-    sections: [
-      ["Регулярная чистка", "Используйте мягкую щётку или пылесос на минимальной мощности без вращающейся турбощётки."],
-      ["Удаление пятен", "Сразу промокните влагу сухой салфеткой. Для локальной чистки используйте слегка влажную ткань без агрессивных средств."],
-      ["Хранение", "Храните изделие в сухом проветриваемом месте, свернув в рулон лицевой стороной наружу."],
-    ],
+    text: "Джут живой: пыль, влага и форма",
   },
 };
 
 export function InformationPage({ type }: { type: keyof typeof infoPages }) {
   const data = infoPages[type];
-  return <Page><Hero title={data.title} text={data.text} /><section className="shell editorial-info"><div className="editorial-icon">{data.icon}</div>{data.sections.map(([title, text], i) => <article key={title}><b>0{i + 1}</b><h2>{title}</h2><p>{text}</p></article>)}<div className="editorial-cta"><h3>Остались вопросы?</h3><Button render={<Link href="/contacts" />}>Связаться с нами</Button></div></section></Page>;
+  return (
+    <Page>
+      <Hero title={data.title} text={data.text} image="/images/interiors/08-table.jpg" />
+      <section className="shell care-guide">
+        <article>
+          <b>01</b>
+          <h2>Как ведёт себя джут</h2>
+          <p>Это натуральное волокно: прочное, и оно впитывает влагу. Во влажном воздухе изделие становится плотнее и лучше держит форму. В сухом — мягче. Поэтому уход зависит от того, где вещь стоит.</p>
+        </article>
+        <article>
+          <b>02</b>
+          <h2>Сухая чистка</h2>
+          <p>Пыль и мелкий сор снимайте пылесосом на небольшой мощности, мягкой щёткой или сухой тканью. Так хватает для обычной уборки.</p>
+        </article>
+        <article>
+          <b>03</b>
+          <h2>Влажная чистка</h2>
+          <p>Протирайте губкой, смоченной в мыльном растворе. Пятно обработайте мягкой щёткой с небольшим количеством средства, затем снова пройдитесь влажной губкой и дайте высохнуть. Ковры и салфетки при необходимости можно постирать вручную в проточной воде с мягким средством.</p>
+        </article>
+        <article>
+          <b>04</b>
+          <h2>Как вернуть форму</h2>
+          <p>Плоские изделия после стирки сушите на ровной поверхности. Когда волокно станет мягче, форму можно вернуть утюгом на высокой температуре. Если корзина в сухом воздухе обмякла, сбрызните её водой и прогладьте.</p>
+        </article>
+        <article>
+          <b>05</b>
+          <h2>Чего не делать</h2>
+          <p>Не стирайте в машине и не замачивайте надолго. Не используйте агрессивную химию. Не выкручивайте и не отжимайте. Крупные корзины не стирайте целиком: им достаточно сухой чистки и влажной губки.</p>
+        </article>
+        <div className="editorial-cta"><h3>Остались вопросы?</h3><Button render={<Link href="/contacts" />}>Связаться с нами</Button></div>
+      </section>
+    </Page>
+  );
 }
 
 const warrantyPromises = [
-  [ShieldCheck, "Проверка перед отправкой", "Смотрим форму, плотность плетения и обработку края. С производства уезжает только то, что готовы поставить в свой дом."],
+  [ShieldCheck, "Проверка перед отправкой", "Смотрим форму, плотность шва и обработку края. С производства уезжает только то, что готовы поставить в свой дом."],
   [Leaf, "Натуральный джут", "Работаем с природным волокном, без синтетического ворса. Лёгкий растительный запах — норма, он уходит после проветривания."],
-  [Sparkles, "Собственное производство", "Полный цикл в России: от каната до готовой вещи. Знаем, кто плёл, и отвечаем за результат, а не за чужой конвейер."],
+  [Sparkles, "Собственное производство", "Полный цикл в России: от материала до готовой вещи. Знаем, кто отшивал изделие, и отвечаем за результат, а не за чужой конвейер."],
   [PackageCheck, "Бережная упаковка", "Укладываем так, чтобы изделие доехало таким же, каким ушло с производства. Если перевозка подвела — разберёмся."],
-  [Heart, "30 дней на недостаток", "Нашли производственный дефект — напишите в течение месяца после получения. Предложим решение: исправление, замена или возврат."],
-  [ShieldCheck, "Честно про ручную работу", "Небольшие отличия оттенка, фактуры и размера до ±2 см — характер джута и ручного плетения, а не брак."],
+  [Heart, "14 дней на недостаток", "Нашли производственный дефект — напишите в течение 14 дней после получения. Предложим решение: исправление, замена или возврат."],
+  [ShieldCheck, "Честно про ручную работу", "Небольшие отличия оттенка, фактуры и размера до ±2 см — характер джута и ручного пошива, а не брак."],
 ] as const;
 
 export function WarrantyPage() {
   return (
     <Page>
-      <Hero title="Гарантия качества" text="Отвечаем за материал, плетение и то, как изделие приедет к вам" />
+      <Hero title="Гарантия качества" text="Отвечаем за материал, пошив и то, как изделие приедет к вам" />
       <section className="shell about-intro">
         <div>
           <p className="eyebrow">Наше обещание</p>
@@ -87,7 +114,7 @@ export function WarrantyPage() {
           <h2>Когда мы всё исправим</h2>
           <ul>
             <li>Ошибка размера больше допустимых ±2 см</li>
-            <li>Распущенный край, слабый узел, дыра в плетении</li>
+            <li>Распущенный край, слабый шов, дыра в полотне</li>
             <li>Изделие приехало повреждённым при целой претензии к перевозке</li>
             <li>Отправили не ту модель или не тот размер</li>
           </ul>
@@ -97,7 +124,7 @@ export function WarrantyPage() {
           <h2>Что не считается дефектом</h2>
           <ul>
             <li>Небольшой разный тон джута в пределах натурального волокна</li>
-            <li>Живая фактура каната и лёгкая асимметрия ручной работы</li>
+            <li>Живая фактура джута и лёгкая асимметрия ручной работы</li>
             <li>Растительный запах в первые дни, который выветривается</li>
             <li>Следы естественного износа при неправильном уходе</li>
           </ul>
@@ -109,16 +136,16 @@ export function WarrantyPage() {
           <h2>Три шага — и мы на связи</h2>
         </div>
         <ol>
-          <li><b>Напишите нам</b><span>В течение 30 дней после получения: почта, форма на сайте или сообщение в Telegram и ВКонтакте.</span></li>
+          <li><b>Напишите нам</b><span>В течение 14 дней после получения — в Telegram или Макс.</span></li>
           <li><b>Пришлите фото</b><span>Изделие целиком, крупный план участка и упаковку — так быстрее понять, производство это или дорога.</span></li>
-          <li><b>Согласуем решение</b><span>Замена, доработка или возврат. Не оставляем вас один на один с канатом и вопросами.</span></li>
+          <li><b>Согласуем решение</b><span>Замена, доработка или возврат. Не оставляем вас один на один с проблемой.</span></li>
         </ol>
       </section>
       <section className="shell editorial-cta warranty-cta">
         <h3>Остались вопросы по качеству?</h3>
         <div className="about-actions">
-          <Button render={<Link href="/contacts" />}>Написать нам <ArrowRight /></Button>
-          <Button variant="outline" render={<Link href="/care" />}>Уход за изделиями</Button>
+          <Button render={<a href={TELEGRAM_HREF} target="_blank" rel="noopener noreferrer" />}>Написать в Telegram <ArrowRight /></Button>
+          <Button variant="outline" render={<a href={MAX_HREF} target="_blank" rel="noopener noreferrer" />}>Написать в Макс</Button>
         </div>
       </section>
     </Page>
@@ -126,7 +153,7 @@ export function WarrantyPage() {
 }
 
 export function PromotionsPage() {
-  return <Page><Hero title="Акции" text="Две скидки, которые действуют сейчас" /><section className="shell promotions-grid"><article><Image src="/images/hero.png" alt="" fill /><div><span>На заказ</span><h2>Скидка 10%</h2><p>Если сумма заказа от 15 000 ₽.</p><Button render={<Link href="/catalog" />}>Выбрать изделия</Button></div></article><article><Image src="/images/basket.png" alt="" fill /><div><span>Из мастерской</span><h2>Скидка 5%</h2><p>Если забираете заказ самовывозом в Ульяновске.</p><Button render={<Link href="/delivery" />}>Как забрать</Button></div></article></section></Page>;
+  return <Page><Hero title="Акции" text="Две скидки, которые действуют сейчас" image="/images/interiors/07-living.jpg" /><section className="shell promotions-grid"><article><Image src="/images/interiors/01-kover-150.jpg" alt="Круглый джутовый ковёр в гостиной" fill /><div><span>На заказ</span><h2>Скидка 10%</h2><p>Если сумма заказа от 15 000 ₽.</p><Button render={<Link href="/catalog" />}>Выбрать изделия</Button></div></article><article><Image src="/images/interiors/06-bedroom.jpg" alt="Джутовый ковёр в спальне" fill /><div><span>Из мастерской</span><h2>Скидка 5%</h2><p>Если забираете заказ самовывозом в Ульяновске.</p><Button render={<Link href="/delivery" />}>Как забрать</Button></div></article></section></Page>;
 }
 
 export function ReturnsPage() {
@@ -161,7 +188,7 @@ export function ReturnsPage() {
       </section>
       <section className="shell returns-callout">
         <h2>Индивидуальный заказ</h2>
-        <p>Вещь, сплетённую по вашим размерам и без брака, вернуть и обменять нельзя: она сделана только для вас. Если недостаток с производства — пишите, это гарантийный случай. <Link href="/warranty">Как мы разбираем брак</Link>.</p>
+        <p>Вещь, сшитую по вашим размерам и без брака, вернуть и обменять нельзя: она сделана только для вас. Если недостаток с производства — пишите, это гарантийный случай. <Link href="/warranty">Как мы разбираем брак</Link>.</p>
       </section>
       <section className="shell warranty-steps">
         <div>

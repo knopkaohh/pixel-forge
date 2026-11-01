@@ -3,7 +3,7 @@ import { WarrantyPage } from "@/components/content-pages";
 
 export const metadata: Metadata = {
   title: "Гарантия качества — Мэри Джут",
-  description: "Собственное производство отвечает за материал, плетение и доставку. 30 дней на производственный недостаток.",
+  description: "Собственное производство отвечает за материал, пошив и доставку. 14 дней на производственный недостаток.",
 };
 
 export default function Warranty() {
