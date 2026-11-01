@@ -3,7 +3,7 @@ import { PaymentPage } from "@/components/site";
 
 export const metadata: Metadata = {
   title: "Оплата — Мэри Джут",
-  description: "Один заказ, одна сумма, оплата картой. Адрес доставки указываете при оформлении.",
+  description: "Корзина, доставка и оплата картой онлайн. Стоимость видна до оплаты.",
 };
 
 export default function Payment() {

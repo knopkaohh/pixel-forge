@@ -7,7 +7,7 @@ import { ArrowRight, ChevronDown, Heart, Leaf, PackageCheck, ShieldCheck, Sparkl
 import { Header, Footer } from "@/components/site";
 import { Button } from "@/components/ui/button";
 import { privacyPolicy, userAgreement, type LegalBlock } from "@/lib/legal";
-import { MAX_HREF, TELEGRAM_HREF } from "@/lib/contacts";
+import { MessengerButtons } from "@/components/messenger-buttons";
 
 function Page({ children }: { children: React.ReactNode }) {
   return <><Header /><main>{children}</main><Footer /></>;
@@ -28,7 +28,7 @@ const faqs = [
 
 export function FaqPage() {
   const [open, setOpen] = useState(0);
-  return <Page><Hero title="Вопросы и ответы" text="Собрали всё важное о материалах, заказе и уходе" /><section className="shell faq-page"><div><p className="eyebrow">Помощь покупателю</p><h2>Частые вопросы</h2>{faqs.map(([question, answer], index) => <article className={open === index ? "open" : ""} key={question}><button onClick={() => setOpen(open === index ? -1 : index)}><span>0{index + 1}</span><b>{question}</b><ChevronDown /></button>{open === index && <p>{answer}</p>}</article>)}</div><aside><Leaf /><h3>Не нашли ответ?</h3><p>Напишите нам — поможем с выбором и расскажем об изделиях подробнее.</p><Button render={<Link href="/contacts" />}>Задать вопрос <ArrowRight /></Button></aside></section></Page>;
+  return <Page><Hero title="Вопросы и ответы" text="Собрали всё важное о материалах, заказе и уходе" /><section className="shell faq-page"><div><p className="eyebrow">Помощь покупателю</p><h2>Частые вопросы</h2>{faqs.map(([question, answer], index) => <article className={open === index ? "open" : ""} key={question}><button onClick={() => setOpen(open === index ? -1 : index)}><span>0{index + 1}</span><b>{question}</b><ChevronDown /></button>{open === index && <p>{answer}</p>}</article>)}</div><aside><Leaf /><h3>Не нашли ответ?</h3><p>Поможем с выбором и расскажем об изделиях подробнее.</p><div className="about-actions"><MessengerButtons /></div></aside></section></Page>;
 }
 
 const infoPages = {
@@ -69,7 +69,7 @@ export function InformationPage({ type }: { type: keyof typeof infoPages }) {
           <h2>Чего не делать</h2>
           <p>Не стирайте в машине и не замачивайте надолго. Не используйте агрессивную химию. Не выкручивайте и не отжимайте. Крупные корзины не стирайте целиком: им достаточно сухой чистки и влажной губки.</p>
         </article>
-        <div className="editorial-cta"><h3>Остались вопросы?</h3><Button render={<Link href="/contacts" />}>Связаться с нами</Button></div>
+        <div className="editorial-cta"><h3>Остались вопросы?</h3><div className="about-actions"><MessengerButtons /></div></div>
       </section>
     </Page>
   );
@@ -80,7 +80,7 @@ const warrantyPromises = [
   [Leaf, "Натуральный джут", "Работаем с природным волокном, без синтетического ворса. Лёгкий растительный запах — норма, он уходит после проветривания."],
   [Sparkles, "Собственное производство", "Полный цикл в России: от материала до готовой вещи. Знаем, кто отшивал изделие, и отвечаем за результат, а не за чужой конвейер."],
   [PackageCheck, "Бережная упаковка", "Укладываем так, чтобы изделие доехало таким же, каким ушло с производства. Если перевозка подвела — разберёмся."],
-  [Heart, "14 дней на недостаток", "Нашли производственный дефект — напишите в течение 14 дней после получения. Предложим решение: исправление, замена или возврат."],
+  [Heart, "14 дней на недостаток", "Нашли производственный дефект — напишите в Telegram или Макс в течение 14 дней после получения. Предложим решение: исправление, замена или возврат."],
   [ShieldCheck, "Честно про ручную работу", "Небольшие отличия оттенка, фактуры и размера до ±2 см — характер джута и ручного пошива, а не брак."],
 ] as const;
 
@@ -136,7 +136,7 @@ export function WarrantyPage() {
           <h2>Три шага — и мы на связи</h2>
         </div>
         <ol>
-          <li><b>Напишите нам</b><span>В течение 14 дней после получения — в Telegram или Макс.</span></li>
+          <li><b>Напишите в чат</b><span>В течение 14 дней после получения — в Telegram или Макс.</span></li>
           <li><b>Пришлите фото</b><span>Изделие целиком, крупный план участка и упаковку — так быстрее понять, производство это или дорога.</span></li>
           <li><b>Согласуем решение</b><span>Замена, доработка или возврат. Не оставляем вас один на один с проблемой.</span></li>
         </ol>
@@ -144,8 +144,7 @@ export function WarrantyPage() {
       <section className="shell editorial-cta warranty-cta">
         <h3>Остались вопросы по качеству?</h3>
         <div className="about-actions">
-          <Button render={<a href={TELEGRAM_HREF} target="_blank" rel="noopener noreferrer" />}>Написать в Telegram <ArrowRight /></Button>
-          <Button variant="outline" render={<a href={MAX_HREF} target="_blank" rel="noopener noreferrer" />}>Написать в Макс</Button>
+          <MessengerButtons />
         </div>
       </section>
     </Page>
@@ -196,7 +195,7 @@ export function ReturnsPage() {
           <h2>Три шага</h2>
         </div>
         <ol>
-          <li><b>Напишите нам</b><span>После получения зайдите в контакты на сайте и попросите бланк заявления на возврат.</span></li>
+          <li><b>Напишите в чат</b><span>После получения напишите в Telegram или Макс и попросите бланк заявления на возврат.</span></li>
           <li><b>Сложите всё вместе</b><span>Изделие и то, что к нему прилагалось, в ту же упаковку, если она цела.</span></li>
           <li><b>Передайте обратно</b><span>Отнесите в пункт, где забирали, или отправьте Почтой России за свой счёт и пришлите нам трек-номер.</span></li>
         </ol>
@@ -225,7 +224,7 @@ export function ReturnsPage() {
       <section className="shell editorial-cta warranty-cta">
         <h3>Нужен бланк или совет?</h3>
         <div className="about-actions">
-          <Button render={<Link href="/contacts" />}>Написать нам <ArrowRight /></Button>
+          <MessengerButtons />
           <Button variant="outline" render={<Link href="/warranty" />}>Гарантия качества</Button>
         </div>
       </section>
@@ -234,7 +233,7 @@ export function ReturnsPage() {
 }
 
 export function CertificatesPage() {
-  return <Page><Hero title="Сертификаты" text="Документы и подтверждение качества материалов" /><section className="shell certificates-page"><div><ShieldCheck /><p className="eyebrow">Документы мастерской</p><h2>Мы готовим документы к публикации</h2><p>Изделия из джута не входят в перечень продукции, подлежащей обязательной сертификации. Добровольные документы сейчас находятся в процессе оформления и появятся здесь после получения.</p><Button render={<Link href="/contacts" />}>Задать вопрос о материалах</Button></div><Image src="/images/process.png" alt="Натуральный джут и ручная работа" width={620} height={460} /></section></Page>;
+  return <Page><Hero title="Сертификаты" text="Документы и подтверждение качества материалов" /><section className="shell certificates-page"><div><ShieldCheck /><p className="eyebrow">Документы мастерской</p><h2>Мы готовим документы к публикации</h2><p>Изделия из джута не входят в перечень продукции, подлежащей обязательной сертификации. Добровольные документы сейчас находятся в процессе оформления и появятся здесь после получения.</p><div className="about-actions"><MessengerButtons /></div></div><Image src="/images/process.png" alt="Натуральный джут и ручная работа" width={620} height={460} /></section></Page>;
 }
 
 function LegalBlocks({ blocks }: { blocks: LegalBlock[] }) {
