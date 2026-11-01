@@ -1619,8 +1619,8 @@ body.is-loading { overflow:hidden; }
 }
 .hero .hero-content > .hero-draft:before { content: none; display: none; }
 .hero > .hero-shade { background: none; }
-.hero-slides picture img { object-position: center 72%; transform: none; }
-.hero-slides picture.curtain img { object-position: center 72%; }
+.hero-slides picture img { object-position: center 84%; transform: none; }
+.hero-slides picture.curtain img { object-position: center 84%; }
 .hero-slides picture.detail img { object-position: center center; }
 .about-hero .hero-shade {
   background:
