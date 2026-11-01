@@ -59,7 +59,7 @@ const RUG_SPECS = {
   thickness: "8 мм",
   color: "натуральный",
   production: "Россия, Ульяновская область",
-  care: "Влажная чистка намыленной губкой. Сухая чистка. Можно пылесосить. Стирать запрещено.",
+  care: "Сухая чистка и влажная губка. При необходимости — ручная стирка. В машине стирать нельзя.",
 } as const;
 
 const TABLE_SPECS = {
@@ -67,14 +67,14 @@ const TABLE_SPECS = {
   thickness: "8 мм",
   color: "натуральный",
   production: "Россия, Ульяновская область",
-  care: "Влажная чистка намыленной губкой. Сухая чистка. Стирать запрещено.",
+  care: "Сухая чистка и влажная губка. При необходимости — ручная стирка. В машине стирать нельзя.",
 } as const;
 
 function shots(folder: string, count: number) {
   return Array.from({ length: count }, (_, index) => `/images/products/${folder}/${index + 1}.jpg`);
 }
 
-const RUG_DESCRIPTION = "Безворсовый ковер из натурального джута, ручной работы. Отшивается из джутового каната шириной 8 мм, на швейной машине, строчкой зигзаг, прочными нитями. Плетеная фактура делает его теплым акцентом в интерьере – особенно в стиле бохо, скандинавском и джапанди.\n\nКовер обладает высокой износостойкостью, низкой теплопроводностью, подходит для теплых полов и влажных помещений. Фотографии на странице относятся к выбранному размеру.";
+const RUG_DESCRIPTION = "Безворсовый ковер из натурального джута, ручной работы. Отшивается из джутового каната шириной 8 мм, на швейной машине, строчкой зигзаг, прочными нитями. Фактура шва делает его теплым акцентом в интерьере – особенно в стиле бохо, скандинавском и джапанди.\n\nКовер обладает высокой износостойкостью, низкой теплопроводностью, подходит для теплых полов и влажных помещений. Фотографии на странице относятся к выбранному размеру.";
 
 const PLACEMAT_DESCRIPTION = "Набор джутовых плейсматов, ручной работы. Выполнены из джутового каната, прошиты строчкой зигзаг. При заказе учтите толщину 8 мм. Термостойкие и подходят как подставка под горячую посуду, сковородки и горшочки, для украшения и сервировки стола под тарелки. Создают уютную атмосферу на кухне и в столовой.";
 
@@ -108,17 +108,18 @@ function rug(opts: {
 }
 
 export const products: CatalogProduct[] = [
-  rug({ sku: "w002", name: "Ковёр круглый 100 см", sizeLabel: "100 см", price: 3479, count: 6, featured: true }),
-  rug({ sku: "w003", name: "Ковёр круглый 100 см", sizeLabel: "100 см", price: 3479, count: 8, featured: true }),
-  rug({ sku: "w005", name: "Ковёр овальный 60×100 см", sizeLabel: "60×100 см", price: 2448, count: 6 }),
-  rug({ sku: "w006", name: "Ковёр круглый 90 см", sizeLabel: "90 см", price: 2892, count: 4 }),
-  rug({ sku: "w007", name: "Ковёр круглый 120 см", sizeLabel: "120 см", price: 4766, count: 6 }),
-  rug({ sku: "w008", name: "Ковёр овальный 80×120 см", sizeLabel: "80×120 см", price: 3971, count: 7, featured: true }),
-  rug({ sku: "w012", name: "Ковёр круглый 60 см", sizeLabel: "60 см", price: 1742, count: 5, featured: true }),
-  rug({ sku: "w013", name: "Ковёр овальный 50×70 см", sizeLabel: "50×70 см", price: 1785, count: 5, featured: true }),
-  rug({ sku: "w014", name: "Ковёр круглый 150 см", sizeLabel: "150 см", price: 7666, count: 7, featured: true }),
-  rug({ sku: "w017", name: "Ковёр овальный 80×150 см", sizeLabel: "80×150 см", price: 5162, count: 6 }),
-  rug({ sku: "w018", name: "Ковёр круглый 200 см", sizeLabel: "200 см", price: 12619, count: 7 }),
+  rug({ sku: "w002", name: "Ковёр круглый 100 см", sizeLabel: "100 см", price: 2550, count: 6, featured: true }),
+  rug({ sku: "w003", name: "Ковёр круглый 100 см", sizeLabel: "100 см", price: 2300, count: 8, featured: true }),
+  rug({ sku: "w004", name: "Ковёр круглый 80 см", sizeLabel: "80 см", price: 1400, count: 6, featured: true }),
+  rug({ sku: "w005", name: "Ковёр овальный 60×100 см", sizeLabel: "60×100 см", price: 1550, count: 6 }),
+  rug({ sku: "w006", name: "Ковёр круглый 90 см", sizeLabel: "90 см", price: 2000, count: 4 }),
+  rug({ sku: "w007", name: "Ковёр круглый 120 см", sizeLabel: "120 см", price: 3150, count: 6 }),
+  rug({ sku: "w008", name: "Ковёр овальный 80×120 см", sizeLabel: "80×120 см", price: 2490, count: 7, featured: true }),
+  rug({ sku: "w012", name: "Ковёр круглый 60 см", sizeLabel: "60 см", price: 950, count: 5, featured: true }),
+  rug({ sku: "w013", name: "Ковёр овальный 50×70 см", sizeLabel: "50×70 см", price: 1050, count: 5, featured: true }),
+  rug({ sku: "w014", name: "Ковёр круглый 150 см", sizeLabel: "150 см", price: 5740, count: 7, featured: true }),
+  rug({ sku: "w017", name: "Ковёр овальный 80×150 см", sizeLabel: "80×150 см", price: 3190, count: 6 }),
+  rug({ sku: "w018", name: "Ковёр круглый 200 см", sizeLabel: "200 см", price: 9490, count: 7 }),
   {
     id: "w011",
     slug: "w011",
@@ -127,7 +128,7 @@ export const products: CatalogProduct[] = [
     name: "Набор сервировочных салфеток, 2 шт",
     sizeLabel: "2 шт, 35×35 см",
     category: "Сервировка стола",
-    price: 1290,
+    price: 790,
     image: "/images/products/w011/1.jpg",
     images: shots("w011", 4),
     description: `Комплект: 2 шт 35×35 см.\n\n${PLACEMAT_DESCRIPTION}`,
@@ -145,7 +146,7 @@ export const products: CatalogProduct[] = [
     name: "Набор сервировочных салфеток, 4+1",
     sizeLabel: "4 шт 35×35 см и 1 шт 20×20 см",
     category: "Сервировка стола",
-    price: 2136,
+    price: 1350,
     image: "/images/products/w010/1.jpg",
     images: shots("w010", 5),
     description: `Комплект: 4 шт 35×35 см и 1 шт 20×20 см.\n\n${PLACEMAT_DESCRIPTION}`,
@@ -153,6 +154,24 @@ export const products: CatalogProduct[] = [
     variants: [],
     specs: { ...TABLE_SPECS, diameter: "4 шт 35×35 см и 1 шт 20×20 см" },
     reviews: [],
+  },
+  {
+    id: "w016",
+    slug: "w016",
+    sku: "w016",
+    family: "w016",
+    name: "Набор маленьких салфеток, 4 шт",
+    sizeLabel: "4 шт, 20×20 см",
+    category: "Сервировка стола",
+    price: 540,
+    image: "/images/products/w016/1.jpg",
+    images: shots("w016", 5),
+    description: `Комплект: 4 шт 20×20 см.\n\n${PLACEMAT_DESCRIPTION}`,
+    variantKind: "set",
+    variants: [],
+    specs: { ...TABLE_SPECS, diameter: "4 шт, 20×20 см" },
+    reviews: [],
+    featured: true,
   },
 ];
 
@@ -200,6 +219,8 @@ const SLUG_ALIASES: Record<string, string> = {
   "salfetki-servirovochnye": "w011",
   "kover-50x70": "w013",
   "kover-60": "w012",
+  "kover-80": "w004",
+  "salfetki-4": "w016",
   "kover-60x100": "w005",
   "kover-80x120": "w008",
   "kover-80x150": "w017",

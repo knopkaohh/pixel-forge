@@ -3,7 +3,7 @@ import { PaymentPage } from "@/components/site";
 
 export const metadata: Metadata = {
   title: "Оплата — Мэри Джут",
-  description: "Оплата заказа через Ozon эквайринг: после оформления под каждой позицией открывается защищённая форма оплаты.",
+  description: "Корзина, доставка и оплата картой онлайн. Стоимость видна до оплаты.",
 };
 
 export default function Payment() {

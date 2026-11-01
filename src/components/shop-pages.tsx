@@ -47,7 +47,7 @@ function OrderPayment({ id, total }: { id: string; total: number }) {
       {payUrl ? (
         <Button render={<a href={payUrl} target="_blank" rel="noopener noreferrer" />}>Оплатить заказ <ExternalLink /></Button>
       ) : (
-        <span>Менеджер отправит одну ссылку на всю сумму — на телефон и почту из заказа.</span>
+        <span>Ссылка на оплату всей суммы придёт на телефон и почту из заказа.</span>
       )}
     </div>
   );
@@ -89,16 +89,16 @@ export function CheckoutPage() {
         </section>
         <section className="shell order-pay">
           <div>
-            <p className="eyebrow">Одна оплата</p>
-            <h2>Весь заказ — одной суммой</h2>
-            <p>Отдельных ссылок на каждое изделие нет. Когда ссылка будет готова, она появится здесь и придёт на телефон и почту.</p>
+            <p className="eyebrow">Оплата</p>
+            <h2>Одна сумма за весь заказ</h2>
+            <p>Платите один раз, картой. Отдельной оплаты по каждому изделию нет: ссылка на всю сумму придёт на телефон и почту из заказа.</p>
             <OrderPayment id={order.id} total={order.total} />
           </div>
           <aside>
             <h3>Итого</h3>
             <strong>{price(order.total)}</strong>
             <p>{order.customer.delivery}: {order.customer.pickupPoint}</p>
-            <p>Ссылки сохранятся в личном кабинете, если закроете страницу.</p>
+            <p>Заказ сохранится в личном кабинете, если закроете страницу.</p>
             <div>
               <Button render={<Link href="/account" />}>Личный кабинет</Button>
               <Button variant="outline" render={<Link href="/catalog" />}>Продолжить покупки</Button>
@@ -116,7 +116,7 @@ export function CheckoutPage() {
       <section><b>01</b><div><h2>Получатель</h2><div className="checkout-fields"><label>Имя<Input name="name" required placeholder="Мария" /></label><label>Телефон<PhoneInput name="phone" required /></label><label>E-mail<Input name="email" required type="email" placeholder="mail@example.ru" /></label></div></div></section>
       <section><b>02</b><div><h2>Способ доставки</h2><div className="delivery-options">{["СДЭК", "Ozon"].map(value => <button type="button" onClick={() => { setDelivery(value); setPickup(value === "СДЭК" ? "СДЭК · ул. Гончарова, 23" : "Ozon · ул. Радищева, 71"); }} className={delivery === value ? "selected" : ""} key={value}><i>{delivery === value && "✓"}</i><span><b>{value}</b><small>Доставка до пункта выдачи</small></span></button>)}</div><label className="pickup-field">Пункт выдачи<select value={pickup} onChange={event => setPickup(event.target.value)}>{delivery === "СДЭК" ? <><option>СДЭК · ул. Гончарова, 23</option><option>СДЭК · пр-т Нариманова, 64</option></> : <><option>Ozon · ул. Радищева, 71</option><option>Ozon · ул. Федерации, 11</option></>}</select></label></div></section>
       <section><b>03</b><div><h2>Комментарий</h2><textarea name="comment" placeholder="Пожелания к заказу или доставке" /></div></section>
-    </div><aside className="cart-summary checkout-summary"><h3>Итого</h3>{cart.map(item => <div key={item.id}><span>{item.name}{item.option ? `, ${item.option}` : ""} × {item.quantity}</span><b>{price(item.price * item.quantity)}</b></div>)}<div className="cart-total"><span>К оплате</span><strong>{price(cartTotal)}</strong></div><Button type="submit" disabled={submitting}>{submitting ? "Оформляем..." : "Оформить заказ"} <ArrowRight /></Button><p>Оплата будет одной ссылкой на всю сумму</p></aside></form>
+    </div><aside className="cart-summary checkout-summary"><h3>Итого</h3>{cart.map(item => <div key={item.id}><span>{item.name}{item.option ? `, ${item.option}` : ""} × {item.quantity}</span><b>{price(item.price * item.quantity)}</b></div>)}<div className="cart-total"><span>К оплате</span><strong>{price(cartTotal)}</strong></div><Button type="submit" disabled={submitting}>{submitting ? "Оформляем..." : "Оформить заказ"} <ArrowRight /></Button><p>Одна оплата картой за весь заказ</p></aside></form>
   </ShopPage>;
 }
 
